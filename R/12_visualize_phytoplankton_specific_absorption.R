@@ -1,7 +1,14 @@
 rm(list = ls())
 
-absorption <- vroom::vroom(here::here("data/clean/absorption_with_metadata.csv")) %>%
-  select(mission, measurement_id, wavelength, phytoplankton_absorption, hplc_chla) %>%
+absorption <-
+  vroom::vroom(here::here("data/clean/absorption_with_metadata.csv")) %>%
+  select(
+    mission,
+    measurement_id,
+    wavelength,
+    phytoplankton_absorption,
+    hplc_chla
+  ) %>%
   filter(wavelength %in% c(443, 675))
 
 absorption
