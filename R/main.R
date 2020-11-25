@@ -16,10 +16,18 @@ library(zoo)
 library(vegan)
 library(broom)
 library(glue)
+library(patchwork)
+library(data.table)
 
 # Set default ggplot2 font size and font family
 # devtools::install_github("PMassicotte/ggpmthemes")
 theme_set(theme_poppins(base_size = 10))
+theme_update(
+  panel.border = element_blank(),
+  axis.ticks = element_blank(),
+  strip.background = element_rect(fill = "#3c3c3c"),
+  strip.text = element_text(color = "white", face = "bold")
+)
 
 # Cleaning scripts --------------------------------------------------------
 
