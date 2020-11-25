@@ -39,7 +39,6 @@ df <- df %>%
 
 df
 
-
 # Remove spectra with a least 1 negative value between 350 and 400 --------
 
 df <- df %>%

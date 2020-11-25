@@ -189,3 +189,70 @@ ggsave(
   width = 8,
   height = 6
 )
+
+
+# Non-algal vs phyto overtime ---------------------------------------------
+
+min_wl <- 440
+max_wl <- 490
+
+df_viz <- absorption %>%
+  filter(wavelength %in% c(min_wl, max_wl)) %>%
+  select(
+    measurement_id,
+    wavelength,
+    phytoplankton_absorption,
+    non_algal_absorption
+  ) %>%
+  group_by(measurement_id) %>%
+  summarise(
+    a_det_440_a_det_490_ratio =
+      non_algal_absorption[wavelength == min_wl] /
+      non_algal_absorption[wavelength == max_wl],
+    a_phy_440_a_phy_490_ratio =
+      phytoplankton_absorption[wavelength == min_wl] /
+      phytoplankton_absorption[wavelength == max_wl]
+  ) %>%
+  ungroup()
+
+df_viz
+
+# Get the date for each measurement
+df_viz <- absorption %>%
+  distinct(measurement_id, date) %>%
+  right_join(df_viz)
+
+df_viz %>%
+  pivot_longer(contains("ratio")) %>%
+  ggplot(aes(x = value)) +
+  geom_histogram() +
+  facet_wrap(~name)
+
+p1 <- df_viz %>%
+  filter(across(contains("ratio"), ~ between(.x, 0, 4))) %>%
+  ggplot(aes(x = a_det_440_a_det_490_ratio, y = a_phy_440_a_phy_490_ratio)) +
+  geom_point(size = 1) +
+  # geom_hex() +
+  labs(
+    title = "Scatterplot of non-algal and phytoplankton absorption",
+    x = bquote(frac(a[nap](440), a[nap](490))),
+    y = bquote(frac(a[phi](440), a[phi](490)))
+  ) +
+  theme(
+    panel.border = element_blank(),
+    axis.ticks = element_blank(),
+    plot.caption = element_text(color = "grey50", size = 6)
+  )
+
+p2 <- p1 +
+  facet_wrap(~lubridate::month(date, label = TRUE), scales = "free")
+
+p <- p1 / p2 +
+  plot_annotation(tag_levels = "A")
+
+ggsave(
+  here::here("graphs/09_adet_ratio_vs_aphy_ratio.pdf"),
+  device = cairo_pdf,
+  width = 9,
+  height = 11
+)
