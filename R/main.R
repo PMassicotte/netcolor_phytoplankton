@@ -19,6 +19,9 @@ library(glue)
 library(patchwork)
 library(data.table)
 
+# library(furrr)
+# plan(multiprocess(workers = availableCores() - 1))
+
 # Set default ggplot2 font size and font family
 # devtools::install_github("PMassicotte/ggpmthemes")
 theme_set(theme_poppins(base_size = 10))

@@ -39,6 +39,41 @@ df <- df %>%
 
 df
 
+# Quick check that all measurement have 401 wavelengths
+df %>%
+  group_by(measurement_id, foldername) %>%
+  mutate(n = n()) %>%
+  assertr::verify(n == 401)
+
+# Baseline correction -----------------------------------------------------
+
+# From Babin 2003:
+
+# The final estimates of ap(l) and aNAP(l) were obtained by subtracting the
+# measured values of ap(750) and aNAP(750) from all the measured spectral values
+# of ap(l) and aNAP(l), respectively (to be exact, the averages of the measured
+# values between 746 and 750 nm were subtracted).
+
+df <- df %>%
+  group_by(measurement_id, foldername) %>%
+  mutate(across(
+    c(non_algal_absorption, phytoplankton_absorption),
+    ~ mean(.x[between(wavelength, 746, 750)]),
+    .names = "mean_{.col}"
+  )) %>%
+  ungroup() %>%
+  mutate(
+    non_algal_absorption = non_algal_absorption - mean_non_algal_absorption
+  ) %>%
+  mutate(
+    phytoplankton_absorption = phytoplankton_absorption - mean_phytoplankton_absorption
+  )
+
+df
+
+df <- df %>%
+  select(-contains("mean"))
+
 # Remove spectra with a least 1 negative value between 350 and 400 --------
 
 df <- df %>%
@@ -49,7 +84,6 @@ df <- df %>%
       phytoplankton_absorption < 0
   ) & between(wavelength, 350, 400))) %>%
   ungroup()
-
 
 # Remove outliers ---------------------------------------------------------
 
