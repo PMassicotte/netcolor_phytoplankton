@@ -47,12 +47,12 @@ ggsave(
   height = 5.2
 )
 
-pdftools::pdf_convert(
-  here::here("graphs/04_map_sampling_location.pdf"),
-  format = "png",
-  filenames = here::here("graphs/04_map_sampling_location.png"),
-  dpi = 300
-)
+# pdftools::pdf_convert(
+#   here::here("graphs/04_map_sampling_location.pdf"),
+#   format = "png",
+#   filenames = here::here("graphs/04_map_sampling_location.png"),
+#   dpi = 300
+# )
 
 # Spatial/temporal overview -----------------------------------------------
 
