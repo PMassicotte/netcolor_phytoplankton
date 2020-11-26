@@ -3,7 +3,7 @@ rm(list = ls())
 absorption <-
   vroom::vroom(here::here("data/clean/absorption_with_metadata.csv")) %>%
   select(
-    mission,
+    mission_name,
     measurement_id,
     wavelength,
     phytoplankton_absorption,
@@ -49,7 +49,7 @@ ggsave(
 # Spectra examples --------------------------------------------------------
 
 df <- vroom::vroom(here::here("data/clean/absorption_with_metadata.csv")) %>%
-  filter(mission == "AZMP Fall 2015")
+  filter(foldername == "AZMP Fall 2015")
 
 df
 
