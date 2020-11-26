@@ -11,13 +11,30 @@ df <- data.table::fread("data/clean/absorption_with_metadata.csv") %>%
 
 df
 
+
+# Cut wavelengths ---------------------------------------------------------
+
+# The fit was done for data between 380 and 730 nm, excluding the 400–480 and
+# 620–710 nm ranges to avoid any residual pigment absorption that might still
+# have been present after sodium hypochlorite treatment. (Babin 2003)
+
+df <- df %>%
+  filter(between(wavelength, 380, 730)) %>%
+  filter(!between(wavelength, 400, 480)) %>%
+  filter(!between(wavelength, 620, 710))
+
+df
+
 # Fit an exponential model ------------------------------------------------
 
 fit_exponential <- function(data) {
-  a0 <- data$non_algal_absorption[data$wavelength == 443]
+
+  reference_wl <- 500
+
+  a0 <- data$non_algal_absorption[data$wavelength == reference_wl]
 
   model <- nls(
-    non_algal_absorption ~ a0 * exp(-s * (wavelength - 443)) + k,
+    non_algal_absorption ~ a0 * exp(-s * (wavelength - reference_wl)) + k,
     start = c(a0 = a0, s = 0.002, k = 0),
     data = data
   )
@@ -41,7 +58,6 @@ df <- df %>%
 
 df2 <- df %>%
   mutate(pred = map2(data, model, modelr::add_predictions))
-
 
 # Plot some models --------------------------------------------------------
 
@@ -81,6 +97,8 @@ ggsave(
 
 df2 <- df2 %>%
   mutate(model_r2 = map_dbl(pred, ~ cor(.$non_algal_absorption, .$pred)^2))
+
+df2
 
 df2 %>%
   ggplot(aes(x = model_r2)) +
