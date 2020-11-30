@@ -102,8 +102,80 @@ p <- absorption %>%
   )
 
 ggsave(
-  here::here("graphs/14_specific_phytoplanton_absorption_spectra_vs_fitted.pdf"),
+  here::here("graphs/13_specific_phytoplanton_absorption_spectra_vs_fitted.pdf"),
   device = cairo_pdf,
   width = 12,
   height = 8
 )
+
+
+# Reproduce figure 1 ------------------------------------------------------
+
+# Try to reproduce the figure 1 in Bricaud 1995
+
+absorption <- vroom::vroom(here::here("data/clean/absorption_with_metadata.csv"))
+
+absorption <- absorption %>%
+  select(
+    measurement_id,
+    depth,
+    longitude,
+    latitude,
+    wavelength,
+    phytoplankton_absorption,
+    hplc_chla
+  ) %>%
+  mutate(specific_phytoplankton_absorption = phytoplankton_absorption / hplc_chla)
+
+df_viz <- absorption %>%
+  group_nest(wavelength) %>%
+  mutate(mod = map(
+    data,
+    ~ minpack.lm::nlsLM(
+      specific_phytoplankton_absorption ~ a * hplc_chla^-b,
+      data = .,
+      start = list(a = 0.01, b = 0.1),
+      control = minpack.lm::nls.lm.control(maxiter = 1e3)
+    )
+  ))
+
+df_viz <- df_viz %>%
+  mutate(tidied = map(mod, broom::tidy)) %>%
+  mutate(pred = map2(data, mod, modelr::add_predictions)) %>%
+  mutate(glanced = map(mod, broom::glance))
+
+p <- df_viz %>%
+  filter(wavelength %in% c(412, 443, 490, 565, 675)) %>%
+  unnest(pred) %>%
+  ggplot(aes(x = hplc_chla, y = specific_phytoplankton_absorption)) +
+  geom_point(aes(color = latitude), size = 0.5, alpha = 0.7) +
+  geom_line(aes(y = pred), color = "red") +
+  facet_wrap(~glue("{wavelength} nm"), scales = "free_y") +
+  scale_x_log10() +
+  annotation_logticks(sides = "b", size = 0.1) +
+  scale_color_viridis_c() +
+  labs(
+    title = "Replicate of figure 1 in Bricaud 1995"
+  )
+
+ggsave(
+  here::here("graphs/13_specific_phytoplanton_absorption_spectra_vs_chla.pdf"),
+  device = cairo_pdf
+)
+
+# Reproduce their figure 3
+df_viz %>%
+  unnest(tidied) %>%
+  filter(between(wavelength, 400, 700)) %>%
+  ggplot(aes(x = wavelength, y = estimate, color = term)) +
+  geom_line() +
+  facet_wrap(~term, scales = "free")
+
+# Reproduce their figure 4
+absorption %>%
+  filter(wavelength == 443) %>%
+  filter(between(phytoplankton_absorption, 0, 0.6)) %>%
+  filter(between(hplc_chla, 0, 25)) %>%
+  ggplot(aes(x = hplc_chla, y = phytoplankton_absorption)) +
+  geom_point()
+
