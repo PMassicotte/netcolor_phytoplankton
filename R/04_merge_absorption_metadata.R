@@ -69,7 +69,7 @@ p <- metadata %>%
   )
 
 ggsave(
-  here::here("graphs/03_histogram_number_hplc_pigments_per_observation.pdf"),
+  here::here("graphs/04_histogram_number_hplc_pigments_per_observation.pdf"),
   device = cairo_pdf,
   width = 7.44,
   height = 4.31
@@ -93,6 +93,16 @@ metadata <- metadata %>%
 
 metadata
 
+# Define north or south position for each station -------------------------
+
+metadata <- metadata %>%
+  mutate(position = case_when(
+    latitude >= 52.5 ~ "North",
+    TRUE ~ "South"
+  ), .after = longitude)
+
+metadata
+
 # Merge with absorption data ----------------------------------------------
 
 files <- fs::dir_ls("data/clean/absorption/")
@@ -106,7 +116,6 @@ absorption <- map_df(files,
 absorption <- absorption %>%
   # distinct(measurement_id) %>%
   mutate(measurement_id = parse_number(measurement_id))
-
 
 metadata %>%
   anti_join(absorption)
@@ -178,7 +187,7 @@ df_viz <- df_viz %>%
   mutate(p = map(data, plot_absorption_spectra))
 
 pdf(
-  here::here("graphs/03_absorption_spectra_that_have_matching_metadata.pdf"),
+  here::here("graphs/04_absorption_spectra_that_have_matching_metadata.pdf"),
   width = 10,
   height = 4
 )

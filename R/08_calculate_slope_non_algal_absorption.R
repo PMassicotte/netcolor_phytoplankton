@@ -11,7 +11,6 @@ df <- data.table::fread("data/clean/absorption_with_metadata.csv") %>%
 
 df
 
-
 # Cut wavelengths ---------------------------------------------------------
 
 # The fit was done for data between 380 and 730 nm, excluding the 400–480 and
@@ -87,7 +86,7 @@ p <- df2 %>%
   )
 
 ggsave(
-  here::here("graphs/06_non_algal_absorption_spectra_vs_fitted.pdf"),
+  here::here("graphs/08_non_algal_absorption_spectra_vs_fitted.pdf"),
   device = cairo_pdf,
   width = 12,
   height = 7

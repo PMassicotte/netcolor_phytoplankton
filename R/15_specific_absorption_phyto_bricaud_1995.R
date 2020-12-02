@@ -102,7 +102,7 @@ p <- absorption %>%
   )
 
 ggsave(
-  here::here("graphs/13_specific_phytoplanton_absorption_spectra_vs_fitted.pdf"),
+  here::here("graphs/15_specific_phytoplanton_absorption_spectra_vs_fitted.pdf"),
   device = cairo_pdf,
   width = 12,
   height = 8
@@ -159,7 +159,7 @@ p <- df_viz %>%
   )
 
 ggsave(
-  here::here("graphs/13_specific_phytoplanton_absorption_spectra_vs_chla.pdf"),
+  here::here("graphs/15_specific_phytoplanton_absorption_spectra_vs_chla.pdf"),
   device = cairo_pdf
 )
 

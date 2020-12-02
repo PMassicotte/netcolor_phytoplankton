@@ -71,7 +71,7 @@ p <- df_viz %>%
   )
 
 ggsave(
-  here::here("graphs/09_absorption_vs_hplc_chla.pdf"),
+  here::here("graphs/11_absorption_vs_hplc_chla.pdf"),
   device = cairo_pdf,
   height = 8
 )
@@ -134,7 +134,7 @@ p <- df_viz %>%
   )
 
 ggsave(
-  here::here("graphs/09_timeseries_packaging_effect.pdf"),
+  here::here("graphs/11_timeseries_packaging_effect.pdf"),
   device = cairo_pdf,
   width = 8,
   height = 6
@@ -184,7 +184,7 @@ df_viz %>%
   )
 
 ggsave(
-  here::here("graphs/09_timeseries_aphy443_chla.pdf"),
+  here::here("graphs/11_timeseries_aphy443_chla.pdf"),
   device = cairo_pdf,
   width = 8,
   height = 6
@@ -251,7 +251,7 @@ p <- p1 / p2 +
   plot_annotation(tag_levels = "A")
 
 ggsave(
-  here::here("graphs/09_adet_ratio_vs_aphy_ratio.pdf"),
+  here::here("graphs/11_adet_ratio_vs_aphy_ratio.pdf"),
   device = cairo_pdf,
   width = 9,
   height = 11

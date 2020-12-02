@@ -40,7 +40,7 @@ p <- df %>%
   )
 
 ggsave(
-  here::here("graphs/12_histogram_specific_absorption.pdf"),
+  here::here("graphs/14_histogram_specific_absorption.pdf"),
   device = cairo_pdf,
   width = 9,
   height = 5
@@ -85,7 +85,7 @@ p <- df %>%
   )
 
 ggsave(
-  here::here("graphs/12_absorption_azmp_fall_2015.pdf"),
+  here::here("graphs/14_absorption_azmp_fall_2015.pdf"),
   device = cairo_pdf,
   width = 10,
   height = 10

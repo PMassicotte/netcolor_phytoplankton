@@ -41,7 +41,7 @@ p <- metadata %>%
   )
 
 ggsave(
-  here::here("graphs/04_map_sampling_location.pdf"),
+  here::here("graphs/06_map_sampling_location.pdf"),
   device = cairo_pdf,
   width = 5.96,
   height = 5.2
@@ -86,7 +86,7 @@ p <- df %>%
     axis.text = element_text(size = 6)
   )
 
-file <- here::here("graphs/04_map_sampling_location_by_month.pdf")
+file <- here::here("graphs/06_map_sampling_location_by_month.pdf")
 ggsave(
   file,
   width = 8,

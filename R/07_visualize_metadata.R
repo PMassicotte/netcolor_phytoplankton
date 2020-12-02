@@ -27,7 +27,7 @@ metadata %>%
   )
 
 ggsave(
-  here::here("graphs/05_number_absorption_spectra_per_mission.pdf"),
+  here::here("graphs/07_number_absorption_spectra_per_mission.pdf"),
   device = cairo_pdf,
   width = 8,
   height = 8
@@ -51,7 +51,7 @@ metadata %>%
   )
 
 ggsave(
-  here::here("graphs/05_number_absorption_spectra_per_year.pdf"),
+  here::here("graphs/07_number_absorption_spectra_per_year.pdf"),
   device = cairo_pdf,
   width = 6,
   height = 5
@@ -77,7 +77,7 @@ metadata %>%
   )
 
 ggsave(
-  here::here("graphs/05_number_available_observations.pdf"),
+  here::here("graphs/07_number_available_observations.pdf"),
   device = cairo_pdf,
   width = 8,
   height = 8
@@ -103,7 +103,7 @@ metadata %>%
   )
 
 ggsave(
-  here::here("graphs/05_number_absorption_spectra_per_yday.pdf"),
+  here::here("graphs/07_number_absorption_spectra_per_yday.pdf"),
   device = cairo_pdf,
   width = 9,
   height = 5
@@ -133,7 +133,7 @@ p <- metadata %>%
   )
 
 ggsave(
-  here::here("graphs/05_histogram_hplc_chla.pdf"),
+  here::here("graphs/07_histogram_hplc_chla.pdf"),
   device = cairo_pdf,
   width = 6,
   height = 4

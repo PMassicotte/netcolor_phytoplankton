@@ -64,7 +64,7 @@ p <- df_viz %>%
   )
 
 ggsave(
-  here::here("graphs/07_non_algal_absorption_slope_vs_yday.pdf"),
+  here::here("graphs/09_non_algal_absorption_slope_vs_yday.pdf"),
   device = cairo_pdf,
   width = 7,
   height = 6
@@ -95,7 +95,7 @@ p <- skim_df %>%
   )
 
 ggsave(
-  here::here("graphs/07_variable_complete_rate.pdf"),
+  here::here("graphs/09_variable_complete_rate.pdf"),
   device = cairo_pdf,
   height = 10,
   width = 10
@@ -141,9 +141,9 @@ fviz_pca_var(
   repel = T # Avoid text overlapping
 )
 
-ggsave(
-  "~/Desktop/test_pca.pdf",
-  device = cairo_pdf,
-  width = 8,
-  height = 8
-)
+# ggsave(
+#   "~/Desktop/test_pca.pdf",
+#   device = cairo_pdf,
+#   width = 8,
+#   height = 8
+# )

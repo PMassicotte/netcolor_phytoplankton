@@ -18,6 +18,8 @@ library(broom)
 library(glue)
 library(patchwork)
 library(data.table)
+library(stars)
+library(MBA)
 
 # library(furrr)
 # plan(multiprocess(workers = availableCores() - 1))
@@ -34,21 +36,23 @@ theme_update(
 
 # Cleaning scripts --------------------------------------------------------
 
-source("R/00_convert_absorption_txt_to_asc.R")
-source("R/01_validate_absorption_data_file_naming.R")
-source("R/02_tidy_absorption_spectra.R")
-source("R/03_merge_absorption_metadata.R")
+source("R/01_convert_absorption_txt_to_asc.R")
+source("R/02_validate_absorption_data_file_naming.R")
+source("R/03_tidy_absorption_spectra.R")
+source("R/04_merge_absorption_metadata.R")
+source("R/05_extract_bathymetry.R")
 
 # Visualization -----------------------------------------------------------
 
-source("R/04_map_sampling_locations.R")
-source("R/05_visualize_metadata.R")
-source("R/06_calculate_slope_non_algal_absorption.R")
-source("R/07_exploration.R")
-source("R/08_explore_hplc_pigments.R")
-source("R/09_exploration_absorption_vs_hplc_pigments.R")
-source("R/10_timeseries_hplc_pigments.R")
-source("R/11_devred_2016_jgr.R")
-source("R/12_visualize_phytoplankton_specific_absorption.R")
-source("R/13_temporal_variability_s_nap.R")
-source("R/14_specific_absorption_phyto_bricaud_1995.R")
+source("R/06_map_sampling_locations.R")
+source("R/07_visualize_metadata.R")
+source("R/08_calculate_slope_non_algal_absorption.R")
+source("R/09_exploration.R")
+source("R/10_explore_hplc_pigments.R")
+source("R/11_exploration_absorption_vs_hplc_pigments.R")
+source("R/12_timeseries_hplc_pigments.R")
+source("R/13_devred_2016_jgr.R")
+source("R/14_visualize_phytoplankton_specific_absorption.R")
+source("R/15_specific_absorption_phyto_bricaud_1995.R")
+
+

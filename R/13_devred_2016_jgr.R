@@ -67,7 +67,7 @@ p <- absorption %>%
   )
 
 ggsave(
-  here::here("graphs/11_hplc_chla_vs_phyto_absorption.pdf"),
+  here::here("graphs/13_hplc_chla_vs_phyto_absorption.pdf"),
   device = cairo_pdf,
   height = 8,
   width = 10
@@ -95,7 +95,7 @@ p <- absorption %>%
   )
 
 ggsave(
-  here::here("graphs/11_s_vs_wavelength.pdf"),
+  here::here("graphs/13_s_vs_wavelength.pdf"),
   device = cairo_pdf,
   width = 6,
   height = 4
@@ -165,7 +165,7 @@ p <- df_viz %>%
   )
 
 ggsave(
-  here::here("graphs/11_as1_as2_vs_wavelength.pdf"),
+  here::here("graphs/13_as1_as2_vs_wavelength.pdf"),
   device = cairo_pdf,
   width = 8,
   height = 8

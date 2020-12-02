@@ -66,7 +66,7 @@ p <- df_viz %>%
   )
 
 ggsave(
-  here::here("graphs/08_boxplots_hplc_pigments_by_latitudes.pdf"),
+  here::here("graphs/10_boxplots_hplc_pigments_by_latitudes.pdf"),
   device = cairo_pdf,
   width = 12,
   height = 10

@@ -166,7 +166,7 @@ df_viz <- df_viz %>%
   # slice(86) %>%
   mutate(p = map(data, plot_absorption_spectra))
 
-pdf(here::here("graphs/02_absorption_spectra.pdf"), width = 10, height = 4)
+pdf(here::here("graphs/03_absorption_spectra.pdf"), width = 10, height = 4)
 
 walk(df_viz$p, print)
 

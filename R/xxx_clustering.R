@@ -7,6 +7,7 @@ metadata <- read_csv("data/clean/metadata.csv")
 
 hplc_pigments <-
   c(
+    "hplc_chla",
     "hplc_chlb",
     "hplc_chlc3",
     "hplc_fucox",
@@ -115,3 +116,14 @@ ggsave(
 #   ggplot(aes(x = value)) +
 #   geom_histogram() +
 #   facet_wrap(~name, scales = "free_x")
+
+
+# Temporal cluster? -------------------------------------------------------
+
+df %>%
+  unnest(augmented) %>%
+  filter(k == 3) %>%
+  mutate(month = lubridate::month(date, label = TRUE)) %>%
+  count(.cluster, month) %>%
+  ggplot(aes(x = n, y = month, fill = .cluster)) +
+  geom_col()

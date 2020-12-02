@@ -45,7 +45,7 @@ df_viz %>%
   )
 
 ggsave(
-  here::here("graphs/10_timeseries_fuco_chla.pdf"),
+  here::here("graphs/12_timeseries_fuco_chla.pdf"),
   device = cairo_pdf,
   width = 8,
   height = 6
@@ -92,7 +92,7 @@ p <- df_viz %>%
   )
 
 ggsave(
-  here::here("graphs/10_timeseries_chla.pdf"),
+  here::here("graphs/12_timeseries_chla.pdf"),
   device = cairo_pdf,
   width = 8,
   height = 6
