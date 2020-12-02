@@ -174,6 +174,8 @@ dev.off()
 
 # Export the clean data ---------------------------------------------------
 
+fs::dir_create(here::here("data/clean/absorption/"))
+
 df %>%
   count(foldername, measurement_id) %>%
   assertr::verify(n == 401)
