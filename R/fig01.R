@@ -8,19 +8,33 @@
 
 rm(list = ls())
 
+metadata <- vroom::vroom("data/clean/absorption_with_metadata.csv") %>%
+  distinct(
+    measurement_id,
+    mission_name,
+    longitude,
+    latitude,
+    date,
+    position
+  )
+
+bathymetry <- read_csv(here::here("data/clean/bathymetry.csv"))
+bioregion <- read_csv(here::here("data/clean/bioregions.csv"))
+
+df <- metadata %>%
+  inner_join(bathymetry, by = "measurement_id") %>%
+  inner_join(bioregion, by = "measurement_id")
+
+df
+
+# Spatial operations ------------------------------------------------------
+
 crs_string <-
   "+proj=lcc +lat_1=49 +lat_2=77 +lon_0=-91.52 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"
 
-metadata <- vroom::vroom("data/clean/absorption_with_metadata.csv")
+crs_string <- 4326
 
-bathymetry <- read_csv(here::here("data/clean/bathymetry.csv"))
-
-metadata <- metadata %>%
-  left_join(bathymetry, by = "measurement_id") %>%
-  distinct(mission_name, longitude, latitude, bathymetry)
-
-
-metadata <- metadata %>%
+df <- df %>%
   st_as_sf(coords = c("longitude", "latitude"), crs = 4326) %>%
   st_transform(crs = crs_string)
 
@@ -55,9 +69,32 @@ bathy_interpolated <- bathy %>%
 
 range(bathy_interpolated$xyz.est.z, na.rm = TRUE)
 
+# Labels for the facets ---------------------------------------------------
+
+df
+
+df <- df %>%
+  mutate(yday = lubridate::yday(date)) %>%
+  mutate(bioregion_id = parse_number(bioregion)) %>%
+  group_by(bioregion) %>%
+  mutate(label = glue::glue("{bioregion_name}<br><span style = 'font-size:3pt; color:grey75;'>Bathymetry: {-max(bathymetry)} - {-min(bathymetry)} meters<br>DOY: {min(yday)} - {max(yday)}</span>")) %>%
+  mutate(label = fct_reorder(label, bioregion_id)) %>%
+  ungroup()
+
+df
+
 # Plot --------------------------------------------------------------------
 
-p <- metadata %>%
+# tibble(
+#   longitude = c(-80, -40),
+#   latitude = c(35, 70)
+# ) %>%
+#   st_as_sf(coords = c("longitude", "latitude"), crs = 4326) %>%
+#   st_transform(crs = crs_string) %>%
+#   st_bbox()
+
+p <- df %>%
+  # filter(bioregion_id == 1) %>%
   ggplot() +
   ggisoband::geom_isobands(
     data = bathy_interpolated,
@@ -120,20 +157,20 @@ p <- metadata %>%
     fill = "#616368",
     color = "white"
   ) +
-  geom_sf(size = 0.25, aes(color = bathymetry_bin)) +
+  geom_sf(size = 0.1, color = "#FA003F") +
   geom_sf(
     data = st_graticule(
       wm,
-      lat = 52.5, lon = 150
+      lat = 48, lon = 150
     ),
-    color = "red",
+    color = "#FFCF00",
     size = 0.25,
     lty = 2
   ) +
   coord_sf(
-    crs = crs_string,
-    xlim = c(-2827590, 3593626),
-    ylim = c(5700000, 11239251)
+    crs = 4326,
+    xlim = c(-80, -40),
+    ylim = c(35, 70)
   ) +
   scale_x_continuous(breaks = seq(-180, 180, by = 10), expand = c(0, 0)) +
   scale_y_continuous(breaks = seq(0, 90, by = 5), expand = c(0, 0)) +
@@ -145,14 +182,44 @@ p <- metadata %>%
     panel.grid = element_line(size = 0.25),
     axis.title = element_blank(),
     legend.key.size = unit(1, "cm"),
-    legend.key = element_rect(color = NA, fill = NA)
-  )
+    legend.key = element_rect(color = NA, fill = NA),
+    legend.box = "vertical",
+    axis.text = element_text(size = 3, color = "gray50"),
+    panel.background = element_rect(fill = "#B9DDF1"),
+    strip.text = element_markdown(size = 4, face = "plain", family = "Roboto Mono")
+  ) +
+  facet_wrap(~label)
 
 ggsave(
   here::here("graphs/fig01.pdf"),
   device = cairo_pdf,
-  width = 5.96,
+  width = 8,
   height = 5.2
 )
 
 knitr::plot_crop(here::here("graphs/fig01.pdf"))
+
+pdftools::pdf_convert(
+  here::here("graphs/fig01.pdf"),
+  format = "png",
+  filenames = here::here("graphs/fig01.png"),
+  dpi = 600
+)
+
+# ggsave(
+#   here::here("graphs/fig01.png"),
+#   # res = 600,
+#   width = 8,
+#   height = 5.2,
+#   dpi = 600
+# )
+
+
+# ragg::agg_png(
+#   here::here("graphs/fig01.png"),
+#   width = 4000,
+#   height = 4000,
+#   res = 600
+# )
+# print(p)
+# invisible(dev.off())

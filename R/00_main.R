@@ -20,6 +20,7 @@ library(patchwork)
 library(data.table)
 library(stars)
 library(MBA)
+library(ggtext)
 
 # library(furrr)
 # plan(multiprocess(workers = availableCores() - 1))

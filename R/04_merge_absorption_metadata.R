@@ -93,16 +93,6 @@ metadata <- metadata %>%
 
 metadata
 
-# Define north or south position for each station -------------------------
-
-metadata <- metadata %>%
-  mutate(position = case_when(
-    latitude >= 52.5 ~ "North",
-    TRUE ~ "South"
-  ), .after = longitude)
-
-metadata
-
 # Merge with absorption data ----------------------------------------------
 
 files <- fs::dir_ls("data/clean/absorption/")

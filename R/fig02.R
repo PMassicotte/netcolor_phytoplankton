@@ -1,83 +1,74 @@
-# <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-# AUTHOR:       Philippe Massicotte
-#
-# DESCRIPTION:  Timeseries of chla
-# <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-
 rm(list = ls())
 
-hplc <- read_csv(here::here("data/clean/metadata.csv"))
+# Prepare the data --------------------------------------------------------
 
-df_viz <- hplc %>%
-  select(measurement_id, date, hplc_chla, hplc_fucox) %>%
-  mutate(yday = lubridate::yday(date)) %>%
-  mutate(date = as.Date(paste0("2014-", yday), "%Y-%j")) %>%
-  group_by(date) %>%
-  summarise(across(contains("hplc"),  ~mean(., na.rm = TRUE)))
-
-df_viz
-
-# Chla --------------------------------------------------------------------
-
-p1 <- df_viz %>%
-  ggplot(aes(x = date, y = hplc_chla)) +
-  geom_point(color = "gray50") +
-  geom_line(aes(y = rollmean(
-    hplc_chla,
-    k = 28,
-    fill = NA
-  )), color = "red") +
-  scale_x_date(date_labels = "%b", date_breaks = "1 month") +
-  scale_y_continuous(breaks = scales::breaks_pretty(n = 10)) +
-  labs(
-    y = bquote("Chla" ~ (mgC~m^{-3})),
-    x = NULL
-  ) +
-  theme(
-    panel.border = element_blank(),
-    axis.ticks = element_blank(),
-    plot.caption = element_text(
-      color = "grey50",
-      size = 6
-    )
+df <- fread(here::here("data/clean/absorption_with_metadata.csv")) %>%
+  as_tibble() %>%
+  filter(wavelength == 440) %>%
+  select(
+    measurement_id,
+    date,
+    wavelength,
+    contains("absorption"),
+    hplc_chla
   )
 
+df
 
-# Fuco/chla ratio ---------------------------------------------------------
+bioregion <- read_csv(here::here("data/clean/bioregions.csv")) %>%
+  mutate(bioregion_id = parse_number(bioregion)) %>%
+  mutate(bioregion_name = fct_reorder(bioregion_name, bioregion_id))
 
-p2 <- df_viz %>%
-  mutate(fuco_chla_ratio = hplc_fucox / hplc_chla) %>%
-  ggplot(aes(x = date, y = fuco_chla_ratio)) +
-  geom_point(color = "gray50") +
-  geom_line(aes(y = rollmean(
-    fuco_chla_ratio,
-    k = 28,
-    fill = NA
-  )), color = "red") +
-  scale_x_date(date_labels = "%b", date_breaks = "1 month") +
-  scale_y_continuous(breaks = scales::breaks_pretty(n = 10)) +
+df <- df %>%
+  inner_join(bioregion, by = "measurement_id")
+
+df
+
+# Add prediction from other models found in the literature ----------------
+
+df <- df %>%
+  mutate(bricaud_1998 = 0.0378 * hplc_chla^0.627) %>%
+  mutate(bricaud_2004 = 0.0654 * hplc_chla^0.728) %>%
+  mutate(devred_2006 = ((0.0839 - 0.0176) / 1.613) * (1 - exp(-1.613 * hplc_chla)) + 0.0176 * hplc_chla)
+
+# Plot --------------------------------------------------------------------
+
+p <- df %>%
+  ggplot(aes(x = hplc_chla, y = phytoplankton_absorption)) +
+  geom_point(color = "grey60", size = 0.5) +
+  geom_line(aes(y = bricaud_1998, color = "Bricaud 1998")) +
+  geom_line(aes(y = bricaud_2004, color = "Bricaud 2004")) +
+  geom_line(aes(y = devred_2006, color = "Devred 2006")) +
+  scale_x_log10() +
+  scale_y_log10() +
+  annotation_logticks(sides = "bl", size = 0.25) +
+  geom_smooth(method = "lm") +
   labs(
-    y = bquote(frac("Fuco" ~ (mgC~m^{-3}), "Chla" ~ (mgC~m^{-3}))),
-    x = NULL
+    x = quote("Chla" ~ (mgC~m^{-3})),
+    y = quote(a[phi] ~ (440) ~ (m^{-1}))
   ) +
   theme(
-    panel.border = element_blank(),
-    axis.ticks = element_blank(),
-    plot.caption = element_text(
-      color = "grey50",
-      size = 6
+    legend.position = "top",
+    legend.title = element_blank()
+  ) +
+  paletteer::scale_color_paletteer_d(
+    "ggthemes::wsj_rgby",
+    guide = guide_legend(
+      label.position = "top",
+      override.aes = list(size = 2),
+      keywidth = unit(3, "cm")
     )
   )
-
-# Combine plots -----------------------------------------------------------
-
-p <- p1 / p2 +
-  plot_annotation(tag_levels = "A") &
-  theme(plot.tag = element_text(face = "bold"))
 
 ggsave(
   here::here("graphs/fig02.pdf"),
   device = cairo_pdf,
-  width = 8,
-  height = 8
+  width = 5,
+  height = 4
+)
+
+pdftools::pdf_convert(
+  pdf = here::here("graphs/fig02.pdf"),
+  filenames = here::here("graphs/fig02.png"),
+  dpi = 600
 )

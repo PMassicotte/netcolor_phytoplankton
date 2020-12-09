@@ -1,139 +1,127 @@
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 # AUTHOR:       Philippe Massicotte
 #
-# DESCRIPTION:  Temporal variability of the spectral slope of non-algal
-# absorption.
+# DESCRIPTION:  Yearly variations in chla, a*_phy, a_nap and s_nap.
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
-rm(list = ls())
-
-non_algal_absorption_slope <-
-  read_csv("data/clean/non_algal_absorption_slope.csv") %>%
-  select(-c(id, cc, model_r2))
-
-metadata <- read_csv("data/clean/metadata.csv")
-
-metadata <- metadata %>%
+df <- fread(here::here("data/clean/absorption_with_metadata.csv")) %>%
+  as_tibble() %>%
+  filter(wavelength == 443) %>%
   select(
     measurement_id,
     date,
-    depth,
-    longitude,
-    latitude
+    wavelength,
+    contains("absorption"),
+    hplc_chla
   )
-
-df <- non_algal_absorption_slope %>%
-  inner_join(metadata, by = "measurement_id") %>%
-  mutate(yday = lubridate::yday(date))
 
 df
 
-df %>%
-  count(yday, sort = TRUE)
+df <- df %>%
+  mutate(specific_phytoplankton_absorption = phytoplankton_absorption / hplc_chla)
 
-# Histogram of S_NAP ------------------------------------------------------
+snap <- read_csv(here::here("data/clean/non_algal_absorption_slope.csv")) %>%
+  select(measurement_id, non_algal_absorption_slope)
 
-df %>%
-  ggplot(aes(x = non_algal_absorption_slope)) +
-  geom_histogram(binwidth = 0.0005) +
-  geom_vline(
-    xintercept = 0.0123,
-    color = "red",
-    lty = 2
-  ) +
-  annotate("text",
-    x = 0.0126,
-    y = Inf,
-    label = "Average value of 0.0123\nin Babin 2003",
-    vjust = 1,
-    hjust = 0
-  )
+bioregion <- read_csv(here::here("data/clean/bioregions.csv")) %>%
+  mutate(bioregion_id = parse_number(bioregion)) %>%
+  mutate(bioregion_name = fct_reorder(bioregion_name, bioregion_id))
 
+df <- df %>%
+  inner_join(bioregion, by = "measurement_id") %>%
+  inner_join(snap, by = "measurement_id")
 
-# Histogram of depth measurements -----------------------------------------
+df
 
-#TODO: Should we keep only surface measurements?
-df %>%
-  ggplot(aes(x = depth)) +
-  geom_histogram(binwidth = 0.5)
+# Boxplot over the years --------------------------------------------------
 
-# Sina plot ---------------------------------------------------------------
-
-p1 <- df %>%
-  ggplot(aes(
-    x = lubridate::month(date, label = TRUE, abbr = TRUE),
-    y = non_algal_absorption_slope
-  )) +
-  ggforce::geom_sina(
-    aes(color = latitude),
-    size = 0.5
-  ) +
-  scale_x_discrete(expand = expansion(mult = c(0.05, 0.05))) +
-  labs(
-    x = NULL,
-    y = quote(S[NAP] ~ (nm^{-1})),
-    color = "Latitude"
-  ) +
-  scale_color_viridis_c(
-    option = "B",
-    guide = guide_colorbar(
-      barwidth = unit(10, "cm"),
-      barheight = unit(0.25, "cm"),
-      title.position = "top",
-      title.hjust = 0.5
-    )
-  ) +
-  theme(legend.position = "top")
-
-# Rolling mean plot -------------------------------------------------------
-
+# Use boxplot to have a feeling how the data vary over the years
 df_viz <- df %>%
-  group_by(yday) %>%
-  summarise(
-    mean_non_algal_absorption_slope = mean(non_algal_absorption_slope),
-    sd_non_algal_absorption_slope = sd(non_algal_absorption_slope),
-    n = n()
-  ) %>%
-  mutate(date = as.Date(paste0("2014-", yday), "%Y-%j"))
+  mutate(year = lubridate::year(date)) %>%
+  mutate(year = fct_reorder(as.character(year), year)) %>%
+  add_count(year) %>%
+  filter(n > 1)
 
 df_viz
 
-p2 <- df_viz %>%
-  ggplot(aes(x = date, y = mean_non_algal_absorption_slope)) +
-  geom_point(color = "gray50") +
-  geom_line(aes(y = rollmean(
-    mean_non_algal_absorption_slope,
-    k = 28,
-    na.pad = TRUE
-  )),
-  color = "red",
-  size = 0.5
-  ) +
+df_viz %>%
+  ggplot(aes(x = year, y = hplc_chla)) +
+  geom_boxplot(size = 0.25) +
   labs(
-    y = quote(S[NAP] ~ (nm^{-1})),
+    title = "Temporal variation of Chla\nusing boxplot",
+    y = bquote("Chla" ~ (mgC~m^{-3})),
     x = NULL
   ) +
-  scale_x_date(
-    date_labels = "%b",
-    date_breaks = "1 month",
-    expand = expansion(mult = c(0.05, 0.01))
+  facet_wrap(~bioregion_name, ncol = 1, scales = "free_y")
+
+# Weighted mean -----------------------------------------------------------
+
+df_viz <- df %>%
+  mutate(year = lubridate::year(date)) %>%
+  filter(year > 2004) %>%
+  group_by(year, bioregion_name) %>%
+  mutate(n = n()) %>%
+  summarise(across(
+    c(contains("absorption"), "hplc_chla"),
+    list(mean = mean, sd = sd),
+    na.rm = TRUE,
+    .names = "{.fn}_{.col}"
+  )) %>%
+  ungroup()
+
+df_viz
+
+# Chla --------------------------------------------------------------------
+
+p1 <- df_viz %>%
+  filter(year > 2004) %>%
+  ggplot(
+    aes(
+      x = year,
+      y = mean_hplc_chla
+    )
   ) +
-  scale_y_continuous(breaks = scales::breaks_pretty(n = 5)) +
-  theme(
-    panel.grid.minor.x = element_blank()
+  geom_pointrange(
+    aes(
+      ymin = mean_hplc_chla - sd_hplc_chla,
+      ymax = mean_hplc_chla + sd_hplc_chla
+    ),
+    show.legend = FALSE,
+    fill = "#3c3c3c",
+    color = "gray75",
+    shape = 20,
+    fatten = 5,
+    size = 0.5
+  ) +
+  geom_line() +
+  scale_y_continuous(breaks = scales::breaks_pretty(n = 4)) +
+  scale_x_continuous(breaks = scales::breaks_pretty(n = 8)) +
+  facet_wrap(~bioregion_name, scales = "free_y", ncol = 1) +
+  labs(
+    y = bquote("Chla" ~ (mgC~m^{-3})),
+    x = NULL
   )
 
 # Combine plots -----------------------------------------------------------
 
-p <- p1 / p2 +
-  plot_annotation(
-    tag_levels = "A"
-  ) &
-  theme(plot.tag = element_text(face = "bold"))
+# p <- p1 + p2 +
+#   plot_annotation(tag_levels = "A") &
+#   theme(plot.tag = element_text(face = "bold"))
 
 ggsave(
+  plot = p1,
   here::here("graphs/fig04.pdf"),
   device = cairo_pdf,
-  width = 6,
-  height = 8
+  width = 5,
+  height = 10
 )
+
+# Convert to png ----------------------------------------------------------
+
+pdftools::pdf_convert(
+  pdf = here::here("graphs/fig04.pdf"),
+  filenames = here::here("graphs/fig04.png"),
+  dpi = 300
+)
+
+
