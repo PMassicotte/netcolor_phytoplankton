@@ -77,7 +77,7 @@ df <- df %>%
   mutate(yday = lubridate::yday(date)) %>%
   mutate(bioregion_id = parse_number(bioregion)) %>%
   group_by(bioregion) %>%
-  mutate(label = glue::glue("{bioregion_name}<br><span style = 'font-size:3pt; color:grey75;'>Bathymetry: {-max(bathymetry)} - {-min(bathymetry)} meters<br>DOY: {min(yday)} - {max(yday)}</span>")) %>%
+  mutate(label = glue::glue("{bioregion_name}<br><span style = 'font-size:4pt; color:grey75;'>Bathymetry: {-max(bathymetry)} - {-min(bathymetry)} meters<br>DOY: {min(yday)} - {max(yday)}</span>")) %>%
   mutate(label = fct_reorder(label, bioregion_id)) %>%
   ungroup()
 
@@ -125,18 +125,17 @@ p <- df %>%
     limits = c(-4000, 0),
     oob = scales::squish,
     guide = guide_legend(
-      label.position = "top",
+      label.position = "left",
       title = "Depth (m)",
       title.position = "top",
       title.hjust = 0.5,
       title.theme = element_text(face = "bold", size = 8, family = "Poppins"),
-      label.theme = element_text(size = 6, family = "Poppins"),
+      label.theme = element_text(size = 6, family = "Lato"),
       keyheight = unit(0.25, "cm"),
       keywidth = unit(0.75, "cm"),
-      byrow = TRUE,
-      nrow = 1
+      direction = "vertical"
     ),
-    breaks = -seq(0, 3000, by = 500),
+    breaks = -seq(0, 3000, by = 250),
     na.value = "#B9DDF1"
   ) +
   geom_sf(
@@ -176,7 +175,8 @@ p <- df %>%
   scale_y_continuous(breaks = seq(0, 90, by = 5), expand = c(0, 0)) +
   theme(
     legend.title = element_blank(),
-    legend.position = "bottom",
+    legend.position = c(0.9, 0.1),
+    legend.justification = c(1, 0),
     panel.border = element_blank(),
     axis.ticks = element_blank(),
     panel.grid = element_line(size = 0.25),
@@ -184,9 +184,10 @@ p <- df %>%
     legend.key.size = unit(1, "cm"),
     legend.key = element_rect(color = NA, fill = NA),
     legend.box = "vertical",
-    axis.text = element_text(size = 3, color = "gray50"),
+    axis.text = element_text(size = 4, color = "gray50"),
     panel.background = element_rect(fill = "#B9DDF1"),
-    strip.text = element_markdown(size = 4, face = "plain", family = "Roboto Mono")
+    strip.text = element_markdown(size = 5, face = "bold", family = "Lato"),
+    panel.spacing = unit(1, "lines")
   ) +
   facet_wrap(~label)
 
