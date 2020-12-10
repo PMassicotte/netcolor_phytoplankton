@@ -21,6 +21,7 @@ library(data.table)
 library(stars)
 library(MBA)
 library(ggtext)
+library(ggfortify) # Fortify ACF and CCF objects
 
 # library(furrr)
 # plan(multiprocess(workers = availableCores() - 1))
