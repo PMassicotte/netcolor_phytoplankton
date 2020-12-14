@@ -91,6 +91,45 @@ p <- df_viz %>%
 
 p
 
+# Visualization of a correlation matrix -----------------------------------
+
+# While we are there, have a look to all pairwise correlations
+
+p <- df_viz %>%
+  select(bioregion_name, contains("rollmean")) %>%
+  drop_na() %>%
+  group_nest(bioregion_name) %>%
+  mutate(cor_mat = map(data, cor)) %>%
+  mutate(cor_plot = map2(
+    bioregion_name,
+    cor_mat,
+    function(bioregion_name, cor_mat) {
+      ggcorrplot(cor_mat,
+        lab = TRUE,
+        type = "lower",
+        title = bioregion_name
+      )
+    }
+  ))
+
+p <- wrap_plots(p$cor_plot, ncol = 1)
+
+ggsave(
+  here::here("graphs/18_pairwise_correlation_rollingmean.pdf"),
+  width = 15,
+  height = 15,
+  device = cairo_pdf
+)
+
+knitr::plot_crop(here::here("graphs/18_pairwise_correlation_rollingmean.pdf"))
+
+pdftools::pdf_convert(
+  here::here("graphs/18_pairwise_correlation_rollingmean.pdf"),
+  format = "png",
+  filenames = here::here("graphs/18_pairwise_correlation_rollingmean.png"),
+  dpi = 300
+)
+
 # Crosscorrelation --------------------------------------------------------
 
 df_viz <- df_viz %>%
