@@ -1,3 +1,16 @@
+# <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+# AUTHOR:       Philippe Massicotte
+#
+# DESCRIPTION:
+
+# Beaucoup de relation aph(443)-chl ont été etablie avec quelques
+# croisieres seulement, ici avec une serie temporelle de 10-20ans, ca serait
+# bien de voir si ces relations tiennent toujours la route, je vais commencer a
+# remplir le google doc avec ce genre de relations, e.g., Bricaud et al., 1998 &
+# 2004 et on pourra ajouter une figure aph440 vs chl (bricaud utilise 440 et non
+# 443).
+# <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
 rm(list = ls())
 
 # Prepare the data --------------------------------------------------------

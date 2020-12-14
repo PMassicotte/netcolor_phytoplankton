@@ -130,7 +130,7 @@ p <- df %>%
       title.position = "top",
       title.hjust = 0.5,
       title.theme = element_text(face = "bold", size = 8, family = "Poppins"),
-      label.theme = element_text(size = 6, family = "Lato"),
+      label.theme = element_text(size = 6, family = "Open Sans"),
       keyheight = unit(0.25, "cm"),
       keywidth = unit(0.75, "cm"),
       direction = "vertical"
@@ -186,7 +186,7 @@ p <- df %>%
     legend.box = "vertical",
     axis.text = element_text(size = 4, color = "gray50"),
     panel.background = element_rect(fill = "#B9DDF1"),
-    strip.text = element_markdown(size = 5, face = "bold", family = "Lato"),
+    strip.text = element_markdown(size = 5, face = "bold", family = "Open Sans"),
     panel.spacing = unit(1, "lines")
   ) +
   facet_wrap(~label)
@@ -204,7 +204,7 @@ pdftools::pdf_convert(
   here::here("graphs/fig01.pdf"),
   format = "png",
   filenames = here::here("graphs/fig01.png"),
-  dpi = 600
+  dpi = 300
 )
 
 # ggsave(
