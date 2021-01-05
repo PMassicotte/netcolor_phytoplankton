@@ -133,9 +133,13 @@ pdftools::pdf_convert(
 # Crosscorrelation --------------------------------------------------------
 
 df_viz <- df_viz %>%
-  drop_na(rollmean_non_algal_absorption, rollmean_hplc_chla) %>%
+  drop_na(
+    rollmean_non_algal_absorption,
+    rollmean_hplc_chla,
+    rollmean_non_algal_absorption_slope
+  ) %>%
   group_nest(bioregion_name) %>%
-  mutate(mod_ccf = map(
+  mutate(mod_ccf_anap = map(
     data,
     ~ ccf(
       .$rollmean_non_algal_absorption,
@@ -144,14 +148,24 @@ df_viz <- df_viz %>%
       lag.max = 30
     )
   )) %>%
-  mutate(fortified = map(mod_ccf, fortify))
+  mutate(mod_ccf_snap = map(
+    data,
+    ~ ccf(
+      .$rollmean_non_algal_absorption_slope,
+      .$rollmean_hplc_chla,
+      plot = FALSE,
+      lag.max = 30
+    )
+  )) %>%
+  mutate(fortified_ccf_anap = map(mod_ccf_anap, fortify)) %>%
+  mutate(fortified_ccf_snap = map(mod_ccf_snap, fortify))
 
 df_viz
 
 # Correlation plots -------------------------------------------------------
 
 p <- df_viz %>%
-  unnest(fortified) %>%
+  unnest(fortified_ccf_anap) %>%
   janitor::clean_names() %>%
   ggplot(aes(x = lag, y = 0)) +
   geom_segment(aes(xend = lag, yend = acf), color = "#3c3c3c") +
@@ -159,20 +173,20 @@ p <- df_viz %>%
   scale_x_continuous(breaks = scales::breaks_pretty(n = 10)) +
   scale_y_continuous(breaks = scales::breaks_pretty(n = 10)) +
   labs(
-    title = "Autocorrelation between aphy(443) and chla",
+    title = "Autocorrelation between aNAP(443) and chla",
     y = "Correlation",
     x = "Lag (days)"
   )
 
 ggsave(
-  here::here("graphs/18_autocorrelation_aphy443_chla.pdf"),
+  here::here("graphs/18_autocorrelation_anap443_chla.pdf"),
   device = cairo_pdf,
   width = 8.55,
   height = 4.34
 )
 
 ggsave(
-  here::here("graphs/18_autocorrelation_aphy443_chla.png"),
+  here::here("graphs/18_autocorrelation_anap443_chla.png"),
   width = 8.55,
   height = 4.34,
   dpi = 600
@@ -183,3 +197,54 @@ ggsave(
 #   unnest(data)
 #
 # cor(tt$rollmean_non_algal_absorption, tt$rollmean_hplc_chla)
+
+p <- df_viz %>%
+  unnest(fortified_ccf_snap) %>%
+  janitor::clean_names() %>%
+  ggplot(aes(x = lag, y = 0)) +
+  geom_segment(aes(xend = lag, yend = acf), color = "#3c3c3c") +
+  facet_wrap(~bioregion_name) +
+  scale_x_continuous(breaks = scales::breaks_pretty(n = 10)) +
+  scale_y_continuous(breaks = scales::breaks_pretty(n = 10)) +
+  labs(
+    title = "Autocorrelation between SNAP(443) and chla",
+    y = "Correlation",
+    x = "Lag (days)"
+  )
+
+ggsave(
+  here::here("graphs/18_autocorrelation_snap443_chla.pdf"),
+  device = cairo_pdf,
+  width = 8.55,
+  height = 4.34
+)
+
+ggsave(
+  here::here("graphs/18_autocorrelation_snap443_chla.png"),
+  width = 8.55,
+  height = 4.34,
+  dpi = 600
+)
+
+# tt <- df_viz %>%
+#   filter(str_detect(bioregion_name, "SSFa")) %>%
+#   unnest(data)
+#
+# cor(tt$rollmean_non_algal_absorption_slope, tt$rollmean_hplc_chla)
+
+p <- df_viz %>%
+  unnest(data) %>%
+  ggplot(aes(x = rollmean_non_algal_absorption_slope, y = rollmean_hplc_chla)) +
+  geom_point() +
+  facet_wrap(~bioregion_name) +
+  geom_smooth(method = "lm") +
+  labs(
+    title = "Relationship between SNAP(443) and chla (i.e. lag = 0)"
+  )
+
+ggsave(
+  here::here("graphs/18_correlation_snap443_chla_at_lag_0.png"),
+  width = 8.55,
+  height = 4.34,
+  dpi = 600
+)
