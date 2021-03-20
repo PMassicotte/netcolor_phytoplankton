@@ -9,18 +9,17 @@ rm(list = ls())
 crs_string <-
   "+proj=lcc +lat_1=49 +lat_2=77 +lon_0=-91.52 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"
 
-metadata <- vroom::vroom("data/clean/absorption_with_metadata.csv")
+metadata <- read_csv("data/clean/metadata.csv")
 
 metadata
 
 metadata <- metadata %>%
-  distinct(measurement_id, mission_name, longitude, latitude, position) %>%
-  st_as_sf(coords = c("longitude", "latitude"), crs = 4326) %>%
-  st_transform(crs = crs_string)
+  drop_na(longitude, latitude) %>%
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
 
 bathy <-
   read_stars(
-    "data/raw/bathymetry/GEBCO_2020_01_Dec_2020_dc69d6fb1af3/gebco_2020_n70.0_s35.0_w-80.0_e-40.0.tif"
+    "data/raw/bathymetry/GEBCO_2020_20_Mar_2021_6b1b8dd40371/gebco_2020_n80.0_s35.0_w-90.0_e-20.0.tif"
   )
 
 df <- st_extract(bathy, metadata) %>%
@@ -28,10 +27,11 @@ df <- st_extract(bathy, metadata) %>%
   janitor::clean_names()
 
 bathymetry <- df %>%
-  select(bathymetry = gebco_2020_n70_0_s35_0_w_80_0_e_40_0_tif) %>%
+  select(bathymetry = gebco_2020_n80_0_s35_0_w_90_0_e_20_0_tif) %>%
   bind_cols(metadata, .) %>%
   as_tibble() %>%
-  select(measurement_id, bathymetry)
+  select(sample_id, bathymetry) %>%
+  mutate(bathymetry = as.vector(bathymetry))
 
 bathymetry
 
@@ -74,43 +74,8 @@ p <- bathymetry %>%
   )
 
 ggsave(
-  here::here("graphs/05_histogram_bathymetry.pdf"),
+  here::here("graphs/03_histogram_bathymetry.pdf"),
   device = cairo_pdf,
   width = 6,
   height = 5
-)
-
-# Count how many observation there are in each bin ------------------------
-
-p <- bathymetry %>%
-  left_join(metadata) %>%
-  count(bathymetry_bin, position) %>%
-  mutate(position = fct_relevel(position, c("South", "North"))) %>%
-  ggplot(aes(x = n, y = position, fill = bathymetry_bin)) +
-  geom_col(position = "dodge") +
-  paletteer::scale_fill_paletteer_d(
-    "ggsci::default_locuszoom",
-    guide = guide_legend(
-      label.position = "top",
-      keywidth = unit(3, "cm"),
-      keyheight = unit(0.25, "cm")
-    )
-  ) +
-  scale_x_continuous(breaks = scales::breaks_pretty(n = 10)) +
-  labs(
-    x = "Number of observation",
-    y = NULL,
-    title = "Number of observation per position and bathymetry bin",
-    subtitle = "North/south stations classified using 52.5 degree latitude."
-  ) +
-  theme(
-    legend.position = "top",
-    legend.title = element_blank()
-  )
-
-ggsave(
-  here::here("graphs/06_number_observation_position_bathymetry_class.pdf"),
-  device = cairo_pdf,
-  width = 8,
-  height = 6
 )
