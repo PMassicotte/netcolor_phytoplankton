@@ -125,6 +125,11 @@ metadata <- metadata %>%
   filter(n == 1) %>%
   select(-n)
 
+# Remove measurements without geographic coordinate or date
+
+metadata <- metadata %>%
+  filter(!if_any(c(date, longitude, latitude), is.na))
+
 # HPLC --------------------------------------------------------------------
 
 hplc <- df %>%
@@ -158,6 +163,11 @@ hplc <- hplc %>%
   mutate(hplchla = sum(hplchla, hplcchla, na.rm = TRUE)) %>%
   select(-hplcchla) %>%
   rename(hplcchla = hplchla)
+
+# Only keep sample with metadata
+
+hplc <- hplc %>%
+  semi_join(metadata, by = "sample_id")
 
 # Absorption --------------------------------------------------------------
 
@@ -209,6 +219,9 @@ absorption
 absorption %>%
   count(sample_id, sort = TRUE) %>%
   assertr::verify(n == 400)
+
+absorption <- absorption %>%
+  semi_join(metadata, by = "sample_id")
 
 # Export ------------------------------------------------------------------
 

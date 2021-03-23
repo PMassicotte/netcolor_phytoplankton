@@ -11,16 +11,12 @@ source("R/zzz.R")
 stations <- read_csv(here("data/clean/metadata.csv"))
 bioregions <- read_csv(here("data/clean/bioregions.csv"))
 
-stations %>%
-  filter(is.na(longitude))
-
 crs_string <-
   "+proj=lcc +lat_1=49 +lat_2=77 +lon_0=-91.52 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"
 
 # crs_string <- 4326
 
 stations_sf <- stations %>%
-  drop_na(longitude, latitude) %>%
   inner_join(bioregions, by = "sample_id") %>%
   st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
 

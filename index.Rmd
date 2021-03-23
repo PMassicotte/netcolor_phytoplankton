@@ -61,14 +61,6 @@ This section shows some graphics about the processed data. The data consists in 
 
 ## Mismatch between metadata, HPLC and absorption
 
-The following table shows the HPLC data that have no metadata associated.
-
-```{r}
-hplc %>% 
-  anti_join(metadata, by = "sample_id") %>% 
-  rmarkdown::paged_table()
-```
-
 Now, this table shows the metadata that have no HPLC values associated.
 
 ```{r}
@@ -86,15 +78,7 @@ absorption %>%
   rmarkdown::paged_table()
 ```
 
-## Missing geographical coordinates
-
-These are measurements without goegraphical coordinates.
-
-```{r}
-metadata %>% 
-  filter(is.na(longitude)) %>% 
-  rmarkdown::paged_table()
-```
+## First visualizations
 
 Most of the data is from the Scotian Shelf, Labrador Sea and Scotian Shelf and Slope.
 
@@ -160,14 +144,13 @@ df_viz %>%
 This is not the final map, but it gives a first spatial overview of the data.
 
 ```{r, fig.align='center'}
-knitr::include_graphics(pdf2png(here("graphs/05_geographical_map.pdf")))
+knitr::include_graphics(pdf2png(here("graphs/fig01.pdf")))
 ```
 
 ## HPLC
 
 -   I also noticed there are a lot of `0` in the HPLC data.
     -   Should we consider `0` values as real `0` or missing values?
-
 
 ```{r}
 hplc %>%
@@ -265,5 +248,7 @@ knitr::include_graphics(pdf2png(here("graphs/fig03.pdf")))
 ```
 
 ## TODOS
+
+- Re-do the analysis with only measurements made at the surface layer (<= 2 meters).
 
 ## References
