@@ -4,7 +4,7 @@
 # AUTHOR:       Philippe Massicotte
 #
 # DESCRIPTION:  Project aiming to look at a large database of absorption
-# meausrments (total + phyto).
+# measurements (total, phyto and anap).
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 # Setup -------------------------------------------------------------------
@@ -40,11 +40,13 @@ theme_update(
 
 # Cleaning scripts --------------------------------------------------------
 
-source("R/01_convert_absorption_txt_to_asc.R")
-source("R/02_validate_absorption_data_file_naming.R")
-source("R/03_tidy_absorption_spectra.R")
-source("R/04_merge_absorption_metadata.R")
-source("R/05_extract_bathymetry.R")
+source("R/01_tidy_data.R")
+source("R/02_calculate_slope_non_algal_absorption.R")
+source("R/03_extract_bathymetry.R")
+source("R/04_classify_observations_into_bioregions.R")
+source("R/05_geographical_map.R")
+source("R/06_visualize_metadata.R")
+source("R/07_explore_absorption.R")
 
 # Visualization -----------------------------------------------------------
 

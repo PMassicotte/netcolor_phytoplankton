@@ -1,0 +1,269 @@
+---
+title: "NetCOLOR project"
+date: "Last compiled on `r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    highlight: zenburn
+    css: "theme.css"
+    toc: true
+    toc_float:
+      collapsed: false
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.pos = "center",
+  cache = TRUE
+)
+
+library(here)
+library(tidyverse)
+library(kableExtra)
+
+library(ggpmthemes)
+
+# Set default ggplot2 font size and font family
+# devtools::install_github("PMassicotte/ggpmthemes")
+theme_set(theme_light_modified(
+  base_family = "Montserrat Alternates",
+  base_size = 10
+))
+
+theme_update(
+  panel.border = element_blank(),
+  axis.ticks = element_blank(),
+  strip.background = element_blank(),
+  strip.text = element_text(face = "bold", size = 10, color = "#4c4a4a")
+)
+
+source(here("R/zzz.R"))
+```
+
+```{r open_data}
+hplc <- vroom::vroom(here("data/clean/hplc.csv"))
+metadata <- vroom::vroom(here("data/clean/metadata.csv"))
+absorption <- vroom::vroom(here("data/clean/absorption.csv"))
+```
+
+This section shows some graphics about the processed data. The data consists in three `.csv` files:
+
+1.  `metadata.csv`
+
+2.  `hplc.csv`
+
+3.  `absorption.csv`
+
+`sample_id` *438116* was duplicated and removed from the data.
+
+## Mismatch between metadata, HPLC and absorption
+
+The following table shows the HPLC data that have no metadata associated.
+
+```{r}
+hplc %>% 
+  anti_join(metadata, by = "sample_id") %>% 
+  rmarkdown::paged_table()
+```
+
+Now, this table shows the metadata that have no HPLC values associated.
+
+```{r}
+metadata %>% 
+  anti_join(hplc, by = "sample_id") %>% 
+  rmarkdown::paged_table()
+```
+
+These are the absorption spectra with no HPLC association.
+
+```{r}
+absorption %>% 
+  anti_join(hplc, by = "sample_id") %>% 
+  distinct(sample_id, .keep_all = TRUE) %>% 
+  rmarkdown::paged_table()
+```
+
+## Missing geographical coordinates
+
+These are measurements without goegraphical coordinates.
+
+```{r}
+metadata %>% 
+  filter(is.na(longitude)) %>% 
+  rmarkdown::paged_table()
+```
+
+Most of the data is from the Scotian Shelf, Labrador Sea and Scotian Shelf and Slope.
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/06_number_measurements_cruise.pdf")))
+```
+
+The number of observation is also relatively stable through the years.
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/06_number_measurements_per_year.pdf")))
+```
+
+## Bioregions
+
+Observations were classified into bioregions based on the following criteria (where `position` is `south` if `latitude < 48`):
+
+```{r, eval=FALSE, echo=TRUE}
+bathymetry > -300 & position == "North" ~ "Labrador & Greenland Shelves (LGS)"
+bathymetry <= -300 & position == "North" ~ "Labrador Sea Bassin (LSB)"
+bathymetry >= -300 & position == "South" & yday <= 180 ~ "Scotian Shelf Spring (SSSp)"
+bathymetry >= -300 & position == "South" & yday > 180 ~ "Scotian Shelf Fall (SSFa)"
+bathymetry < -300 & position == "South"~ "Northwest Atlantic Bassin ocean (NAB)"
+```
+
+```{r, fig.align='center'}
+knitr::include_graphics(pdf2png(here("graphs/04_number_observations_per_bioregion.pdf")))
+```
+
+## Depth of measurements
+
+- There are two columns in the data that can be used to characterize the depth of the measurement. Which one should be used?
+
+```{r}
+df_viz <- absorption %>% 
+  distinct(sample_id, depth, pressure)
+
+df_viz %>% 
+  drop_na() %>% 
+  ggplot(aes(x = depth, y = pressure)) +
+  geom_point() +
+  geom_abline(lty = 2, color = "red")
+```
+
+- Looks like that most measurements were made at `depth == 1`. Should we only use these observations?
+
+```{r}
+df_viz %>% 
+  count(depth) %>% 
+  drop_na() %>% 
+  # mutate(depth = fct_reorder(as.character(depth), n))
+  ggplot(aes(x = n, y = fct_rev(factor(depth)))) +
+  geom_col() +
+  labs(
+    x = "Number of observations",
+    y = "Depth of measurements (m)"
+  )
+```
+
+
+## Geographical map
+
+This is not the final map, but it gives a first spatial overview of the data.
+
+```{r, fig.align='center'}
+knitr::include_graphics(pdf2png(here("graphs/05_geographical_map.pdf")))
+```
+
+## HPLC
+
+-   I also noticed there are a lot of `0` in the HPLC data.
+    -   Should we consider `0` values as real `0` or missing values?
+
+
+```{r}
+hplc %>%
+  select(-abs_vol_l) %>%
+  pivot_longer(chlb:zea) %>%
+  drop_na() %>%
+  mutate(is_zero = value == 0) %>% 
+  count(name, is_zero) %>%
+  ggplot(aes(x = n, y = name, fill = is_zero)) +
+  geom_col() +
+  paletteer::scale_fill_paletteer_d("ggthemes::wsj_colors6") +
+  labs(
+    y = NULL,
+    fill = "Value\nis zero"
+  ) 
+```
+
+- Some HPLC `sample_id` were not numeric (ex.: FL002), I removed them from the data.
+
+-   There are `hplchla` and `hplcchla` variables in the data. I have merge both columns into one because I suspect it is an error and should be the same variable.
+
+- I have calculated `aphy_specific` using `hplcchla`.
+
+## Absorption
+
+-   Here is how I named absorption data:
+
+    -   `anap` is the data contained in files with `detritus` in their name.
+    -   `ap` is the data contained in files with `particulate` in their name.
+    -   `aphy` is the data contained in files with `phytoplankton` in their name.
+
+-   Is the absorption data ready to go (i.e. no further processing required)?
+
+A quick look at one sample (378972) seems to indicate no...
+
+```{r}
+absorption %>% 
+  filter(sample_id == 378972) %>%
+  ggplot(aes(x = wavelength, y = anap)) +
+  geom_line()
+```
+
+-   How should we use the quality flags?
+
+-   I think we should only keep the 2671 spectra where all the three flags are at 1.
+
+```{r}
+absorption %>%
+  filter(wavelength == 350) %>%
+  count(
+    qc_flag_410_smaller_than_440,
+    qc_flag_443_to_490,
+    qc_flag_chl_a_to_443_550_670
+  ) %>% 
+  kableExtra::kbl() %>% 
+  kableExtra::kable_material()
+```
+
+Overview pf `aphy` per bioregion. We can see that there are some negative values at low wavelengths (see `Northwest Atlantic Bassin ocean (NAB)`).
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/07_aph_spectral_profiles_per_bioregion.pdf")))
+```
+
+### Calculating snap
+
+> The fit was done for data between 380 and 730 nm, excluding the 400--480 and 620--710 nm ranges to avoid any residual pigment absorption that might still have been present after sodium hypochlorite treatment [@Babin2003].
+
+A R2 of 0.90 was used to filter out bad models.
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/02_non_algal_absorption_spectra_vs_fitted.pdf")))
+```
+
+## Preliminary analysis
+
+### Comparing aphy vs. chla
+
+This section explore the relationship between aphy and chla and compare it with existing published models.
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/fig02.pdf")))
+```
+
+### Timeseries
+
+- For these graphs, have calculated the year day average of each variable. Then, I have used a 8-days (points) rollmean (red curves).
+
+- I have only used the two bioregions at this time.
+
+- I am not sure if this is really interesting because there are many gaps in the year days, so using a 8 points moving window is not really 8 days.
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/fig03.pdf")))
+```
+
+## TODOS
+
+## References

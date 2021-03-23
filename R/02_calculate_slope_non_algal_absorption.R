@@ -6,18 +6,18 @@
 
 rm(list = ls())
 
-df <- data.table::fread("data/clean/absorption_with_metadata.csv") %>%
+absorption <- data.table::fread("data/clean/absorption.csv") %>%
   as_tibble()
 
-df
+absorption
 
 # Cut wavelengths ---------------------------------------------------------
 
 # The fit was done for data between 380 and 730 nm, excluding the 400–480 and
 # 620–710 nm ranges to avoid any residual pigment absorption that might still
-# have been present after sodium hypochlorite treatment. (Babin 2003)
+# have been present after sodium hypochlorite treatment (Babin 2003).
 
-df <- df %>%
+df <- absorption %>%
   filter(between(wavelength, 380, 730)) %>%
   filter(!between(wavelength, 400, 480)) %>%
   filter(!between(wavelength, 620, 710))
@@ -30,10 +30,10 @@ fit_exponential <- function(data) {
 
   reference_wl <- 500
 
-  a0 <- data$non_algal_absorption[data$wavelength == reference_wl]
+  a0 <- data$anap[data$wavelength == reference_wl]
 
   model <- nls(
-    non_algal_absorption ~ a0 * exp(-s * (wavelength - reference_wl)) + k,
+    anap ~ a0 * exp(-s * (wavelength - reference_wl)) + k,
     start = c(a0 = a0, s = 0.002, k = 0),
     data = data
   )
@@ -42,7 +42,7 @@ fit_exponential <- function(data) {
 }
 
 df <- df %>%
-  group_by(measurement_id, foldername) %>%
+  group_by(sample_id) %>%
   nest() %>%
   mutate(id = cur_group_id())
 
@@ -55,20 +55,30 @@ df <- df %>%
   mutate(cc = map_chr(model, class)) %>%
   filter(cc != "logical")
 
-df2 <- df %>%
+df <- df %>%
   mutate(pred = map2(data, model, modelr::add_predictions))
 
 # Plot some models --------------------------------------------------------
 
 set.seed(2020)
 
-p <- df2 %>%
+df_model <- df %>%
   slice_sample(n= 49) %>%
-  unnest(pred) %>%
-  ggplot(aes(x = wavelength, y = non_algal_absorption)) +
+  select(sample_id, data_model = data, model) %>%
+  mutate(pred = map(model, ~predict(., newdata = list(wavelength = 380:730)))) %>%
+  mutate(wl = list(380:730))
+
+df_viz <- df_model %>%
+  unnest(data_model)
+
+df_pred <- df_model %>%
+  unnest(c(wl, pred))
+
+p <- df_viz %>%
+  ggplot(aes(x = wavelength, y = anap)) +
   geom_point(size = 0.1) +
-  geom_line(aes(y = pred), color = "red") +
-  facet_wrap(~measurement_id, scales = "free_y") +
+  geom_line(data = df_pred, aes(x = wl, y = pred), color = "red") +
+  facet_wrap(~sample_id, scales = "free_y") +
   scale_y_continuous(breaks = scales::breaks_pretty(n = 4)) +
   labs(
     title = "Examples of fitted non-algal absorption spectra",
@@ -86,7 +96,7 @@ p <- df2 %>%
   )
 
 ggsave(
-  here::here("graphs/08_non_algal_absorption_spectra_vs_fitted.pdf"),
+  here::here("graphs/02_non_algal_absorption_spectra_vs_fitted.pdf"),
   device = cairo_pdf,
   width = 12,
   height = 7
@@ -94,29 +104,29 @@ ggsave(
 
 # Filter out bad models ---------------------------------------------------
 
-df2 <- df2 %>%
-  mutate(model_r2 = map_dbl(pred, ~ cor(.$non_algal_absorption, .$pred)^2))
+df <- df %>%
+  mutate(model_r2 = map_dbl(pred, ~ cor(.$anap, .$pred)^2))
 
-df2
+df
 
-df2 %>%
+df %>%
   ggplot(aes(x = model_r2)) +
   geom_histogram()
 
 # Example of a bad model
-df2 %>%
+df %>%
   filter(model_r2 == min(model_r2)) %>%
   unnest(pred) %>%
-  ggplot(aes(x = non_algal_absorption, y = pred)) +
+  ggplot(aes(x = anap, y = pred)) +
   geom_point()
 
 # Keep only "good" models
-df2 <- df2 %>%
+df <- df %>%
   filter(model_r2 >= 0.90)
 
-df2 <- df2 %>%
-  mutate(non_algal_absorption_slope = map_dbl(model, ~ coef(.)[2]))
+df <- df %>%
+  mutate(snap = map_dbl(model, ~ coef(.)[2]))
 
-df2 %>%
-  select(!where(is.list)) %>%
+df %>%
+  select(sample_id, snap) %>%
   write_csv("data/clean/non_algal_absorption_slope.csv")

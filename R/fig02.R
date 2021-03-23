@@ -15,47 +15,52 @@ rm(list = ls())
 
 # Prepare the data --------------------------------------------------------
 
-df <- fread(here::here("data/clean/absorption_with_metadata.csv")) %>%
+absorption <- fread(here::here("data/clean/absorption.csv")) %>%
   as_tibble() %>%
   filter(wavelength == 440) %>%
   select(
-    measurement_id,
+    sample_id,
     date,
     wavelength,
-    contains("absorption"),
-    hplc_chla
-  )
+    aphy,
+    aphy_specific
+  ) %>%
+  drop_na()
 
-df
+absorption
 
-bioregion <- read_csv(here::here("data/clean/bioregions.csv")) %>%
-  mutate(bioregion_id = parse_number(bioregion)) %>%
-  mutate(bioregion_name = fct_reorder(bioregion_name, bioregion_id))
+bioregion <- read_csv(here::here("data/clean/bioregions.csv"))
 
-df <- df %>%
-  inner_join(bioregion, by = "measurement_id")
+hplc <- read_csv(here::here("data/clean/hplc.csv")) %>%
+  select(sample_id, hplcchla) %>%
+  drop_na()
+
+df <- absorption %>%
+  inner_join(bioregion, by = "sample_id") %>%
+  inner_join(hplc, by = "sample_id")
 
 df
 
 # Add prediction from other models found in the literature ----------------
 
 df <- df %>%
-  mutate(bricaud_1998 = 0.0378 * hplc_chla^0.627) %>%
-  mutate(bricaud_2004 = 0.0654 * hplc_chla^0.728) %>%
-  mutate(devred_2006 = ((0.0839 - 0.0176) / 1.613) * (1 - exp(-1.613 * hplc_chla)) + 0.0176 * hplc_chla)
+  mutate(bricaud_1998 = 0.0378 * hplcchla^0.627) %>%
+  mutate(bricaud_2004 = 0.0654 * hplcchla^0.728) %>%
+  mutate(devred_2006 = ((0.0839 - 0.0176) / 1.613) * (1 - exp(-1.613 * hplcchla)) + 0.0176 * hplcchla)
 
 # Plot --------------------------------------------------------------------
 
 p <- df %>%
-  ggplot(aes(x = hplc_chla, y = phytoplankton_absorption)) +
-  geom_point(color = "grey60", size = 0.5) +
-  geom_line(aes(y = bricaud_1998, color = "Bricaud 1998")) +
-  geom_line(aes(y = bricaud_2004, color = "Bricaud 2004")) +
-  geom_line(aes(y = devred_2006, color = "Devred 2006")) +
+  filter(hplcchla > 0) %>% # TODO: check the minimum plausible value
+  ggplot(aes(x = hplcchla, y = aphy)) +
+  geom_point(color = "grey80", size = 0.25) +
+  geom_line(aes(y = bricaud_1998, color = "Bricaud 1998"), lty = 2) +
+  geom_line(aes(y = bricaud_2004, color = "Bricaud 2004"), lty = 2) +
+  geom_line(aes(y = devred_2006, color = "Devred 2006"), lty = 2) +
   scale_x_log10() +
   scale_y_log10() +
   annotation_logticks(sides = "bl", size = 0.25) +
-  geom_smooth(method = "lm") +
+  geom_smooth(method = "lm", aes(color = "This study"), se = FALSE) +
   labs(
     x = quote("Chla" ~ (mgC~m^{-3})),
     y = quote(a[phi] ~ (440) ~ (m^{-1}))
@@ -65,11 +70,11 @@ p <- df %>%
     legend.title = element_blank()
   ) +
   paletteer::scale_color_paletteer_d(
-    "ggthemes::wsj_rgby",
+    "ggsci::default_locuszoom",
     guide = guide_legend(
       label.position = "top",
-      override.aes = list(size = 2),
-      keywidth = unit(3, "cm")
+      override.aes = list(size = 2, lty = 1),
+      keywidth = unit(2, "cm")
     )
   )
 
@@ -78,10 +83,4 @@ ggsave(
   device = cairo_pdf,
   width = 5,
   height = 4
-)
-
-pdftools::pdf_convert(
-  pdf = here::here("graphs/fig02.pdf"),
-  filenames = here::here("graphs/fig02.png"),
-  dpi = 600
 )

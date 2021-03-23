@@ -6,21 +6,23 @@
 
 rm(list = ls())
 
-metadata <- vroom::vroom("data/clean/absorption_with_metadata.csv")
-bathymetry <- read_csv(here::here("data/clean/bathymetry.csv"))
+metadata <- read_csv(here("data/clean/metadata.csv"))
+bathymetry <- read_csv(here("data/clean/bathymetry.csv"))
 
 metadata
 bathymetry
 
+# Only keep the variables needed for the classification
 metadata <- metadata %>%
-  inner_join(bathymetry, by = "measurement_id") %>%
-  distinct(
-    measurement_id,
-    latitude,
-    date,
-    bathymetry
-  ) %>%
-  mutate(yday = lubridate::yday(date))
+  inner_join(bathymetry, by = "sample_id") %>%
+  select(sample_id, date, bathymetry, latitude)
+
+metadata
+
+# Extract the yday
+
+metadata <- metadata %>%
+  mutate(yday = lubridate::yday(date), .after = date)
 
 # Define north or south position for each station -------------------------
 
@@ -57,16 +59,26 @@ metadata <- metadata %>%
   )
 
 metadata %>%
-  filter(is.na(bioregion)) %>%
-  ggplot(aes(x = yday)) +
-  geom_histogram(binwidth = 5)
-
-metadata %>%
-  count(bioregion) %>%
-  as_tibble() %>%
-  ggplot(aes(x = n, y = bioregion)) +
-  geom_col()
-
-metadata %>%
-  select(measurement_id, bioregion, bioregion_name) %>%
+  select(sample_id, bioregion_name) %>%
   write_csv(here::here("data/clean/bioregions.csv"))
+
+p <- metadata %>%
+  count(bioregion_name) %>%
+  mutate(bioregion_name = fct_reorder(bioregion_name, n)) %>%
+  ggplot(aes(x = n, y = bioregion_name)) +
+  geom_col() +
+  labs(
+    title = "Number of observations per bioregion",
+    y = NULL
+  ) +
+  theme(
+    plot.title.position = "plot"
+  )
+
+ggsave(
+  here("graphs/04_number_observations_per_bioregion.pdf"),
+  device = cairo_pdf,
+  width = 7,
+  height = 4
+)
+

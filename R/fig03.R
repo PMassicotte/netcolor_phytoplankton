@@ -8,32 +8,33 @@ rm(list = ls())
 
 # Prepare the data --------------------------------------------------------
 
-df <- fread(here::here("data/clean/absorption_with_metadata.csv")) %>%
+absorption <- fread(here::here("data/clean/absorption.csv")) %>%
   as_tibble() %>%
+  filter(depth <= 2) %>%
   filter(wavelength == 443) %>%
   select(
-    measurement_id,
+    sample_id,
     date,
     wavelength,
-    contains("absorption"),
-    hplc_chla
+    anap,
+    ap,
+    aphy,
+    aphy_specific
   )
 
-df
+absorption
 
-df <- df %>%
-  mutate(specific_phytoplankton_absorption = phytoplankton_absorption / hplc_chla)
+snap <- read_csv(here::here("data/clean/non_algal_absorption_slope.csv"))
 
-snap <- read_csv(here::here("data/clean/non_algal_absorption_slope.csv")) %>%
-  select(measurement_id, non_algal_absorption_slope)
+bioregion <- read_csv(here::here("data/clean/bioregions.csv"))
 
-bioregion <- read_csv(here::here("data/clean/bioregions.csv")) %>%
-  mutate(bioregion_id = parse_number(bioregion)) %>%
-  mutate(bioregion_name = fct_reorder(bioregion_name, bioregion_id))
+hplc <- read_csv(here::here("data/clean/hplc.csv")) %>%
+  select(sample_id, hplcchla)
 
-df <- df %>%
-  inner_join(bioregion, by = "measurement_id") %>%
-  inner_join(snap, by = "measurement_id")
+df <- absorption %>%
+  inner_join(bioregion, by = "sample_id") %>%
+  inner_join(snap, by = "sample_id") %>%
+  inner_join(hplc, by = "sample_id")
 
 df
 
@@ -45,7 +46,7 @@ df_viz <- df %>%
   group_by(date, bioregion_name) %>%
   mutate(n = n()) %>%
   summarise(across(
-    c(contains("absorption"), "hplc_chla"),
+    c(anap, ap, aphy, aphy_specific, snap, hplcchla),
     ~ mean(., na.rm = TRUE)
   )) %>%
   ungroup()
@@ -60,7 +61,7 @@ df_viz <- df_viz %>%
   group_by(bioregion_name) %>%
   arrange(date) %>%
   mutate(across(
-    c(contains("absorption"), "hplc_chla"),
+    c(anap, ap, aphy, aphy_specific, snap, hplcchla),
     ~ rollmean(., k = 8, fill = NA, align = "center"),
     .names = "rollmean_{.col}"
   )) %>%
@@ -91,9 +92,9 @@ df_viz
 # Chla --------------------------------------------------------------------
 
 p1 <- df_viz %>%
-  ggplot(aes(x = date, y = hplc_chla)) +
+  ggplot(aes(x = date, y = hplcchla)) +
   geom_point(color = "gray60") +
-  geom_line(aes(y = rollmean_hplc_chla), color = "red") +
+  geom_line(aes(y = rollmean_hplcchla), color = "red") +
   scale_x_date(date_labels = "%b", date_breaks = "1 month") +
   scale_y_continuous(breaks = scales::breaks_pretty(n = 6)) +
   labs(
@@ -113,9 +114,9 @@ p1 <- df_viz %>%
 # Specific absorption -----------------------------------------------------
 
 p2 <- df_viz %>%
-  ggplot(aes(x = date, y = phytoplankton_absorption)) +
+  ggplot(aes(x = date, y = aphy_specific)) +
   geom_point(color = "gray60") +
-  geom_line(aes(y = rollmean_phytoplankton_absorption), color = "red") +
+  geom_line(aes(y = rollmean_aphy_specific), color = "red") +
   scale_x_date(date_labels = "%b", date_breaks = "1 month") +
   scale_y_continuous(breaks = scales::breaks_pretty(n = 6)) +
   labs(
@@ -135,9 +136,9 @@ p2 <- df_viz %>%
 # Non-algal absorption ----------------------------------------------------
 
 p3 <- df_viz %>%
-  ggplot(aes(x = date, y = non_algal_absorption)) +
+  ggplot(aes(x = date, y = anap)) +
   geom_point(color = "gray60") +
-  geom_line(aes(y = rollmean_non_algal_absorption), color = "red") +
+  geom_line(aes(y = rollmean_anap), color = "red") +
   scale_x_date(date_labels = "%b", date_breaks = "1 month") +
   scale_y_continuous(breaks = scales::breaks_pretty(n = 6)) +
   labs(
@@ -157,9 +158,9 @@ p3 <- df_viz %>%
 # Slope of non-algal absorption -------------------------------------------
 
 p4 <- df_viz %>%
-  ggplot(aes(x = date, y = non_algal_absorption_slope)) +
+  ggplot(aes(x = date, y = snap)) +
   geom_point(color = "gray60") +
-  geom_line(aes(y = rollmean_non_algal_absorption_slope), color = "red") +
+  geom_line(aes(y = rollmean_snap), color = "red") +
   scale_x_date(date_labels = "%b", date_breaks = "1 month") +
   scale_y_continuous(breaks = scales::breaks_pretty(n = 6)) +
   labs(
@@ -188,10 +189,3 @@ ggsave(
   width = 8,
   height = 12
 )
-
-pdftools::pdf_convert(
-  pdf = here::here("graphs/fig03.pdf"),
-  filenames = here::here("graphs/fig03.png"),
-  dpi = 300
-)
-
