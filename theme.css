@@ -93,4 +93,6 @@ code {
 }
 
 
-
+.csl-entry em {
+  background-image:none;
+}
