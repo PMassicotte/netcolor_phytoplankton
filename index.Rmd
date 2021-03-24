@@ -162,10 +162,22 @@ hplc %>%
 
 -   Absorption spectra with `aphy(440)` \< `aphy(410)` have been removed (possible problem with pigment extraction).
 
--   The next graph shows an overview of `aphy` per bioregion.
+#### ap
 
 ```{r}
-knitr::include_graphics(pdf2png(here("graphs/07_aph_spectral_profiles_per_bioregion.pdf")))
+knitr::include_graphics(pdf2png(here("graphs/07_ap_spectral_profiles_per_bioregion.pdf")))
+```
+
+#### aphy
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/07_aphy_spectral_profiles_per_bioregion.pdf")))
+```
+
+#### anap
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/07_anap_spectral_profiles_per_bioregion.pdf")))
 ```
 
 ### Calculating snap
@@ -199,6 +211,8 @@ knitr::include_graphics(pdf2png(here("graphs/fig02.pdf")))
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs/fig03.pdf")))
 ```
+
+-   There are temporal gaps in the data. At the moment, I am not sure how to deal with that.
 
 ## TODOS
 
