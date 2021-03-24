@@ -10,6 +10,8 @@ metadata <- read_csv(here::here("data/clean/metadata.csv"))
 
 metadata
 
+# Number of measurements per year -----------------------------------------
+
 metadata %>%
   mutate(year = lubridate::year(date)) %>%
   count(year, sort = TRUE) %>%
@@ -36,6 +38,8 @@ ggsave(
   height = 5
 )
 
+# Number of measurements per cruise ---------------------------------------
+
 metadata %>%
   count(cruise_name) %>%
   mutate(cruise_name = str_wrap(cruise_name, 30)) %>%
@@ -55,5 +59,3 @@ ggsave(
   height = 7,
   width = 5
 )
-
-

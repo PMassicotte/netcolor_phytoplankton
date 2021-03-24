@@ -164,6 +164,24 @@ hplc <- hplc %>%
   select(-hplcchla) %>%
   rename(hplcchla = hplchla)
 
+# but19 should be the sum of but19 + butlike
+hplc %>%
+  select(contains("but"))
+
+hplc <- hplc %>%
+  rowwise() %>%
+  mutate(but19 = sum(c_across(contains("but")), na.rm = TRUE)) %>%
+  select(-butlike)
+
+# hex19 should be the sum of hex19 + hexlike + hexlike2
+hplc %>%
+  select(contains("hex"))
+
+hplc <- hplc %>%
+  rowwise() %>%
+  mutate(hex19 = sum(c_across(contains("hex")), na.rm = TRUE)) %>%
+  select(-hexlike2, -hexlike)
+
 # Only keep sample with metadata
 
 hplc <- hplc %>%
@@ -200,6 +218,35 @@ absorption <- absorption %>%
 absorption %>%
   count(sample_id, sort = TRUE) %>%
   assertr::verify(n == 400)
+
+# Remove spectra with any value <= 0 between 350 and 400 nm
+
+absorption <- absorption %>%
+  group_by(sample_id) %>%
+  filter(!any((ap <= 0 |
+    aphy <= 0 | anap <= 0) & between(wavelength, 350, 400))) %>%
+  ungroup()
+
+absorption %>%
+  count(sample_id, sort = TRUE) %>%
+  assertr::verify(n == 400)
+
+# Remove spectra where aphy(440) < aphy(410)
+
+aphy_pigment_extraction_problem <- absorption %>%
+  filter(wavelength %in% c(410, 440)) %>%
+  select(sample_id, wavelength, aphy) %>%
+  pivot_wider(
+    names_from = wavelength,
+    values_from = aphy,
+    names_prefix = "wl"
+  ) %>%
+  filter(wl440 < wl410)
+
+absorption <- absorption %>%
+  anti_join(aphy_pigment_extraction_problem, by = "sample_id")
+
+absorption
 
 # Calculate specific phyto absorption -------------------------------------
 
