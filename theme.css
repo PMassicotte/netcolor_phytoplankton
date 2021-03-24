@@ -96,3 +96,7 @@ code {
 .csl-entry em {
   background-image:none;
 }
+
+.csl-entry {
+  padding-bottom: 20px;
+}

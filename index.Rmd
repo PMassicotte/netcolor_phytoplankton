@@ -61,7 +61,7 @@ This section shows some graphics about the processed data. The data consists in 
 
 ## Notes
 
-- Will be using `depth` instead of `pressure` to characterize the depth of the measurements.
+-   Will be using `depth` instead of `pressure` to characterize the depth of the measurements.
 
 ## Mismatch between metadata, HPLC and absorption
 
@@ -140,15 +140,15 @@ hplc %>%
   ) 
 ```
 
-- Some HPLC `sample_id` were not numeric (ex.: FL002), I removed them from the data.
+-   Some HPLC `sample_id` were not numeric (ex.: FL002), I removed them from the data.
 
 -   There are `hplchla` and `hplcchla` variables in the data. I have merge both columns into one because I suspect it is an error and should be the same variable.
 
-- `but19` was summed as `but19` + `butlike`.
+-   `but19` was summed as `but19` + `butlike`.
 
-- `hex19` was summed as `hex19` + `hexlike` + `hexlike2`.
+-   `hex19` was summed as `hex19` + `hexlike` + `hexlike2`.
 
-- I have calculated `aphy_specific` using `hplcchla`.
+-   I have calculated `aphy_specific` using `hplcchla`.
 
 ## Absorption
 
@@ -158,12 +158,11 @@ hplc %>%
     -   `ap` is the data contained in files with `particulate` in their name.
     -   `aphy` is the data contained in files with `phytoplankton` in their name.
 
+-   Absorption spectra with any values \<= 0 between 350 and 400 nm have been removed.
 
-- Absorption spectra with any values <= 0 between 350 and 400 nm have been removed.
+-   Absorption spectra with `aphy(440)` \< `aphy(410)` have been removed (possible problem with pigment extraction).
 
-- Absorption spectra with `aphy(440)` < `aphy(410)` have been removed (possible problem with pigment extraction).
-
-- The next graph shows an overview of `aphy` per bioregion.
+-   The next graph shows an overview of `aphy` per bioregion.
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs/07_aph_spectral_profiles_per_bioregion.pdf")))
@@ -191,11 +190,11 @@ knitr::include_graphics(pdf2png(here("graphs/fig02.pdf")))
 
 ### Seasonal cycle
 
-- For these graphs, have calculated the year day average of each variable. Then, I have used a 8-days (points) rollmean (red curves).
+-   For these graphs, have calculated the year day average of each variable. Then, I have used a 8-days (points) rollmean (red curves).
 
-- I have only used the two bioregions at this time.
+-   I have only used the two bioregions at this time.
 
-- I am not sure if this is really interesting because there are many gaps in the year days, so using a 8 points moving window is not really 8 days.
+-   I am not sure if this is really interesting because there are many gaps in the year days, so using a 8 points moving window is not really 8 days.
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs/fig03.pdf")))
@@ -203,22 +202,24 @@ knitr::include_graphics(pdf2png(here("graphs/fig03.pdf")))
 
 ## TODOS
 
-- Re-do the analysis with only measurements made at the surface layer (<= 2 meters).
+-   Re-do the analysis with only measurements made at the surface layer (\<= 2 meters).
 
-- Combine all the data into a single file.
+-   Combine all the data into a single file.
 
-- Add figure numbers.
+-   Add figure numbers.
 
-- Aphy vs chla : cool de voir que des modeles vieux de 15, 20 ans fonctionne toujours, ca serait bien d’avoir les erreurs relatives et absolues de chaques models, ca sera bien pour la discussion
+-   Aphy vs chla : cool de voir que des modeles vieux de 15, 20 ans fonctionne toujours, ca serait bien d'avoir les erreurs relatives et absolues de chaques models, ca sera bien pour la discussion
 
-- Time series , je mettrais plutôt « seasonal cycle » and I would remove august and september, there are not enough data.
+-   Time series , je mettrais plutôt « seasonal cycle » and I would remove august and september, there are not enough data.
 
-- Regarder les variations aph443 vs anap443 et aph443/aph443 vs Snap par bioregions et saison
+-   Regarder les variations aph443 vs anap443 et aph443/aph443 vs Snap par bioregions et saison
 
-- Est-ce que ces variations changes avec les pigments ? surtout fucox, perid, phae (je vais en trouver d’autres ensuites)
+-   Est-ce que ces variations changes avec les pigments ? surtout fucox, perid, phae (je vais en trouver d'autres ensuites)
 
-- Je vais reflechir a un moyen d’exploiter toute les longueurs d’onde du phyto, ca serait domange de s’arreter a suelement une !
+-   Je vais reflechir a un moyen d'exploiter toute les longueurs d'onde du phyto, ca serait domange de s'arreter a suelement une !
 
-- Regarder si on voit des tendances a plus long terme (peut-etre des analyses en utilisant gam) avec aph, anap et le rapport aph/anap
+    -   We could try the spectral slope curve from @Helms2008.
+
+-   Regarder si on voit des tendances a plus long terme (peut-etre des analyses en utilisant gam) avec aph, anap et le rapport aph/anap
 
 ## References
