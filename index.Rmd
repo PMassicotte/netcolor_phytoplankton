@@ -163,7 +163,7 @@ hplc %>%
 
 - Absorption spectra with `aphy(440)` < `aphy(410)` have been removed (possible problem with pigment extraction).
 
-Overview of `aphy` per bioregion. We can see that there are some negative values at low wavelengths (see `Northwest Atlantic Bassin ocean (NAB)`).
+- The next graph shows an overview of `aphy` per bioregion.
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs/07_aph_spectral_profiles_per_bioregion.pdf")))
