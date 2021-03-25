@@ -218,6 +218,18 @@ knitr::include_graphics(pdf2png(here("graphs/fig02a.pdf")))
 knitr::include_graphics(pdf2png(here("graphs/08_number_observations_per_yday_bioregion.pdf")))
 ```
 
+- A first attempt can be by using boxplots to see if there are differences among months and bioregions.
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/08_boxplot_aphy_specific_by_month_bioregion.pdf")))
+```
+
+- We can also look at the seasonal variability by bioregion. There are interesting patterns in the data. For instance, in `Northwest Atlantic Bassin ocean (NAB)` we can clearly see the seasonal pattern of `hex19`.
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/08_boxplot_hex19_by_month_bioregion.pdf")))
+```
+
 ## TODOS
 
 - Is there a variable that can be used to distinguish the stations other than the lat/long variables? I could use this to look at temporal/seasonal patterns in the data.
@@ -238,6 +250,8 @@ knitr::include_graphics(pdf2png(here("graphs/08_number_observations_per_yday_bio
     
     - We could try the spectral slope curve from @Helms2008.
     
-    - Regarder si on voit des tendances a plus long terme (peut-etre des analyses en utilisant gam) avec aph, anap et le rapport aph/anap
+- Regarder si on voit des tendances a plus long terme (peut-etre des analyses en utilisant gam) avec aph, anap et le rapport aph/anap
+
+- What are the units for the pigments?
 
 ## References
