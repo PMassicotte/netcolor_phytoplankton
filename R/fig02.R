@@ -84,3 +84,16 @@ ggsave(
   width = 5,
   height = 4
 )
+
+
+# By bioregion ------------------------------------------------------------
+
+p <- p +
+  facet_wrap(~bioregion_name)
+
+ggsave(
+  here::here("graphs/fig02a.pdf"),
+  device = cairo_pdf,
+  width = 9,
+  height = 6
+)
