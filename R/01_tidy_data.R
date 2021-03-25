@@ -133,7 +133,7 @@ metadata <- metadata %>%
 # HPLC --------------------------------------------------------------------
 
 hplc <- df %>%
-  select(hplc, hplc_file) %>%
+  select(hplc) %>%
   unnest(everything()) %>%
   rename(sample_id = id)
 
