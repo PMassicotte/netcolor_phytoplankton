@@ -27,7 +27,7 @@ metadata <- metadata %>%
 # Define north or south position for each station -------------------------
 
 metadata <- metadata %>%
-  mutate(position = case_when(
+  mutate(bioregion_position = case_when(
     latitude >= 48 ~ "North",
     TRUE ~ "South"
   ), .after = latitude)
@@ -39,11 +39,11 @@ metadata
 metadata <- metadata %>%
   mutate(
     bioregion = case_when(
-      bathymetry > -300 & position == "North" ~ "Region 1",
-      bathymetry <= -300 & position == "North" ~ "Region 2",
-      bathymetry >= -300 & position == "South" & yday <= 180 ~ "Region 3",
-      bathymetry >= -300 & position == "South" & yday > 180 ~ "Region 4",
-      bathymetry < -300 & position == "South"~ "Region 5",
+      bathymetry > -300 & bioregion_position == "North" ~ "Region 1",
+      bathymetry <= -300 & bioregion_position == "North" ~ "Region 2",
+      bathymetry >= -300 & bioregion_position == "South" & yday <= 180 ~ "Region 3",
+      bathymetry >= -300 & bioregion_position == "South" & yday > 180 ~ "Region 4",
+      bathymetry < -300 & bioregion_position == "South"~ "Region 5",
       TRUE ~ NA_character_
     )
   ) %>%
@@ -59,7 +59,7 @@ metadata <- metadata %>%
   )
 
 metadata %>%
-  select(sample_id, bioregion_name) %>%
+  select(sample_id, bioregion_name, bioregion_position) %>%
   write_csv(here::here("data/clean/bioregions.csv"))
 
 p <- metadata %>%
