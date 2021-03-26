@@ -150,6 +150,12 @@ hplc %>%
 
 -   I have calculated `aphy_specific` using `hplcchla`.
 
+-   Here is an attempt to visualize the seasonal cycle of few pigments. I have calculated the average pigment concentration and then the average total concentration to finally calculate the relative average contribution of each pigment.
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/10_hplc_month_bioregion.pdf")))
+```
+
 ## Absorption
 
 -   Here is how I named absorption data:
@@ -222,6 +228,12 @@ knitr::include_graphics(pdf2png(here("graphs/08_number_observations_per_yday_bio
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs/08_boxplot_aphy_specific_by_month_bioregion.pdf")))
+```
+
+- Another way to visualize the same data.
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/08_boxplot_aphy_specific_by_month_bioregion2.pdf")))
 ```
 
 - We can also look at the seasonal variability by bioregion. There are interesting patterns in the data. For instance, in `Northwest Atlantic Bassin ocean (NAB)` we can clearly see the seasonal pattern of `hex19`.
