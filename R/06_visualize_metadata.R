@@ -6,13 +6,13 @@
 
 rm(list = ls())
 
-metadata <- read_csv(here::here("data/clean/metadata.csv"))
-
-metadata
+df <- fread(here("data/clean/merged_dataset.csv")) %>%
+  as_tibble() %>%
+  filter(wavelength == 443)
 
 # Number of measurements per year -----------------------------------------
 
-metadata %>%
+df %>%
   mutate(year = lubridate::year(date)) %>%
   count(year, sort = TRUE) %>%
   ggplot(aes(x = year, y = n)) +
@@ -40,14 +40,15 @@ ggsave(
 
 # Number of measurements per cruise ---------------------------------------
 
-metadata %>%
+df %>%
   count(cruise_name) %>%
   mutate(cruise_name = str_wrap(cruise_name, 30)) %>%
   mutate(cruise_name = fct_reorder(cruise_name, n)) %>%
   ggplot(aes(x = n, y = cruise_name)) +
   geom_col() +
   labs(
-    y = NULL
+    y = NULL,
+    x = "Number of measurements"
   ) +
   theme(
     axis.text.y = element_text(size = 6)

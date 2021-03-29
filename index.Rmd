@@ -63,6 +63,12 @@ This section shows some graphics about the processed data. The data consists in 
 
 -   Will be using `depth` instead of `pressure` to characterize the depth of the measurements.
 
+- Will be only using observations measured in the first 2 meters of the water column. All the following graphs will be using data measured between 0-2 meters.
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/05_barplot_measurement_depth.pdf")))
+```
+
 ## Mismatch between metadata, HPLC and absorption
 
 Now, this table shows the metadata that have no HPLC values associated.
@@ -245,8 +251,6 @@ knitr::include_graphics(pdf2png(here("graphs/08_boxplot_hex19_by_month_bioregion
 ## TODOS
 
 - Is there a variable that can be used to distinguish the stations other than the lat/long variables? I could use this to look at temporal/seasonal patterns in the data.
-
-- Re-do the analysis with only measurements made at the surface layer (\<= 2 meters)?
 
 - Add figure numbers.
 

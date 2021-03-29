@@ -15,7 +15,7 @@ hplc
 
 # Monthly average
 df_viz <- hplc %>%
-  select(bioregion_name, date, fucox, hex19, but19, perid, contains("hplc")) %>%
+  select(bioregion_name, date, fucox, hex19, but19, perid, hplcphae) %>%
   mutate(month = lubridate::month(date, label = TRUE)) %>%
   pivot_longer(fucox:hplcphae,
     names_to = "pigment",
@@ -29,13 +29,20 @@ df_viz <- df_viz %>%
   mutate(total_average_concentration = sum(average_concentration, na.rm = TRUE)) %>%
   mutate(relative_average_concentration = average_concentration / total_average_concentration)
 
-
 # Plot --------------------------------------------------------------------
 
 p <- df_viz %>%
+  mutate(pigment = fct_reorder(pigment, relative_average_concentration)) %>%
   ggplot(aes(x = month, y = relative_average_concentration)) +
   geom_col(aes(fill = pigment)) +
-  paletteer::scale_fill_paletteer_d("ggsci::default_nejm") +
+  paletteer::scale_fill_paletteer_d(
+    "ggsci::default_nejm",
+    guide = guide_legend(
+      ncol = 1,
+      keyheight = unit(0.5, "cm"),
+      label.theme = element_text(size = 8)
+    )
+  ) +
   scale_y_continuous(labels = scales::label_percent()) +
   labs(
     x = NULL,
@@ -44,7 +51,7 @@ p <- df_viz %>%
   facet_wrap(~bioregion_name, scales = "free_y", ncol = 2) +
   theme(
     legend.justification = c(0, 0),
-    legend.position = c(0.5, 0),
+    legend.position = c(0.55, 0.02),
     legend.direction = "horizontal",
     legend.title = element_blank()
   )

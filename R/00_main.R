@@ -44,21 +44,24 @@ source("R/01_tidy_data.R")
 source("R/02_calculate_slope_non_algal_absorption.R")
 source("R/03_extract_bathymetry.R")
 source("R/04_classify_observations_into_bioregions.R")
-source("R/05_geographical_map.R")
-source("R/06_visualize_metadata.R")
-source("R/07_explore_absorption.R")
+source("R/05_merge_all_data_into_single_csv.R")
 
 # Visualization -----------------------------------------------------------
 
-source("R/06_map_sampling_locations.R")
-source("R/07_visualize_metadata.R")
-source("R/08_calculate_slope_non_algal_absorption.R")
-source("R/09_exploration.R")
-source("R/10_explore_hplc_pigments.R")
-source("R/11_exploration_absorption_vs_hplc_pigments.R")
-source("R/12_timeseries_hplc_pigments.R")
-source("R/13_devred_2016_jgr.R")
-source("R/14_visualize_phytoplankton_specific_absorption.R")
-source("R/15_specific_absorption_phyto_bricaud_1995.R")
+source("R/06_visualize_metadata.R")
+source("R/07_explore_absorption.R")
+source("R/08_seasonal_cycles.R")
+
+
+# source("R/06_map_sampling_locations.R")
+# source("R/07_visualize_metadata.R")
+# source("R/08_calculate_slope_non_algal_absorption.R")
+# source("R/09_exploration.R")
+# source("R/10_explore_hplc_pigments.R")
+# source("R/11_exploration_absorption_vs_hplc_pigments.R")
+# source("R/12_timeseries_hplc_pigments.R")
+# source("R/13_devred_2016_jgr.R")
+# source("R/14_visualize_phytoplankton_specific_absorption.R")
+# source("R/15_specific_absorption_phyto_bricaud_1995.R")
 
 
