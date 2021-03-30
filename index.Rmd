@@ -248,6 +248,22 @@ knitr::include_graphics(pdf2png(here("graphs/08_boxplot_aphy_specific_by_month_b
 knitr::include_graphics(pdf2png(here("graphs/08_boxplot_hex19_by_month_bioregion.pdf")))
 ```
 
+### Phytoplankton population model
+
+Explore and try to understand the method of Emmanuel that aims to decompose absorption spectra into two populations.
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/11_hplc_chla_vs_phyto_absorption.pdf")))
+```
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/11_s_vs_wavelength.pdf")))
+```
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/11_as1_as2_vs_wavelength.pdf")))
+```
+
 ## TODOS
 
 - Is there a variable that can be used to distinguish the stations other than the lat/long variables? I could use this to look at temporal/seasonal patterns in the data.
