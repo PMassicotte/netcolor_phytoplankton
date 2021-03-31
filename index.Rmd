@@ -192,6 +192,12 @@ knitr::include_graphics(pdf2png(here("graphs/07_aphy_spectral_profiles_per_biore
 knitr::include_graphics(pdf2png(here("graphs/07_aphy_specific_spectral_profiles_per_bioregion.pdf")))
 ```
 
+We can observe that there is a specific absorption gradient among bioregions.
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs/07_sina_plot_aphy_specific_443nm.pdf")))
+```
+
 #### anap
 
 ```{r}
@@ -304,5 +310,7 @@ knitr::include_graphics(pdf2png(here("graphs/12_specific_phytoplankton_absorptio
 -   Regarder si on voit des tendances a plus long terme (peut-etre des analyses en utilisant gam) avec aph, anap et le rapport aph/anap
 
 -   What are the units for the pigments?
+
+- Predict aphy(443) using the main pigments per bioregion and then use variance partitioning to see if there are differences.
 
 ## References

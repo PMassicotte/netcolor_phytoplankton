@@ -111,5 +111,32 @@ ggsave(
   height = 5
 )
 
-
 absorption
+
+
+# Sina plot ---------------------------------------------------------------
+
+# Let's compare aphy specific
+
+p <- absorption %>%
+  filter(wavelength %in% c(443)) %>%
+  ggplot(aes(x = str_wrap(bioregion_name, 20), y = aphy_specific)) +
+  ggforce::geom_sina(aes(color = bioregion_name), size = 0.5) +
+  scale_y_log10() +
+  annotation_logticks(sides = "l", size = 0.1) +
+  scale_color_manual(
+    breaks = area_breaks,
+    values = area_colors
+  ) +
+  labs(
+    x = NULL,
+    y = quote(a[phi]^"*" ~ (443)~(m^{-1}))
+  ) +
+  theme(legend.position = "none")
+
+ggsave(
+  here("graphs/07_sina_plot_aphy_specific_443nm.pdf"),
+  device = cairo_pdf,
+  width = 7,
+  height = 5
+)
