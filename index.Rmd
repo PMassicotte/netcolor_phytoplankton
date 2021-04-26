@@ -272,7 +272,7 @@ In this section, I put our data in the context of the paper by @Bricaud1995.
 knitr::include_graphics(pdf2png(here("graphs","12_specific_phytoplankton_absorption_spectra_vs_fitted.pdf")))
 ```
 
-- The next figure shows $a^*_\phi$ modeled at different wavelengths using the following equation:
+-   The next figure shows $a^*_\phi$ modeled at different wavelengths using the following equation:
 
 $$
 a^*_\phi(\lambda) = A(\lambda)\times\text{chl-a}^{-B(\lambda)}
@@ -308,7 +308,7 @@ knitr::include_graphics(pdf2png(
 ))
 ```
 
-### Relationships between fucoxanthin relative content and absorption 
+### Relationships between fucoxanthin relative content and absorption
 
 ```{r}
 knitr::include_graphics(pdf2png(
@@ -324,6 +324,36 @@ Based on the *linear* relationships in the previous graph, this shows the R2 as 
 ```{r}
 knitr::include_graphics(pdf2png(
   here("graphs", "13_r2_percent_fucoxanthin_vs_aphy_specific.pdf")
+))
+```
+
+## Apparent visible wavelength (AVW)
+
+In this section we explore how the Apparent visible wavelength (AVW) could be used to describe the spectral shape of phytoplankton absorption. The AVW index is calculated following [@vandermeulen2020].
+
+```{r}
+knitr::include_graphics(pdf2png(
+  here("graphs", "14_boxplot_avw_by_bioregions.pdf")
+))
+```
+
+This graph shows all the phytoplankton absorption spectra colored by the value of the calculated AVW.
+
+```{r}
+knitr::include_graphics(pdf2png(
+  here("graphs", "14_normalized_aphy_avw_colored.pdf")
+))
+```
+
+```{r}
+knitr::include_graphics(pdf2png(
+  here("graphs", "14_aphy_spectra_highest_avw_difference.pdf")
+))
+```
+
+```{r}
+knitr::include_graphics(pdf2png(
+  here("graphs", "14_scatterplot_chla_vs_avw.pdf")
 ))
 ```
 
