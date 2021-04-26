@@ -1,127 +1,63 @@
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 # AUTHOR:       Philippe Massicotte
 #
-# DESCRIPTION:  Yearly variations in chla, a*_phy, a_nap and s_nap.
+# DESCRIPTION:  Fig. 3. Mean anap for Scotian Shelf, LGS, NAB et LSB (solid
+# lines) + Spring and Fall Scotian Shelf (dashed line) – Those would be spectra
+# 400-700nm
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
-df <- fread(here::here("data/clean/absorption_with_metadata.csv")) %>%
-  as_tibble() %>%
-  filter(wavelength == 443) %>%
-  select(
-    measurement_id,
-    date,
-    wavelength,
-    contains("absorption"),
-    hplc_chla
-  )
+rm(list = ls())
+
+source(here("R","zzz.R"))
+
+df <- vroom::vroom(here("data","clean","merged_dataset.csv"))
 
 df
 
-df <- df %>%
-  mutate(specific_phytoplankton_absorption = phytoplankton_absorption / hplc_chla)
-
-snap <- read_csv(here::here("data/clean/non_algal_absorption_slope.csv")) %>%
-  select(measurement_id, non_algal_absorption_slope)
-
-bioregion <- read_csv(here::here("data/clean/bioregions.csv")) %>%
-  mutate(bioregion_id = parse_number(bioregion)) %>%
-  mutate(bioregion_name = fct_reorder(bioregion_name, bioregion_id))
-
-df <- df %>%
-  inner_join(bioregion, by = "measurement_id") %>%
-  inner_join(snap, by = "measurement_id")
-
-df
-
-# Boxplot over the years --------------------------------------------------
-
-# Use boxplot to have a feeling how the data vary over the years
-df_viz <- df %>%
-  mutate(year = lubridate::year(date)) %>%
-  mutate(year = fct_reorder(as.character(year), year)) %>%
-  add_count(year) %>%
-  filter(n > 1)
-
-df_viz
-
-df_viz %>%
-  ggplot(aes(x = year, y = hplc_chla)) +
-  geom_boxplot(size = 0.25) +
-  labs(
-    title = "Temporal variation of Chla\nusing boxplot",
-    y = bquote("Chla" ~ (mgC~m^{-3})),
-    x = NULL
-  ) +
-  facet_wrap(~bioregion_name, ncol = 1, scales = "free_y")
-
-# Weighted mean -----------------------------------------------------------
+# Calculate the average absorption spectra by bioregion -------------------
 
 df_viz <- df %>%
-  mutate(year = lubridate::year(date)) %>%
-  filter(year > 2004) %>%
-  group_by(year, bioregion_name) %>%
-  mutate(n = n()) %>%
-  summarise(across(
-    c(contains("absorption"), "hplc_chla"),
-    list(mean = mean, sd = sd),
-    na.rm = TRUE,
-    .names = "{.fn}_{.col}"
-  )) %>%
+  filter(between(wavelength, 400, 700)) %>%
+  group_by(bioregion_name, wavelength) %>%
+  summarise(mean_anap = mean(anap, na.rm = TRUE), n = n()) %>%
   ungroup()
 
 df_viz
 
-# Chla --------------------------------------------------------------------
+# Plot the average absorption spectra -------------------------------------
 
-p1 <- df_viz %>%
-  filter(year > 2004) %>%
-  ggplot(
-    aes(
-      x = year,
-      y = mean_hplc_chla
-    )
-  ) +
-  geom_pointrange(
-    aes(
-      ymin = mean_hplc_chla - sd_hplc_chla,
-      ymax = mean_hplc_chla + sd_hplc_chla
-    ),
-    show.legend = FALSE,
-    fill = "#3c3c3c",
-    color = "gray75",
-    shape = 20,
-    fatten = 5,
-    size = 0.5
-  ) +
+p <- df_viz %>%
+  ggplot(aes(x = wavelength, y = mean_anap, color = bioregion_name)) +
   geom_line() +
-  scale_y_continuous(breaks = scales::breaks_pretty(n = 4)) +
-  scale_x_continuous(breaks = scales::breaks_pretty(n = 8)) +
-  facet_wrap(~bioregion_name, scales = "free_y", ncol = 1) +
+  scale_color_manual(
+    breaks = area_breaks,
+    values = area_colors
+  ) +
   labs(
-    y = bquote("Chla" ~ (mgC~m^{-3})),
-    x = NULL
+    x = "Wavelength (nm)",
+    y = quote(bar(a)[NAP]^"*"~(m^{-1}))
+  ) +
+  theme(
+    legend.title = element_blank(),
+    legend.justification = c(1, 1),
+    legend.position = c(0.9, 0.9)
   )
 
-# Combine plots -----------------------------------------------------------
-
-# p <- p1 + p2 +
-#   plot_annotation(tag_levels = "A") &
-#   theme(plot.tag = element_text(face = "bold"))
-
 ggsave(
-  plot = p1,
-  here::here("graphs/fig04.pdf"),
+  here("graphs/fig04.pdf"),
   device = cairo_pdf,
-  width = 5,
-  height = 10
+  width = 7.19,
+  height = 5.21
 )
 
-# Convert to png ----------------------------------------------------------
+# There are clear bumps in spectra around 530 nm. Check the raw data to find out
+# where it comes from.
 
-pdftools::pdf_convert(
-  pdf = here::here("graphs/fig04.pdf"),
-  filenames = here::here("graphs/fig04.png"),
-  dpi = 300
-)
-
-
+df %>%
+  filter(between(wavelength, 500, 600)) %>%
+  group_nest(sample_id) %>%
+  sample_n(90) %>%
+  unnest(data) %>%
+  ggplot(aes(x = wavelength, y = anap, group = sample_id)) +
+  geom_line(size = 0.1) +
+  facet_wrap(~bioregion_name, scales = "free")

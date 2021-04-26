@@ -335,6 +335,40 @@ knitr::include_graphics(pdf2png(
 ))
 ```
 
+## Figures for the manuscript
+
+### Figure 1
+
+-   Figure 1 : la carte des stations (il y a certains points qui devront bouger).
+
+### Figure 2
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "fig02.pdf")))
+```
+
+### Figure 3
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "fig03.pdf")))
+```
+
+### Figure 4
+
+There are some unusual bumps around 530 nm. We should have a closer look at the raw data.
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "fig04.pdf")))
+```
+
+### Figure 5
+
+Figure 5 : Variations saisonniere de a*p(443) et a*p(670) pour les 4 biomes, on peut avoir 4 panneaux (un pour chaque biome)
+
+### Figure 6
+
+-   Figure 6 : Variations saisonnières de a_det(443) et Slope pour les 4 biomes.
+
 ## TODOS
 
 -   Is there a variable that can be used to distinguish the stations other than the lat/long variables? I could use this to look at temporal/seasonal patterns in the data.
@@ -357,6 +391,6 @@ knitr::include_graphics(pdf2png(
 
 -   What are the units for the pigments?
 
-- Predict aphy(443) using the main pigments per bioregion and then use variance partitioning to see if there are differences.
+-   Predict aphy(443) using the main pigments per bioregion and then use variance partitioning to see if there are differences.
 
 ## References
