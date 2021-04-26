@@ -118,14 +118,6 @@ bathymetry < -300 & position == "South"~ "Northwest Atlantic Bassin ocean (NAB)"
 knitr::include_graphics(pdf2png(here("graphs","04_number_observations_per_bioregion.pdf")))
 ```
 
-## Geographical map
-
-This is not the final map, but it gives a first spatial overview of the data.
-
-```{r, fig.align='center'}
-knitr::include_graphics(pdf2png(here("graphs","fig01.pdf")))
-```
-
 ## HPLC
 
 -   I also noticed there are a lot of `0` in the HPLC data. After discussions, they are true `0` and not missing values.
@@ -340,6 +332,10 @@ knitr::include_graphics(pdf2png(
 ### Figure 1
 
 -   Figure 1 : la carte des stations (il y a certains points qui devront bouger).
+
+```{r, fig.align='center'}
+knitr::include_graphics(pdf2png(here("graphs","fig01.pdf")))
+```
 
 ### Figure 2
 
