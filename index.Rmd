@@ -389,11 +389,19 @@ knitr::include_graphics(pdf2png(here("graphs", "fig04.pdf")))
 
 ### Figure 5
 
-Figure 5 : Variations saisonniere de a*p(443) et a*p(670) pour les 4 biomes, on peut avoir 4 panneaux (un pour chaque biome)
+-   Figure 5 : Variations saisonniere de a*p(443) et a*p(670) pour les 4 biomes, on peut avoir 4 panneaux (un pour chaque biome).
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "fig05.pdf")))
+```
 
 ### Figure 6
 
 -   Figure 6 : Variations saisonnières de a_det(443) et Slope pour les 4 biomes.
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "fig06.pdf")))
+```
 
 ## TODOS
 
