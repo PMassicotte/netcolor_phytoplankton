@@ -119,7 +119,13 @@ p <- ggplot() +
     fill = "#616368",
     color = "white"
   ) +
-  geom_sf(data = stations_sf, aes(color = bioregion_name), size = 0.25, key_glyph = "rect") +
+  geom_sf(
+    data = stations_sf,
+    aes(color = bioregion_name),
+    size = 0.25,
+    key_glyph = "rect"
+  ) +
+  geom_hline(yintercept = 48, lty = 3, size = 0.2, color = "gray25") +
   coord_sf(xlim = st_bbox(bbox)[c(1, 3)], ylim = st_bbox(bbox)[c(2, 4)]) +
   theme(
     legend.title = element_blank(),
