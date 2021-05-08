@@ -24,15 +24,29 @@ df_viz <- df %>%
 
 df_viz
 
+# Normalize the average spectra -------------------------------------------
+
+df_viz <- df_viz %>%
+  group_by(bioregion_name) %>%
+  mutate(
+    mean_aphy_specific_normalized =
+      mean_aphy_specific / pracma::trapz(wavelength, mean_aphy_specific)
+  ) %>%
+  ungroup()
+
 # Plot the average absorption spectra -------------------------------------
 
-p <- df_viz %>%
-  ggplot(aes(x = wavelength, y = mean_aphy_specific, color = bioregion_name)) +
+p1 <- df_viz %>%
+  ggplot(aes(
+    x = wavelength,
+    y = mean_aphy_specific,
+    color = bioregion_name
+  )) +
   geom_line() +
   scale_color_manual(
     breaks = area_breaks,
     values = area_colors
-  ) +
+  )+
   labs(
     x = "Wavelength (nm)",
     y = quote(bar(a)[phi]^"*"~(m^{-1}))
@@ -40,12 +54,38 @@ p <- df_viz %>%
   theme(
     legend.title = element_blank(),
     legend.justification = c(1, 1),
-    legend.position = c(0.9, 0.9)
+    legend.position = c(0.99, 0.99),
+    axis.title.x = element_blank()
+  )
+
+p2 <- df_viz %>%
+  ggplot(aes(
+    x = wavelength,
+    y = mean_aphy_specific_normalized,
+    color = bioregion_name
+  )) +
+  geom_line() +
+  scale_color_manual(
+    breaks = area_breaks,
+    values = area_colors
+  )+
+  labs(
+    x = "Wavelength (nm)",
+    y = quote(Normalized~bar(a)[phi]^"*"~(nm^{-1}))
+  ) +
+  theme(
+    legend.position = "none"
+  )
+
+p <- p1 / p2 +
+  plot_annotation(tag_levels = "A") &
+  theme(
+    plot.tag = element_text(face = "bold", size = 14)
   )
 
 ggsave(
   here("graphs/fig03.pdf"),
   device = cairo_pdf,
   width = 7.19,
-  height = 5.21
+  height = 8
 )

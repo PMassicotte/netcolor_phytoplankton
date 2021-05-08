@@ -24,9 +24,21 @@ df_viz <- df %>%
 
 df_viz
 
+# Normalize the average spectra -------------------------------------------
+
+df_viz <- df_viz %>%
+  group_by(bioregion_name) %>%
+  mutate(
+    mean_anap_normalized =
+      mean_anap / pracma::trapz(wavelength, mean_anap)
+  ) %>%
+  ungroup()
+
+df_viz
+
 # Plot the average absorption spectra -------------------------------------
 
-p <- df_viz %>%
+p1 <- df_viz %>%
   ggplot(aes(x = wavelength, y = mean_anap, color = bioregion_name)) +
   geom_line() +
   scale_color_manual(
@@ -40,14 +52,40 @@ p <- df_viz %>%
   theme(
     legend.title = element_blank(),
     legend.justification = c(1, 1),
-    legend.position = c(0.9, 0.9)
+    legend.position = c(0.99, 0.99),
+    axis.title.x = element_blank()
+  )
+
+p2 <- df_viz %>%
+  ggplot(aes(
+    x = wavelength,
+    y = mean_anap_normalized,
+    color = bioregion_name
+  )) +
+  geom_line() +
+  scale_color_manual(
+    breaks = area_breaks,
+    values = area_colors
+  )+
+  labs(
+    x = "Wavelength (nm)",
+    y = quote(Normalized~bar(a)[NAP]^"*"~(nm^{-1}))
+  ) +
+  theme(
+    legend.position = "none"
+  )
+
+p <- p1 / p2 +
+  plot_annotation(tag_levels = "A") &
+  theme(
+    plot.tag = element_text(face = "bold", size = 14)
   )
 
 ggsave(
   here("graphs/fig04.pdf"),
   device = cairo_pdf,
   width = 7.19,
-  height = 5.21
+  height = 8
 )
 
 # There are clear bumps in spectra around 530 nm. Check the raw data to find out
