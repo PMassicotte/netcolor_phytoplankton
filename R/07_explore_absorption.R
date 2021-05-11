@@ -24,7 +24,7 @@ p <- absorption %>%
     x = "Wavelength (nm)",
     y = quote(a[phy] ~ (m^{-1}))
   ) +
-  facet_wrap(~bioregion_name, scales = "free_y") +
+  facet_wrap(~bioregion_name, scales = "free_y", ncol = 1) +
   theme(
     legend.position = "none"
   )
@@ -32,7 +32,7 @@ p <- absorption %>%
 ggsave(
   here("graphs/07_aphy_spectral_profiles_per_bioregion.pdf"),
   device = cairo_pdf,
-  width = 8,
+  width = 4,
   height = 5
 )
 
@@ -49,7 +49,7 @@ p <- absorption %>%
     x = "Wavelength (nm)",
     y = quote(a[phy]^"*" ~ (m^{-1}))
   ) +
-  facet_wrap(~bioregion_name, scales = "free_y") +
+  facet_wrap(~bioregion_name, scales = "free_y", ncol = 1) +
   theme(
     legend.position = "none"
   )
@@ -57,7 +57,7 @@ p <- absorption %>%
 ggsave(
   here("graphs/07_aphy_specific_spectral_profiles_per_bioregion.pdf"),
   device = cairo_pdf,
-  width = 8,
+  width = 4,
   height = 5
 )
 
@@ -74,7 +74,7 @@ p <- absorption %>%
     x = "Wavelength (nm)",
     y = quote(a[nap] ~ (m^{-1}))
   ) +
-  facet_wrap(~bioregion_name, scales = "free_y") +
+  facet_wrap(~bioregion_name, scales = "free_y", ncol = 1) +
   theme(
     legend.position = "none"
   )
@@ -82,7 +82,7 @@ p <- absorption %>%
 ggsave(
   here("graphs/07_anap_spectral_profiles_per_bioregion.pdf"),
   device = cairo_pdf,
-  width = 8,
+  width = 4,
   height = 5
 )
 
@@ -99,7 +99,7 @@ p <- absorption %>%
     x = "Wavelength (nm)",
     y = quote(a[p] ~ (m^{-1}))
   ) +
-  facet_wrap(~bioregion_name, scales = "free_y") +
+  facet_wrap(~bioregion_name, scales = "free_y", ncol = 1) +
   theme(
     legend.position = "none"
   )
@@ -107,12 +107,11 @@ p <- absorption %>%
 ggsave(
   here("graphs/07_ap_spectral_profiles_per_bioregion.pdf"),
   device = cairo_pdf,
-  width = 8,
+  width = 4,
   height = 5
 )
 
 absorption
-
 
 # Sina plot ---------------------------------------------------------------
 

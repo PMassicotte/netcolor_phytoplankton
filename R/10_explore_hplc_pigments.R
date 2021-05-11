@@ -48,10 +48,8 @@ p <- df_viz %>%
     x = NULL,
     y = "Average contribution"
   ) +
-  facet_wrap(~bioregion_name, scales = "free_y", ncol = 2) +
+  facet_wrap(~bioregion_name, scales = "free_y", ncol = 1) +
   theme(
-    legend.justification = c(0, 0),
-    legend.position = c(0.55, 0.02),
     legend.direction = "horizontal",
     legend.title = element_blank()
   )
@@ -59,6 +57,6 @@ p <- df_viz %>%
 ggsave(
   here("graphs/10_hplc_month_bioregion.pdf"),
   device = cairo_pdf,
-  width = 8,
-  height = 5
+  width = 6,
+  height = 7
 )

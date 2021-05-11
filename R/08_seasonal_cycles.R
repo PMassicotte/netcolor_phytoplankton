@@ -35,9 +35,9 @@ p <- df %>%
   labs(
     x = NULL,
     y = "Number of observations",
-    title = "Number of observations for each days of the year"
+    title = str_wrap("Number of observations for each days of the year", 30)
   ) +
-  facet_wrap(~bioregion_name) +
+  facet_wrap(~bioregion_name, ncol = 1) +
   theme(
     legend.position = "none"
   )
@@ -45,7 +45,7 @@ p <- df %>%
 ggsave(
   here("graphs/08_number_observations_per_yday_bioregion.pdf"),
   device = cairo_pdf,
-  width = 8,
+  width = 4,
   height = 5
 )
 
@@ -188,20 +188,6 @@ p4 <- df_viz %>%
     )
   )
 
-# Combine plots -----------------------------------------------------------
-
-# p <- p1 / p2 / p3 / p4 +
-#   plot_annotation(tag_levels = "A") &
-#   theme(plot.tag = element_text(face = "bold"))
-#
-# ggsave(
-#   here::here("graphs/08_xxx.pdf"),
-#   device = cairo_pdf,
-#   width = 12,
-#   height = 12
-# )
-
-
 # Boxplot by month and bioregion ------------------------------------------
 
 p <- df %>%
@@ -210,10 +196,7 @@ p <- df %>%
   scale_y_log10() +
   scale_fill_manual(
     breaks = area_breaks,
-    values = area_colors,
-    guide = guide_legend(
-      nrow = 2
-    )
+    values = area_colors
   ) +
   labs(
     x = NULL,
@@ -271,10 +254,7 @@ p <- df %>%
   scale_y_log10() +
   scale_fill_manual(
     breaks = area_breaks,
-    values = area_colors,
-    guide = guide_legend(
-      nrow = 2
-    )
+    values = area_colors
   ) +
   labs(
     x = NULL

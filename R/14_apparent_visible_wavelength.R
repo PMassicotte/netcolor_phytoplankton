@@ -62,7 +62,7 @@ p <- df %>%
   )
 
 ggsave(
-  here("graphs/14_boxplot_avw_by_bioregions.pdf"),
+  here("graphs","14_boxplot_avw_by_bioregions.pdf"),
   device = cairo_pdf,
   width = 7.19,
   height = 5.21
@@ -88,12 +88,12 @@ p <- df_viz %>%
     color = "AVW (nm)"
   ) +
   theme(
-    legend.justification = c(1, 0),
-    legend.position = c(0.9, 0)
+    legend.justification = c(1, 1),
+    legend.position = c(0.95, 0.9)
   )
 
 ggsave(
-  here("graphs/14_normalized_aphy_avw_colored.pdf"),
+  here("graphs","14_normalized_aphy_avw_colored.pdf"),
   device = cairo_pdf,
   width = 9,
   height = 5
@@ -124,7 +124,7 @@ df_viz %>%
   )
 
 ggsave(
-  here("graphs/14_aphy_spectra_highest_avw_difference.pdf"),
+  here("graphs","14_aphy_spectra_highest_avw_difference.pdf"),
   device = cairo_pdf,
   width = 7.19,
   height = 5.21
@@ -162,7 +162,7 @@ p <- df_viz %>%
   )
 
 ggsave(
-  here("graphs/14_scatterplot_chla_vs_avw.pdf"),
+  here("graphs","14_scatterplot_chla_vs_avw.pdf"),
   device = cairo_pdf,
   width = 9,
   height = 5.21
