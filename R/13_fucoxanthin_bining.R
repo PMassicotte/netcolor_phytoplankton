@@ -77,7 +77,6 @@ df <- vroom::vroom(here("data/clean/absorption.csv")) %>%
 
 df
 
-
 # Mean phytoplankton specific absorption per fucox bin -------------------
 
 df_viz <- df %>%
@@ -175,3 +174,31 @@ ggsave(
   width = 8.16,
   height = 5.21
 )
+
+# Mean fucox vs mean aphy -------------------------------------------------
+
+hplc <- read_csv(here("data","clean","hplc.csv")) %>%
+  select(sample_id, depth, fucox)
+
+hplc
+
+df
+
+df_viz <- df %>%
+  inner_join(hplc, by = c("sample_id", "depth"))
+
+df_viz
+
+df_viz <- df_viz %>%
+  group_by(wavelength, percent_fucox_bin) %>%
+  summarise(across(c(contains("aphy"), fucox), .fns = list("mean" = mean))) %>%
+  ungroup()
+
+df_viz
+
+df_viz %>%
+  filter(wavelength %in% seq(400, 700, by = 20)) %>%
+  ggplot(aes(x = aphy_mean, y = fucox_mean)) +
+  geom_point(aes(color = percent_fucox_bin)) +
+  geom_smooth(method = "lm") +
+  facet_wrap(~wavelength, scales = "free")
