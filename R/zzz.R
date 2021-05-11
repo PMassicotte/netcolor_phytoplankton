@@ -9,10 +9,8 @@
 
 area_breaks <-
   c(
-    "Labrador & Greenland Shelves (LGS)",
-    "Labrador Sea Bassin (LSB)",
-    "Scotian Shelf Spring (SSSp)",
-    "Scotian Shelf Fall (SSFa)",
+    "Labrador",
+    "Scotian Shelf",
     "Northwest Atlantic Bassin ocean (NAB)"
   )
 
@@ -20,10 +18,26 @@ area_colors <-
   c(
     "#DC3912FF",
     "#FF9900FF",
-    "#109618FF",
-    "#990099FF",
-    "#603808FF"
+    "#109618FF"
   )
+
+# area_breaks <-
+#   c(
+#     "Labrador & Greenland Shelves (LGS)",
+#     "Labrador Sea Bassin (LSB)",
+#     "Scotian Shelf Spring (SSSp)",
+#     "Scotian Shelf Fall (SSFa)",
+#     "Northwest Atlantic Bassin ocean (NAB)"
+#   )
+#
+# area_colors <-
+#   c(
+#     "#DC3912FF",
+#     "#FF9900FF",
+#     "#109618FF",
+#     "#990099FF",
+#     "#603808FF"
+#   )
 
 pdf2png <- function(pdf_file, dpi = 300) {
 
