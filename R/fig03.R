@@ -34,6 +34,9 @@ df_viz <- df_viz %>%
   ) %>%
   ungroup()
 
+df %>%
+  distinct(bioregion_name)
+
 # Plot the average absorption spectra -------------------------------------
 
 p1 <- df_viz %>%

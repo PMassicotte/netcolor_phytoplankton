@@ -6,61 +6,69 @@
 
 rm(list = ls())
 
-source(here("R","zzz.R"))
-
-df <- vroom::vroom(here("data","clean","merged_dataset.csv")) %>%
-  select(sample_id, date, bioregion_name, wavelength, anap, snap) %>%
+df <- vroom::vroom(here("data", "clean", "merged_dataset.csv")) %>%
+  select(sample_id, date, bioregion_name, wavelength, anap) %>%
   filter(wavelength %in% c(443))
 
-df
+df %>%
+  ggplot(aes(x = date, y = anap, color = factor(wavelength))) +
+  geom_point() +
+  facet_wrap(~bioregion_name)
 
-# Seasonal variability ----------------------------------------------------
+df %>%
+  distinct(bioregion_name)
 
-# Figure 6 : Variations saisonnières de a_det(443) et Slope pour les 4 biomes
+# How many observations per yday?
+
+df %>%
+  mutate(yday = lubridate::yday(date)) %>%
+  count(bioregion_name, wavelength, yday) %>%
+  filter(wavelength == 443) %>%
+  ggplot(aes(x = yday, y = n)) +
+  geom_point() +
+  facet_wrap(~bioregion_name, scales = "free_y")
+
+# Format the date for visualization ---------------------------------------
 
 df_viz <- df %>%
-  mutate(month = lubridate::month(date, label = TRUE), .after = date) %>%
-  mutate(wavelength = glue("{wavelength} nm"))
+  mutate(yday = lubridate::yday(date)) %>%
+  mutate(date = as.Date(paste0("2014-", yday), "%Y-%j")) %>%
+  group_by(bioregion_name, date, yday, wavelength) %>%
+  summarise(anap = mean(anap, na.rm = TRUE)) %>%
+  ungroup()
 
-p1 <- df_viz %>%
-  ggplot(aes(x = month, y = anap, fill = bioregion_name)) +
-  geom_boxplot(size = 0.1, outlier.size = 0.25, color = "gray50") +
+df_viz
+
+df_viz %>%
+  count(bioregion_name, wavelength)
+
+# Plot the seasonal cycles ------------------------------------------------
+
+p <- df_viz %>%
+  ggplot(aes(
+    x = date,
+    y = anap
+  )) +
+  geom_point(size = 1, color = "#393E41") +
+  geom_smooth(
+    method = "loess",
+    show.legend = FALSE,
+    color = "#bf1d28",
+    size = 0.5,
+    level = 0.99
+  ) +
+  facet_wrap(~ bioregion_name, scales = "free_y", ncol = 1) +
   labs(
     x = NULL,
-    y = quote(a[NAP]~(m^{-1}))
-  ) +
-  facet_wrap(~bioregion_name, scales = "free") +
-  scale_fill_manual(
-    breaks = area_breaks,
-    values = area_colors
+    y = quote(a[NAP~(443)]~(m^{-1}))
   ) +
   theme(
     legend.position = "none"
   )
-
-p2 <- df_viz %>%
-  ggplot(aes(x = month, y = snap, fill = bioregion_name)) +
-  geom_boxplot(size = 0.1, outlier.size = 0.25, color = "gray50") +
-  labs(
-    x = NULL,
-    y = quote(S[NAP]~(nm^{-1}))
-  ) +
-  facet_wrap(~bioregion_name, scales = "free") +
-  scale_fill_manual(
-    breaks = area_breaks,
-    values = area_colors
-  ) +
-  theme(
-    legend.position = "none"
-  )
-
-p <- p1 / p2 +
-  plot_annotation(tag_levels = "A") &
-  theme(plot.tag = element_text(size = 14, face = "bold"))
 
 ggsave(
-  here("graphs/fig06.pdf"),
+  here("graphs","fig06.pdf"),
   device = cairo_pdf,
-  width = 10,
-  height = 10
+  width = 4,
+  height = 6
 )

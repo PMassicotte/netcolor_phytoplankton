@@ -15,7 +15,7 @@ bathymetry
 # Only keep the variables needed for the classification
 metadata <- metadata %>%
   inner_join(bathymetry, by = "sample_id") %>%
-  select(sample_id, date, bathymetry, latitude)
+  select(sample_id, date, bathymetry, longitude, latitude)
 
 metadata
 
@@ -38,25 +38,40 @@ metadata
 
 metadata <- metadata %>%
   mutate(
-    bioregion = case_when(
-      bathymetry > -300 & bioregion_position == "North" ~ "Region 1",
-      bathymetry <= -300 & bioregion_position == "North" ~ "Region 2",
-      bathymetry >= -300 & bioregion_position == "South" & yday <= 180 ~ "Region 3",
-      bathymetry >= -300 & bioregion_position == "South" & yday > 180 ~ "Region 4",
-      bathymetry < -300 & bioregion_position == "South"~ "Region 5",
+    bioregion_name = case_when(
+      bioregion_position == "North" ~ "Labrador",
+      bathymetry <= -600 & bioregion_position == "South" ~ "Northwest Atlantic Bassin ocean (NAB)",
+      bathymetry > -600 & bioregion_position == "South"~ "Scotian Shelf",
       TRUE ~ NA_character_
     )
-  ) %>%
+  ) %>% # re-classify 1 problematic station
   mutate(
     bioregion_name = case_when(
-      bioregion == "Region 1" ~ "Labrador & Greenland Shelves (LGS)",
-      bioregion == "Region 2" ~ "Labrador Sea Bassin (LSB)",
-      bioregion == "Region 3" ~ "Scotian Shelf Spring (SSSp)",
-      bioregion == "Region 4" ~ "Scotian Shelf Fall (SSFa)",
-      bioregion == "Region 5" ~ "Northwest Atlantic Bassin ocean (NAB)",
-      TRUE ~ NA_character_
+      bathymetry > -600 & longitude >= -50 ~ "Labrador",
+      TRUE ~ bioregion_name
     )
   )
+  # ) %>%
+  # mutate(
+  #   bioregion_name = case_when(
+  #     bioregion == "Region 1" ~ "Labrador",
+  #     bioregion == "Region 2" ~ "Labrador",
+  #     bioregion == "Region 3" ~ "Scotian Shelf",
+  #     bioregion == "Region 4" ~ "Scotian Shelf",
+  #     bioregion == "Region 5" ~ "Northwest Atlantic Bassin ocean (NAB)",
+  #     TRUE ~ NA_character_
+  #   )
+  # )
+  # mutate(
+  #   bioregion_name = case_when(
+  #     bioregion == "Region 1" ~ "Labrador & Greenland Shelves (LGS)",
+  #     bioregion == "Region 2" ~ "Labrador Sea Bassin (LSB)",
+  #     bioregion == "Region 3" ~ "Scotian Shelf Spring (SSSp)",
+  #     bioregion == "Region 4" ~ "Scotian Shelf Fall (SSFa)",
+  #     bioregion == "Region 5" ~ "Northwest Atlantic Bassin ocean (NAB)",
+  #     TRUE ~ NA_character_
+  #   )
+  # )
 
 metadata %>%
   select(sample_id, bioregion_name, bioregion_position) %>%
