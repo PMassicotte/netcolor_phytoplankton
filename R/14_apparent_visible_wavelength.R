@@ -80,7 +80,7 @@ p <- df_viz %>%
   filter(between(wavelength, 400, 700)) %>%
   ggplot(aes(x = wavelength, y = normalized_aphy, color = avw, group = sample_id)) +
   geom_line(size = 0.25) +
-  paletteer::scale_color_paletteer_c("grDevices::Spectral") +
+  paletteer::scale_color_paletteer_c("pals::kovesi.linear_bgyw_15_100_c68", direction = -1) +
   facet_wrap(~bioregion_name) +
   labs(
     x = "Wavelength (nm)",
