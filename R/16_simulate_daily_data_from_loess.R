@@ -29,8 +29,8 @@ df %>%
   filter(wavelength == 443) %>%
   ggplot(aes(x = aphy_specific, y = anap)) +
   geom_point() +
-  scale_x_log10() +
-  scale_y_log10() +
+  # scale_x_log10() +
+  # scale_y_log10() +
   facet_wrap(~bioregion_name, ncol = 1, scales = "free") +
   geom_smooth(method = "lm")
 

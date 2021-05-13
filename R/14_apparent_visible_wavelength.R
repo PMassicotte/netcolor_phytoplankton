@@ -18,7 +18,7 @@ aphy
 # Calculate AVW -----------------------------------------------------------
 
 df <- aphy %>%
-  filter(sample_id == "476288") %>%
+  filter(sample_id == "479274") %>%
   mutate(normalized_aphy = aphy / pracma::trapz(wavelength, aphy))
 
 df %>%
@@ -81,22 +81,18 @@ p <- df_viz %>%
   ggplot(aes(x = wavelength, y = normalized_aphy, color = avw, group = sample_id)) +
   geom_line(size = 0.25) +
   paletteer::scale_color_paletteer_c("pals::kovesi.linear_bgyw_15_100_c68", direction = -1) +
-  facet_wrap(~bioregion_name) +
+  facet_wrap(~bioregion_name, ncol = 1) +
   labs(
     x = "Wavelength (nm)",
-    y = quote(Normalized~a[phi]~(m^-1)),
+    y = quote(Normalized~a[phi]~(nm^-1)),
     color = "AVW (nm)"
-  ) +
-  theme(
-    legend.justification = c(1, 1),
-    legend.position = c(0.95, 0.9)
   )
 
 ggsave(
   here("graphs","14_normalized_aphy_avw_colored.pdf"),
   device = cairo_pdf,
-  width = 9,
-  height = 5
+  width = 6,
+  height = 9
 )
 
 # Compare the spectra with the highest difference
@@ -115,7 +111,7 @@ df_viz %>%
   ) +
   labs(
     x = "Wavelength (nm)",
-    y = quote(Normalized~a[phi]~(m^-1)),
+    y = quote(Normalized~a[phi]~(nm^-1)),
     title = "Spectra with the highest AVW difference"
   ) +
   paletteer::scale_colour_paletteer_d("ggthemes::wsj_colors6") +

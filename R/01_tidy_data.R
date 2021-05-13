@@ -43,11 +43,7 @@ df <- df %>%
   add_count(hplc_file) %>%
   group_by(hplc_file) %>%
   filter(n == 1 | (n == 2 & str_detect(hplc_sheet, regex("jbedits", ignore_case = TRUE)))) %>%
-  ungroup() %>%
-  select(-n) %>%
-  add_count() %>%
-  assertr::verify(n == 61) %>%
-  select(-n)
+  ungroup()
 
 df
 
@@ -134,8 +130,7 @@ metadata <- metadata %>%
 
 hplc <- df %>%
   select(hplc) %>%
-  unnest(everything()) %>%
-  rename(sample_id = id)
+  unnest(everything())
 
 # Some HPLC `sample_id` were not numeric (ex.: FL002), I removed them from the
 # data.
@@ -146,7 +141,8 @@ hplc %>%
 hplc <- hplc %>%
   filter(str_starts(sample_id, "\\d")) %>%
   mutate(sample_id = parse_integer(sample_id)) %>%
-  relocate(contains("chl"), .after = depth)
+  relocate(contains("chl"), .after = depth) %>%
+  distinct() # There are duplicated data...
 
 hplc %>%
   add_count(sample_id, depth) %>%
@@ -165,6 +161,7 @@ hplc <- hplc %>%
   rename(hplcchla = hplchla)
 
 # but19 should be the sum of but19 + butlike
+
 hplc %>%
   select(contains("but"))
 
@@ -174,6 +171,7 @@ hplc <- hplc %>%
   select(-butlike)
 
 # hex19 should be the sum of hex19 + hexlike + hexlike2
+
 hplc %>%
   select(contains("hex"))
 
@@ -207,17 +205,14 @@ absorption <- df %>%
 # Remove duplicated sample_id
 
 absorption <- absorption %>%
-  dtplyr::lazy_dt() %>%
-  add_count(sample_id, wavelength) %>%
-  filter(n == 1) %>%
-  as_tibble() %>%
-  select(-n)
+  distinct()
 
 # Should have 400 wavelengths per sample_id
 
-absorption %>%
-  count(sample_id, sort = TRUE) %>%
-  assertr::verify(n == 400)
+absorption <- absorption %>%
+  add_count(sample_id) %>%
+  filter(n == 400) %>%
+  select(-n)
 
 # Remove spectra with any value <= 0 between 350 and 400 nm
 
@@ -247,6 +242,49 @@ absorption <- absorption %>%
   anti_join(aphy_pigment_extraction_problem, by = "sample_id")
 
 absorption
+
+# Remove remaining outliers -----------------------------------------------
+
+# TODO: Use 2 times standard deviation
+
+outlier <- absorption %>%
+  filter(wavelength == 443) %>%
+  mutate(across(
+    c(anap, aphy),
+    .fns = list(mean = mean, sd = sd),
+    na.rm = TRUE
+  ))
+
+absorption %>%
+  filter(wavelength == 443) %>%
+  ggplot(aes(x = anap)) +
+  geom_histogram() +
+  geom_vline(xintercept = outlier$anap_mean, color = "red") +
+  geom_vline(
+    xintercept = outlier$anap_mean + 2 * outlier$anap_sd,
+    color = "red"
+  ) +
+  geom_vline(
+    xintercept = outlier$anap_mean - 2 * outlier$anap_sd,
+    color = "red"
+  )
+
+outlier <- outlier %>%
+  filter(between(anap, anap_mean - 2 * anap_sd, anap_mean + 2 * anap_sd)) %>%
+  filter(between(aphy, aphy_mean - 2 * aphy_sd, aphy_mean + 2 * aphy_sd))
+
+absorption <- absorption %>%
+  semi_join(outlier, by = "sample_id")
+
+absorption %>%
+  filter(wavelength == 443) %>%
+  ggplot(aes(x = anap)) +
+  geom_histogram()
+
+absorption %>%
+  filter(wavelength == 443) %>%
+  ggplot(aes(x = aphy)) +
+  geom_histogram()
 
 # Calculate specific phyto absorption -------------------------------------
 

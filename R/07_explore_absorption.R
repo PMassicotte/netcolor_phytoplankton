@@ -8,7 +8,7 @@ rm(list = ls())
 
 source("R/zzz.R")
 
-absorption <- fread(here("data/clean/merged_dataset.csv")) %>%
+absorption <- fread(here("data","clean","merged_dataset.csv")) %>%
   as_tibble()
 
 # Plot aphy ---------------------------------------------------------------

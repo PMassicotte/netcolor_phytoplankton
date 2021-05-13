@@ -62,7 +62,7 @@ p <- df_viz %>%
   ) +
   labs(
     x = NULL,
-    y = quote(a[phi]^"*"~(m^{-1}))
+    y = quote(a[phi~(443)]^"*"~(m^{-1}))
   ) +
   theme(
     legend.position = "none"

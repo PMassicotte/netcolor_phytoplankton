@@ -2,6 +2,7 @@
 # AUTHOR:       Philippe Massicotte
 #
 # DESCRIPTION:  Extract bathymetry at the sampling locations.
+# Data: https://download.gebco.net/
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 rm(list = ls())
@@ -17,17 +18,22 @@ metadata <- metadata %>%
   drop_na(longitude, latitude) %>%
   st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
 
-bathy <-
-  read_stars(
-    "data/raw/bathymetry/GEBCO_2020_20_Mar_2021_6b1b8dd40371/gebco_2020_n80.0_s35.0_w-90.0_e-20.0.tif"
+bathy <- read_stars(
+  here(
+    "data",
+    "raw",
+    "bathymetry",
+    "GEBCO_2020_13_May_2021_578bee3937bb",
+    "gebco_2020_n75.0_s30.0_w-100.0_e-20.0.tif"
   )
+)
 
 df <- st_extract(bathy, metadata) %>%
   as_tibble() %>%
   janitor::clean_names()
 
 bathymetry <- df %>%
-  select(bathymetry = gebco_2020_n80_0_s35_0_w_90_0_e_20_0_tif) %>%
+  select(bathymetry = gebco_2020_n75_0_s30_0_w_100_0_e_20_0_tif) %>%
   bind_cols(metadata, .) %>%
   as_tibble() %>%
   select(sample_id, bathymetry) %>%
@@ -59,23 +65,3 @@ bathymetry
 bathymetry %>%
   write_csv(here::here("data/clean/bathymetry.csv"))
 
-# Histogram of the extracted bathymetry -----------------------------------
-
-p <- bathymetry %>%
-  ggplot(aes(x = -bathymetry)) +
-  geom_histogram(binwidth = 0.05) +
-  scale_x_log10(breaks = scales::breaks_log(n = 6)) +
-  scale_y_continuous(breaks = scales::breaks_pretty(n = 6)) +
-  annotation_logticks(sides = "b", size = 0.25) +
-  labs(
-    x = "Depth (m)",
-    y = "Count",
-    title = "Bathymetry at the sampling stations"
-  )
-
-ggsave(
-  here::here("graphs/03_histogram_bathymetry.pdf"),
-  device = cairo_pdf,
-  width = 6,
-  height = 5
-)

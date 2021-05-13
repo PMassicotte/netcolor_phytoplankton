@@ -41,7 +41,7 @@ metadata <- metadata %>%
     bioregion_name = case_when(
       bioregion_position == "North" ~ "Labrador",
       bathymetry <= -600 & bioregion_position == "South" ~ "Northwest Atlantic Bassin ocean (NAB)",
-      bathymetry > -600 & bioregion_position == "South"~ "Scotian Shelf",
+      bathymetry > -600 & bioregion_position == "South" ~ "Scotian Shelf",
       TRUE ~ NA_character_
     )
   ) %>% # re-classify 1 problematic station
@@ -51,27 +51,6 @@ metadata <- metadata %>%
       TRUE ~ bioregion_name
     )
   )
-  # ) %>%
-  # mutate(
-  #   bioregion_name = case_when(
-  #     bioregion == "Region 1" ~ "Labrador",
-  #     bioregion == "Region 2" ~ "Labrador",
-  #     bioregion == "Region 3" ~ "Scotian Shelf",
-  #     bioregion == "Region 4" ~ "Scotian Shelf",
-  #     bioregion == "Region 5" ~ "Northwest Atlantic Bassin ocean (NAB)",
-  #     TRUE ~ NA_character_
-  #   )
-  # )
-  # mutate(
-  #   bioregion_name = case_when(
-  #     bioregion == "Region 1" ~ "Labrador & Greenland Shelves (LGS)",
-  #     bioregion == "Region 2" ~ "Labrador Sea Bassin (LSB)",
-  #     bioregion == "Region 3" ~ "Scotian Shelf Spring (SSSp)",
-  #     bioregion == "Region 4" ~ "Scotian Shelf Fall (SSFa)",
-  #     bioregion == "Region 5" ~ "Northwest Atlantic Bassin ocean (NAB)",
-  #     TRUE ~ NA_character_
-  #   )
-  # )
 
 metadata %>%
   select(sample_id, bioregion_name, bioregion_position) %>%
@@ -97,3 +76,25 @@ ggsave(
   height = 4
 )
 
+# Histogram of the extracted bathymetry -----------------------------------
+
+metadata %>%
+  ggplot(aes(x = -bathymetry)) +
+  geom_histogram() +
+  scale_x_log10(breaks = scales::breaks_log(n = 6)) +
+  scale_y_continuous(breaks = scales::breaks_pretty(n = 6)) +
+  annotation_logticks(sides = "b", size = 0.25) +
+  geom_vline(xintercept = 600, color = "red") +
+  facet_wrap(~bioregion_name, ncol = 1) +
+  labs(
+    x = "Depth (m)",
+    y = "Count",
+    title = "Bathymetry at the\nsampling stations"
+  )
+
+ggsave(
+  here::here("graphs/04_histogram_bathymetry.pdf"),
+  device = cairo_pdf,
+  width = 4,
+  height = 5
+)

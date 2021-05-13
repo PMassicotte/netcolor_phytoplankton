@@ -37,8 +37,8 @@ bathy <- raster::raster(
     "data",
     "raw",
     "bathymetry",
-    "GEBCO_2020_26_Apr_2021_edb2b42fc5c7",
-    "gebco_2020_n72.0_s36.0_w-95.0_e-25.0.tif"
+    "GEBCO_2020_13_May_2021_578bee3937bb",
+    "gebco_2020_n75.0_s30.0_w-100.0_e-20.0.tif"
   )
 ) %>%
   raster::sampleRegular(size = 1e5, asRaster = TRUE) %>%
