@@ -10,9 +10,11 @@ read_hplc <- function(hplc_file, hplc_sheet) {
     skip = n,
     col_types = "text"
   ) %>%
+    rename_with(tolower, everything()) %>%
     janitor::remove_empty(which = "rows") %>%
     janitor::clean_names() %>%
-    mutate(across(-c(id), parse_number))
+    rename_with(~"sample_id", any_of(c("id", "sampleid"))) %>%
+    mutate(across(-sample_id, parse_number))
 
 
   return(df)
