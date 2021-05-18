@@ -22,8 +22,13 @@ library(stars)
 library(MBA)
 library(ggtext)
 library(ggfortify) # Fortify ACF and CCF objects
-library(ggcorrplot)
+library(corrr)
 library(here)
+library(GGally)
+library(tidymodels)
+
+# install.packages("packfor", repos="http://R-Forge.R-project.org")
+library(packfor)
 
 # library(furrr)
 # plan(multiprocess(workers = availableCores() - 1))
@@ -37,6 +42,8 @@ theme_update(
   strip.background = element_rect(fill = "#3c3c3c"),
   strip.text = element_text(color = "white", face = "bold")
 )
+
+doParallel::registerDoParallel(cores = parallel::detectCores() - 1)
 
 # Cleaning scripts --------------------------------------------------------
 

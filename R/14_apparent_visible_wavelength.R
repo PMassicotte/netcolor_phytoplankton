@@ -42,6 +42,11 @@ df <- aphy %>%
 
 df
 
+write_csv(df, here("data","clean","apparent_visible_wavelength.csv"))
+
+# Visualization of AVW ----------------------------------------------------
+
+
 df %>%
   ggplot(aes(x = avw)) +
   geom_histogram(binwidth = 1) +

@@ -403,19 +403,64 @@ knitr::include_graphics(pdf2png(here("graphs", "fig06.pdf")))
 
 ### Figure 7
 
-Temporal autocorrelation between `aphy*` and `anap` at 443 nm.
 
-There are quite many gaps in the data. It was therefore impossible to go lag-correlation because one need one observation per day. To do it so, I took the LOESS models calculated in Fig. 5. Then, I randomly generated data (one observation per day) within the standard error intervals found in Fig. 5. *I repeated the process 1000 times.* After that, I calculated the auto-correlation with a max gap of +- 30 days for each of the simulation. Finally, I calculated the average correlation per lag over the 1000 simulation. The next graph shows the lag-correlation between `aphy*(443)` and `anap(443)`. One can see that there is a gap of ~12 days between the two variables in the Labrador data.
+There are quite many gaps in the data. It was therefore impossible to go lag-correlation because one need one observation per day. To do it so, I took the LOESS models calculated in Fig. 5. Then, I randomly generated data (one observation per day) within the standard error intervals found in Fig. 5. I repeated the process 1000 times (see Appendix 1). After that, I calculated the auto-correlation with a max gap of +- 30 days for each of the simulation. Finally, I calculated the average correlation per lag over the 1000 simulation. The next graphs show the lag-correlation between various absorption index. 
+
+- Panels **A**: Relationships between raw data at lag 0.
+- Panels **B**: Lag plots.
+
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "fig07.pdf")))
+```
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "fig07a.pdf")))
+```
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "fig07b.pdf")))
+```
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "fig07c.pdf")))
+```
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "fig07d.pdf")))
+```
+
+### Figure 8
+
+Here we explore the relationships between the nutrients and the apparent visible wavelength (AVW).
+
+- First, have a look at pairwise scatterplots for the most correlated nutrients to AVW.
+
+```{r}
+knitr::include_graphics(pdf2png(here(
+  "graphs", "fig08_nutrient_correlation_to_avw.pdf"
+)))
+```
+
+- Then, I removed the nutrients that were autocorrelated and made a PCA with the others. 
+
+```{r}
+knitr::include_graphics(pdf2png(here(
+  "graphs", "fig08_pca_avw_nutrients.pdf"
+)))
+```
+
+- We can also see here that when the spectral shape move toward the blue, there is an exponential increase in fucoxanthin concentration.
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "fig08.pdf")))
 ```
 
 ## Appendix
 
 ### Appendix 1
 
-**(A)** Simulated examples of `aphy*(443)` and `anap(443)` at a one-day temporal resolution. The black and red lines show the LOESS model and the 99% confidence interval as they appear in Fig. 5. **(B)** Scatterplots showing the relationships between simulated `aphy*(443)` and `anap(443)` at lag 0.
+**(A)** Simulated examples of `aphy*(443)` and `anap(443)` at a one-day temporal resolution. The black and red lines show the LOESS model and the 99% confidence interval as they appear in Fig. 5. **(B)** Scatterplots showing the relationships between simulated `aphy*(443)` and `anap(443)` at lag 0. Data from Northwest Atlantic Bassin ocean (NAB).
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "appendix1.pdf")))
