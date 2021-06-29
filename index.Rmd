@@ -357,11 +357,24 @@ knitr::include_graphics(pdf2png(
 ))
 ```
 
+## Random forest (RF) classification tree
+
+I have used a random forest classification tree to classify the three bioregions using the variables presented in the graphic below. The model performs well with a **ROC AUC value of 0.846**.
+
+> Generally, an ROC AUC value is between 0.5 and 1, with 1 being a perfect prediction model. If your value is between 0 and 0.5, then this implies that you have meaningful information in your model, but it is being applied incorrectly because doing the opposite of what the model predicts would result in an AUC >0.5.
+
+The variables are ranked as a function of their importance to correctly classify the bioregions. For example, within this set of variables, `fucox` is the most important variable whereas `but19` is the least important.
+
+```{r}
+knitr::include_graphics(pdf2png(
+  here("graphs","17_variable_importance_plot_random_forest.pdf")
+))
+```
+
+
 ## Figures for the manuscript
 
 ### Figure 1
-
--   Figure 1 : la carte des stations (il y a certains points qui devront bouger).
 
 ```{r, fig.align='center'}
 knitr::include_graphics(pdf2png(here("graphs","fig01.pdf")))
@@ -403,12 +416,10 @@ knitr::include_graphics(pdf2png(here("graphs", "fig06.pdf")))
 
 ### Figure 7
 
-
 There are quite many gaps in the data. It was therefore impossible to go lag-correlation because one need one observation per day. To do it so, I took the LOESS models calculated in Fig. 5. Then, I randomly generated data (one observation per day) within the standard error intervals found in Fig. 5. I repeated the process 1000 times (see Appendix 1). After that, I calculated the auto-correlation with a max gap of +- 30 days for each of the simulation. Finally, I calculated the average correlation per lag over the 1000 simulation. The next graphs show the lag-correlation between various absorption index. 
 
 - Panels **A**: Relationships between raw data at lag 0.
 - Panels **B**: Lag plots.
-
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "fig07.pdf")))

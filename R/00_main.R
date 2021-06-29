@@ -26,9 +26,7 @@ library(corrr)
 library(here)
 library(GGally)
 library(tidymodels)
-
-# install.packages("packfor", repos="http://R-Forge.R-project.org")
-library(packfor)
+library(themis)
 
 # library(furrr)
 # plan(multiprocess(workers = availableCores() - 1))
