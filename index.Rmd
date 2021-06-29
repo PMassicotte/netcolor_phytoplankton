@@ -371,6 +371,13 @@ knitr::include_graphics(pdf2png(
 ))
 ```
 
+This graphic show the how good the observations were classified. For example, most Labrador observations were classified correctly.
+
+```{r}
+knitr::include_graphics(pdf2png(
+  here("graphs","17_confusion_matrix_random_forest.pdf"),
+))
+```
 
 ## Figures for the manuscript
 

@@ -191,6 +191,13 @@ final_fit %>%
   conf_mat(bioregion_name, .pred_class) %>%
   autoplot()
 
+ggsave(
+  here("graphs","17_confusion_matrix_random_forest.pdf"),
+  device = cairo_pdf,
+  width = 12,
+  height = 7
+)
+
 # Geographic map showing the prediction accuracy --------------------------
 
 # https://youtu.be/0WCmLYvfHMw?t=2248
