@@ -3,6 +3,9 @@
 #
 # DESCRIPTION:  Apparent Visible Wavelength (AVW) calculation as described in:
 # Vandermeulen et al., “150 Shades of Green.”
+#
+# Note: I have tried with aphy specific, and the results are the same as with
+# aphy.
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 rm(list = ls())
