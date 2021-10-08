@@ -1,0 +1,94 @@
+# <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+# AUTHOR:       Philippe Massicotte
+#
+# DESCRIPTION:  Check if there are any temporal variability in AVW (both aphy
+# and anap).
+# <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+rm(list = ls())
+
+source(here("R","zzz.R"))
+
+avw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv"))
+
+metadata <- read_csv(here("data", "clean", "metadata.csv")) %>%
+  select(sample_id, date, season)
+
+df <- inner_join(avw, metadata, by = "sample_id")
+
+df
+
+df <- df %>%
+  mutate(season = factor(season,
+    levels = c("Spring", "Summer", "Autumn", "Winter")
+  )) %>%
+  mutate(bioregion_name = factor(
+    bioregion_name,
+    levels = c(
+      "Scotian Shelf",
+      "Northwest Atlantic Bassin ocean (NAB)",
+      "Labrador"
+    )
+  ))
+
+# Average by year and make sure that at least 10 observations were used for the
+# calculation.
+
+df_viz <- df %>%
+  mutate(date2 = clock::date_group(date, "year")) %>%
+  group_by(bioregion_name, date2, season) %>%
+  summarise(across(contains("avw"), mean), n = n()) %>%
+  ungroup() %>%
+  filter(n >= 10)
+
+df_viz
+
+# Need at least 5 points to see a temporal trend?
+
+df_viz <- df_viz %>%
+  group_by(bioregion_name, season) %>%
+  filter(n() >= 5) %>%
+  ungroup()
+
+df_viz
+
+# Plot --------------------------------------------------------------------
+
+p <- df_viz %>%
+  filter(season %in% c("Autumn", "Spring")) %>%
+  ggplot(aes(x = date2, y = avw_aphy)) +
+  geom_point(aes(color = bioregion_name)) +
+  scale_color_manual(
+    breaks = area_breaks,
+    values = area_colors
+  ) +
+  geom_smooth(method = "lm", color = "#3c3c3c", size = 0.5, alpha = 0.2) +
+  ggpubr::stat_regline_equation(
+    label.x.npc = 0.15,
+    label.y.npc = 0.1,
+    size = 3,
+    hjust = 0
+  ) +
+  ggpubr::stat_regline_equation(
+    label.x.npc = 0.15,
+    label.y.npc = 0,
+    aes(label = ..rr.label..),
+    size = 3,
+    hjust = 0
+  ) +
+  labs(
+    x = NULL,
+    y = "Phytoplankton Apparent Absorption Wavelength (PAAW)"
+  ) +
+  facet_grid(season ~ str_wrap_factor(bioregion_name, 20), scales = "free_y") +
+  theme(
+    legend.position = "none",
+    panel.spacing = unit(1, "lines", data = NULL)
+  )
+
+ggsave(
+  here("graphs","fig10.pdf"),
+  device = cairo_pdf,
+  width = 8,
+  height = 6
+)
