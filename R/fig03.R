@@ -41,11 +41,13 @@ df_viz <- df %>%
 # Plot --------------------------------------------------------------------
 
 facet_labels <- c(
-  "anap" = "a[NAP]",
-  "ap" = "a[P]",
-  "aphy" = "a[phi]",
-  "aphy_specific" = "a[phi]^'*'"
+  "ap" = "a[P]~(m^{-1})",
+  "anap" = "a[NAP]~(m^{-1})",
+  "aphy" = "a[phi]~(m^{-1})",
+  "aphy_specific" = "a[phi]^'*'~(m^2~mg^{-1})"
 )
+
+facet_labels <- fct_inorder(facet_labels)
 
 set.seed(123)
 
@@ -82,12 +84,12 @@ p <- df_viz %>%
     labels = ~ str_wrap(., width = 20),
     guide = guide_legend(
       override.aes = list(size = 1),
-      label.theme = element_text(size = 7, family = "Poppins")
+      label.theme = element_text(size = 7, family = "Montserrat Light")
     )
   ) +
   labs(
     x = "Wavelength (nm)",
-    y = quote("Absorption" ~ (m^{-1})),
+    y = "Absorption (or specific absorption)",
     color = NULL
   ) +
   facet_wrap(
@@ -99,7 +101,8 @@ p <- df_viz %>%
     legend.justification = c(1, 1),
     legend.position = c(0.45, 1),
     legend.background = element_blank(),
-    legend.key = element_blank()
+    legend.key = element_blank(),
+    strip.text = element_text(size = 10)
   )
 
 ggsave(

@@ -74,7 +74,7 @@ p <- ggplot() +
       label.position = "right",
       label.theme = element_text(
         size = 6,
-        family = "Poppins",
+        family = "Montserrat Light",
         color = "white"
       ),
       nrow = 3,
@@ -91,12 +91,12 @@ p <- ggplot() +
       title.hjust = 0.5,
       title.theme = element_text(
         size = 6,
-        family = "Poppins",
+        family = "Montserrat",
         color = "black"
       ),
       label.theme = element_text(
         size = 5,
-        family = "Open Sans",
+        family = "Montserrat",
         color = "black"
       ),
       barheight = unit(0.15, "cm"),
@@ -139,7 +139,7 @@ p <- ggplot() +
     width_hint = 0.08,
     height = unit(0.1, "cm"),
     line_width = 0.1,
-    text_cex = 0.5
+    text_cex = 0.5,
   ) +
   annotation_north_arrow(
     location = "tr",
@@ -174,7 +174,7 @@ p <- ggplot() +
     strip.text = element_markdown(
       size = 5,
       face = "bold",
-      family = "Open Sans"
+      family = "Montserrat Light"
     ),
     legend.spacing = unit(3, "cm")
   )

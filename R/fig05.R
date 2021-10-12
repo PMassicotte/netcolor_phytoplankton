@@ -3,7 +3,7 @@
 #
 # DESCRIPTION:  The observed nonlinearity between Chl_a and the ratio of
 # phytoplankton absorption aph (443)/aph (670) indicating the packaging effect
-# and changes in the intercellular composition of pigments.
+# and changes in the intracellular composition of pigments.
 #
 # Vishnu et al., Seasonal Variability in Bio-Optical Properties along the
 # Coastal Waters off Cochin.
@@ -78,6 +78,6 @@ p <- df_viz %>%
 ggsave(
   here("graphs", "fig05.pdf"),
   device = cairo_pdf,
-  width = 8,
-  height = 12
+  width = 6,
+  height = 10
 )

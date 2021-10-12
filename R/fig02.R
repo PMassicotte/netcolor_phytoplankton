@@ -45,7 +45,7 @@ p1 <- df_viz %>%
       label.position = "top",
       keyheight = unit(0.1, "cm"),
       keywidth = unit(3, "cm"),
-      label.theme = element_text(size = 5, family = "Poppins"),
+      label.theme = element_text(size = 5, family = "Montserrat Light"),
       nrow = 3
     )
   ) +

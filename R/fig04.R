@@ -53,7 +53,13 @@ df <- df %>%
 p <- df %>%
   filter(hplcchla > 0) %>% # TODO: check the minimum plausible value
   ggplot(aes(x = hplcchla, y = aphy)) +
-  geom_point(color = "#3c3c3c", size = 0.75, shape = 16, stroke = 0, alpha = 0.25) +
+  geom_point(
+    color = "#3c3c3c",
+    size = 0.75,
+    shape = 16,
+    stroke = 0,
+    alpha = 0.25
+  ) +
   geom_line(aes(y = bricaud_1998, color = "Bricaud 1998"), lty = 2) +
   geom_line(aes(y = bricaud_2004, color = "Bricaud 2004"), lty = 2) +
   geom_line(aes(y = devred_2006, color = "Devred 2006"), lty = 2) +
@@ -62,9 +68,13 @@ p <- df %>%
   annotation_logticks(sides = "bl", size = 0.25) +
   geom_smooth(method = "lm", aes(color = "This study"), se = FALSE) +
   ggpubr::stat_regline_equation(label.y.npc = 1, size = 3) +
-  ggpubr::stat_regline_equation(label.y.npc = 0.93, aes(label = ..rr.label..), size = 3) +
+  ggpubr::stat_regline_equation(
+    label.y.npc = 0.93,
+    aes(label = ..rr.label..),
+    size = 3
+  ) +
   labs(
-    x = quote("Chla" ~ (mgC~m^{-3})),
+    x = quote("Chlorophyll-a" ~ (mgC~m^{-3})),
     y = quote(a[phi] ~ (440) ~ (m^{-1}))
   ) +
   theme(
