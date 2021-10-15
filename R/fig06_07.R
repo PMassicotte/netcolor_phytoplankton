@@ -30,22 +30,29 @@ df %>%
   count(sample_id, wavelength) %>%
   assertr::verify(n == 1)
 
+# Range
+df %>%
+  filter(snap > 0.001) %>%
+  pull(snap) %>%
+  range() %>%
+  round(digits = 3)
+
 # Fig 7 Boxplots on absorption --------------------------------------------
 
 p1 <- ggboxlpot(df,
   season,
-  aphy_specific,
+  aphy,
   bioregion_name,
   strip.text = element_text(),
-  ylab = "a[phi]^'*'~(443)~(m^{-1})"
+  ylab = "a[phi]~(443)~(m^{-1})"
 )
 
 p2 <- ggboxlpot(df,
   season,
-  aphy,
+  aphy_specific,
   bioregion_name,
   strip.text = element_blank(),
-  ylab = "a[phi]~(443)~(m^{-1})"
+  ylab = "a[phi]^'*'~(443)~(m^{2}~mg^{-1})"
 )
 
 p3 <- ggboxlpot(df,

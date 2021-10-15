@@ -13,33 +13,10 @@
 
 rm(list = ls())
 
-# Prepare the data --------------------------------------------------------
+source(here("R","zzz.R"))
 
-absorption <- fread(here::here("data","clean","absorption.csv")) %>%
-  as_tibble() %>%
-  filter(wavelength == 440) %>%
-  select(
-    sample_id,
-    date,
-    wavelength,
-    aphy,
-    aphy_specific
-  ) %>%
-  drop_na()
-
-absorption
-
-bioregion <- read_csv(here::here("data","clean","bioregions.csv"))
-
-hplc <- read_csv(here::here("data","clean","hplc.csv")) %>%
-  select(sample_id, hplcchla) %>%
-  drop_na()
-
-df <- absorption %>%
-  inner_join(bioregion, by = "sample_id") %>%
-  inner_join(hplc, by = "sample_id")
-
-df
+df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
+  filter(wavelength == 440)
 
 # Add prediction from other models found in the literature ----------------
 
@@ -50,15 +27,15 @@ df <- df %>%
 
 # Plot --------------------------------------------------------------------
 
-p <- df %>%
+p1 <- df %>%
   filter(hplcchla > 0) %>% # TODO: check the minimum plausible value
   ggplot(aes(x = hplcchla, y = aphy)) +
   geom_point(
-    color = "#3c3c3c",
-    size = 0.75,
+    color = "#6c6c6c",
+    size = 1,
     shape = 16,
     stroke = 0,
-    alpha = 0.25
+    alpha = 0.5
   ) +
   geom_line(aes(y = bricaud_1998, color = "Bricaud 1998"), lty = 2) +
   geom_line(aes(y = bricaud_2004, color = "Bricaud 2004"), lty = 2) +
@@ -74,7 +51,7 @@ p <- df %>%
     size = 3
   ) +
   labs(
-    x = quote("Chlorophyll-a" ~ (mgC~m^{-3})),
+    x = quote("Chlorophyll-a" ~ (mg~m^{-3})),
     y = quote(a[phi] ~ (440) ~ (m^{-1}))
   ) +
   theme(
@@ -82,7 +59,7 @@ p <- df %>%
     legend.title = element_blank()
   ) +
   paletteer::scale_color_paletteer_d(
-    "ggsci::default_locuszoom",
+    "nbapalettes::pacers_venue",
     guide = guide_legend(
       label.position = "top",
       override.aes = list(size = 2, lty = 1),
@@ -90,9 +67,60 @@ p <- df %>%
     )
   )
 
+p2 <- df %>%
+  filter(fucox > 0) %>% # TODO: check the minimum plausible value
+  mutate(bioregion_name = factor(
+    bioregion_name,
+    levels = c(
+      "Scotian Shelf",
+      "Northwest Atlantic Bassin ocean (NAB)",
+      "Labrador"
+    )
+  )) %>%
+  mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20)) %>%
+  ggplot(aes(x = fucox, y = aphy)) +
+  geom_point(aes(color = bioregion_name), size = 0.25) +
+  scale_x_log10() +
+  scale_y_log10() +
+  annotation_logticks(sides = "bl", size = 0.1) +
+  geom_smooth(method = "lm", color = "#3c3c3c", size = 0.5) +
+  ggpubr::stat_regline_equation(
+    label.y.npc = 0.15,
+    label.x.npc = 1,
+    size = 2,
+    hjust = 1
+  ) +
+  ggpubr::stat_regline_equation(
+    aes(label = ..rr.label..),
+    label.y.npc = 0.05,
+    label.x.npc = 1,
+    size = 2,
+    hjust = 1
+  ) +
+  scale_color_manual(
+    breaks = area_breaks,
+    values = area_colors
+  ) +
+  labs(
+    x = quote("Fucoxanthin" ~ (mg~m^{-3})),
+    y = quote(a[phi] ~ (440) ~ (m^{-1}))
+  ) +
+  facet_wrap(~bioregion_name_wrap) +
+  theme(
+    legend.position = "none",
+    strip.text = element_text(size = 8)
+  )
+
+p <- p1 / p2 +
+  plot_layout(heights = c(1, 0.75)) +
+  plot_annotation(tag_levels = "A") &
+  theme(
+    plot.tag = element_text(face = "bold", size = 14)
+  )
+
 ggsave(
   here::here("graphs","fig04.pdf"),
   device = cairo_pdf,
   width = 5,
-  height = 4
+  height = 6
 )

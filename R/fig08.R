@@ -32,7 +32,15 @@ df_viz <- df_viz %>%
 
 df_viz
 
-# Reorder -----------------------------------------------------------------
+# Export the data for later use
+df_viz %>%
+  write_csv(here(
+    "data",
+    "clean",
+    "apparent_visible_wavelength_normalized_spectra.csv"
+  ))
+
+# Reorder by season and bioregion -----------------------------------------
 
 df_viz <- df_viz %>%
   mutate(season = factor(season,
@@ -96,7 +104,7 @@ p2 <- df_viz %>%
   ) +
   scale_y_discrete(expand = expansion(mult = c(0, 0.01))) +
   labs(
-    x = "Phytoplankton Apparent Absorption Wavelength (PAAW)",
+    x = "Phytoplankton Apparent Absorption Wavelength (PAAW, nm)",
     y = NULL
   ) +
   facet_wrap(~bioregion_name_wrap, ncol = 1, scales = "free_y", strip.position = "right") +
@@ -120,6 +128,10 @@ ggsave(
   height = 10
 )
 
+df_viz %>%
+  group_by(bioregion_name) %>%
+  summarise(mean_avw_aphy = mean(avw_aphy, na.rm = TRUE))
+
 
 # Test --------------------------------------------------------------------
 
@@ -140,7 +152,7 @@ p3 <- df_viz %>%
   ) +
   scale_y_discrete(expand = expansion(mult = c(0, 0.01))) +
   labs(
-    x = "Phytoplankton Apparent Absorption Wavelength (PAAW)",
+    x = "Phytoplankton Apparent Absorption Wavelength (PAAW, nm)",
     y = NULL
   ) +
   facet_wrap(

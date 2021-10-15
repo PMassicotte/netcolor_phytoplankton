@@ -391,7 +391,7 @@ knitr::include_graphics(pdf2png(here("graphs", "fig04.pdf")))
 
 > The observed nonlinearity between Chl_a and the ratio of phytoplankton absorption aph (443)/aph (670) indicating the packaging effect and changes in the intercellular composition of pigments.
 
-```{r, out.width="60%", fig.align='center'}
+```{r, fig.align='center'}
 knitr::include_graphics(pdf2png(here("graphs", "fig05.pdf")))
 ```
 
@@ -409,7 +409,7 @@ knitr::include_graphics(pdf2png(here("graphs", "fig07.pdf")))
 
 ### Figure 8
 
-```{r, out.width="60%", fig.align='center'}
+```{r, out.width="90%", fig.align='center'}
 knitr::include_graphics(pdf2png(here("graphs", "fig08.pdf")))
 ```
 
@@ -422,76 +422,31 @@ knitr::include_graphics(pdf2png(here("graphs", "fig09.pdf")))
 ### Figure 10
 
 ```{r}
-knitr::include_graphics(pdf2png(
-  here("graphs", "fig10.pdf")
-))
+knitr::include_graphics(pdf2png(here("graphs", "fig10.pdf")))
 ```
 
 ## Appendix
 
 ### Appendix 1
 
--   This graphic shows the results of regressions between aphy and chla at all wavelengths between 400 and 700 nm.
-
--   This could complement the main figure where we see scatterplots between aphy and chla et 443 and 670 nm for the three bioregions.
+Numbers at the right represent: mean (min - max).
 
 ```{r}
-source(here("R","zzz.R"))
-
-df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  filter(between(wavelength, 400, 700)) %>%
-  select(sample_id, bioregion_name, wavelength, aphy, hplcchla)
-
-df_viz <- df %>% 
-  filter(if_all(c(aphy, hplcchla), ~. > 0)) %>%
-  mutate(across(c(aphy, hplcchla), log10)) %>% 
-  group_nest(bioregion_name, wavelength) %>% 
-  mutate(mod = map(data, ~lm(aphy ~ hplcchla, data = .)), n = n()) %>% 
-  mutate(glanced = map(mod, broom::glance))
-
-# Average every 10 nm
-df_viz %>% 
-  unnest(glanced) %>% 
-  mutate(wavelength_bin = wavelength %/% 10 * 10, .after = wavelength) %>%
-  group_by(bioregion_name, wavelength_bin) %>% 
-  summarise(across(c(wavelength, r.squared), mean)) %>% 
-  ggplot(aes(x = wavelength, y = r.squared, color = bioregion_name)) +
-  geom_line(size = 1) +
-  geom_vline(xintercept = c(443, 670), lty = 2, size = 0.25, color = "#3c3c3c") +
-  scale_color_manual(
-    breaks = area_breaks,
-    values = area_colors,
-    labels = ~str_wrap(., 20)
-  ) +
-  scale_y_continuous(limits = c(0, 1)) +
-  labs(
-    x = "Wavelength (nm)",
-    y = quote("Determination coefficient"~(R^2)),
-    color = NULL
-  )
+knitr::include_graphics(pdf2png(here("graphs", "appendix01.pdf")))
 ```
 
+### Appendix 2
 
-## TODOS
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "appendix02.pdf")))
+```
 
--   Aphy vs chla : cool de voir que des modeles vieux de 15, 20 ans fonctionne toujours, ca serait bien d'avoir les erreurs relatives et absolues de chaques models, ca sera bien pour la discussion
+### Appendix 3
 
--   Regarder les variations aph443 vs anap443 et aph443/aph443 vs Snap par bioregions et saison
+This aphy* ratio was found to correlate with phytoplankton cell size. That is cool to see that PAAW correlates with it! Using PAAW to infer aphy* means that we do not have to measure chla (HPLC or other ways).
 
--   Est-ce que ces variations changes avec les pigments ? surtout fucox, perid, phae (je vais en trouver d'autres ensuites)
-
--   Je vais reflechir a un moyen d'exploiter toute les longueurs d'onde du phyto, ca serait domange de s'arreter a suelement une !
-
-    -   We could try the spectral slope curve from @Helms2008.
-
--   Regarder si on voit des tendances a plus long terme (peut-etre des analyses en utilisant gam) avec aph, anap et le rapport aph/anap
-
--   What are the units for the pigments?
-
--   Predict aphy(443) using the main pigments per bioregion and then use variance partitioning to see if there are differences.
-
--   Histograms of AVW by bioregion to visualize how the WL vary.
-
--   Add units (nm) to plots with AVW (PAAW).
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "appendix03.pdf")))
+```
 
 ## References

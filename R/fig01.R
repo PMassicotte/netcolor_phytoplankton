@@ -130,9 +130,18 @@ p <- ggplot() +
   ) +
   geom_hline(
     yintercept = 48,
-    lty = 3,
-    size = 0.2,
+    lty = 2,
+    size = 0.25,
     color = "gray25"
+  ) +
+  annotate(
+    "text",
+    x = Inf,
+    y = 48.5,
+    label = "48°N",
+    hjust = 1,
+    size = 3,
+    color = "#3c3c3c"
   ) +
   annotation_scale(
     location = "bl",

@@ -90,6 +90,12 @@ p2 <- df %>%
   mutate(label = fct_reorder(label, as.numeric(season))) %>%
   ggplot(aes(x = n, y = label, fill = bioregion_name)) +
   geom_col(position = "dodge") +
+  geom_text(
+    aes(label = n),
+    size = 2.5,
+    position = position_dodge(width = 0.9),
+    hjust = -0.5
+  ) +
   scale_x_continuous(breaks = scales::pretty_breaks(n = 11)) +
   scale_fill_manual(
     breaks = area_breaks,

@@ -57,7 +57,7 @@ p1 <- df %>%
   ) +
   labs(
     x = NULL,
-    y = str_wrap("Phytoplankton Apparent Absorption Wavelength (PAAW)", 40)
+    y = str_wrap("Phytoplankton Apparent Absorption Wavelength (PAAW, nm)", 40)
   ) +
   facet_wrap(~ str_wrap_factor(bioregion_name, 20),
     scales = "free_x",
@@ -68,34 +68,19 @@ p1 <- df %>%
     panel.grid.minor.y = element_blank()
   )
 
-# p2 <- df %>%
-#   ggplot(aes(x = season, y = avw_anap, fill = bioregion_name)) +
-#   geom_boxplot(size = 0.25, outlier.size = 0.25) +
-#   scale_fill_manual(
-#     breaks = area_breaks,
-#     values = area_colors
-#   ) +
-#   scale_y_continuous(
-#     labels = scales::label_number(accuracy = 1),
-#     breaks = scales::breaks_pretty()
-#   ) +
-#   labs(
-#     x = NULL,
-#     y = quote(a[NAP] ~ "absorption wavelength (nm)")
-#   ) +
-#   facet_wrap(~ str_wrap_factor(bioregion_name, 20),
-#     scales = "free_x",
-#     ncol = 3
-#   ) +
-#   theme(
-#     legend.position = "none",
-#     panel.grid.minor.y = element_blank(),
-#     strip.text = element_blank()
-#   )
-
 ggsave(
   here("graphs","fig09.pdf"),
   device = cairo_pdf,
   width = 8,
   height = 3
 )
+
+df
+
+# Average by season excluding Labrador data (because the seasonal pattern is not
+# the same as in Scotian Shelf and NAB).
+
+df %>%
+  filter(bioregion_name != "Labrador") %>%
+  group_by(season) %>%
+  summarise(across(avw_aphy, .fns = list(mean = mean, sd = sd), na.rm = TRUE))

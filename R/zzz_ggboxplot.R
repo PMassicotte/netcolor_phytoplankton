@@ -1,6 +1,6 @@
 ggboxlpot <- function(df, season, y, bioregion_name, strip.text = element_blank(), ylab) {
   p <- ggplot(df, aes(x = {{ season }}, y = {{ y }}, fill = {{ bioregion_name }})) +
-    geom_boxplot(size = 0.25, outlier.size = 0.25) +
+    geom_boxplot(size = 0.1, outlier.size = 0.25) +
     scale_fill_manual(
       breaks = area_breaks,
       values = area_colors

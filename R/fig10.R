@@ -18,6 +18,7 @@ df <- inner_join(avw, metadata, by = "sample_id")
 
 df
 
+# Order by season and bioregion
 df <- df %>%
   mutate(season = factor(season,
     levels = c("Spring", "Summer", "Autumn", "Winter")
@@ -30,6 +31,8 @@ df <- df %>%
       "Labrador"
     )
   ))
+
+df
 
 # Average by year and make sure that at least 10 observations were used for the
 # calculation.
@@ -52,10 +55,18 @@ df_viz <- df_viz %>%
 
 df_viz
 
+df_viz <- df_viz %>%
+  filter(season %in% c("Autumn", "Spring"))
+
 # Plot --------------------------------------------------------------------
 
+# There are very few measurements in autumn in the Labrador sea (n = 21). That
+# is why these are no plot in the Labrador/Autumn facet.
+
+df %>%
+  count(bioregion_name, season)
+
 p <- df_viz %>%
-  filter(season %in% c("Autumn", "Spring")) %>%
   ggplot(aes(x = date2, y = avw_aphy)) +
   geom_point(aes(color = bioregion_name)) +
   scale_color_manual(
@@ -78,7 +89,7 @@ p <- df_viz %>%
   ) +
   labs(
     x = NULL,
-    y = "Phytoplankton Apparent Absorption Wavelength (PAAW)"
+    y = "Phytoplankton Apparent Absorption Wavelength (PAAW, nm)"
   ) +
   facet_grid(season ~ str_wrap_factor(bioregion_name, 20), scales = "free_y") +
   theme(
@@ -92,3 +103,20 @@ ggsave(
   width = 8,
   height = 6
 )
+
+# Calculate the average increase/decrease of PAAW in spring and autumn.
+
+df_viz
+
+# TODO: See if should report these min/max in the manuscript
+df_res <- df_viz %>%
+  mutate(year = lubridate::year(date2)) %>%
+  group_nest(bioregion_name, season) %>%
+  mutate(model = map(data, ~lm(avw_aphy ~ year, data = .))) %>%
+  mutate(augmented = map(model, augment)) %>%
+  mutate(tidied = map(model, tidy))
+
+df_res
+
+df_res %>%
+  unnest(tidied)
