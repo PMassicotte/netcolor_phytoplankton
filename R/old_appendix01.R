@@ -11,7 +11,7 @@ rm(list = ls())
 
 df <- read_csv(here("data/clean/simulated_daily_data_from_loess.csv")) %>%
   filter(wavelength == 443) %>%
-  filter(bioregion_name == "Northwest Atlantic Bassin ocean (NAB)") %>%
+  filter(bioregion_name == "Northwest Atlantic Basin ocean (NAB)") %>%
   filter(name %in% c("aphy_specific", "anap"))
 
 # Randomly choose 3 simulations -------------------------------------------

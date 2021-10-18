@@ -20,7 +20,7 @@ df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
     bioregion_name,
     levels = c(
       "Scotian Shelf",
-      "Northwest Atlantic Bassin ocean (NAB)",
+      "Northwest Atlantic Basin ocean (NAB)",
       "Labrador"
     )
   )) %>%

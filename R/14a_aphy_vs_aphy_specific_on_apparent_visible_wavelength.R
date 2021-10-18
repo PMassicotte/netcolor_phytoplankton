@@ -38,7 +38,14 @@ p2 <- df %>%
     subtitle = "Both curves have the exact same shape."
   )
 
-p1 / p2
+p <- p1 / p2
+
+ggsave(
+  here("graphs","14_compare_avw_from_aphy_vs_aphy_specific.pdf"),
+  device = cairo_pdf,
+  width = 8,
+  height = 6
+)
 
 # Calculate AVW -----------------------------------------------------------
 

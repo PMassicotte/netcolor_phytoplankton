@@ -110,10 +110,10 @@ Observations were classified into bioregions based on the following criteria (wh
 
 ```{r, eval=FALSE, echo=TRUE}
 bathymetry > -300 & position == "North" ~ "Labrador & Greenland Shelves (LGS)"
-bathymetry <= -300 & position == "North" ~ "Labrador Sea Bassin (LSB)"
+bathymetry <= -300 & position == "North" ~ "Labrador Sea Basin (LSB)"
 bathymetry >= -300 & position == "South" & yday <= 180 ~ "Scotian Shelf Spring (SSSp)"
 bathymetry >= -300 & position == "South" & yday > 180 ~ "Scotian Shelf Fall (SSFa)"
-bathymetry < -300 & position == "South"~ "Northwest Atlantic Bassin ocean (NAB)"
+bathymetry < -300 & position == "South"~ "Northwest Atlantic Basin ocean (NAB)"
 ```
 
 ```{r, fig.align='center'}
@@ -232,7 +232,7 @@ knitr::include_graphics(pdf2png(here("graphs","08_boxplot_aphy_specific_by_month
 knitr::include_graphics(pdf2png(here("graphs","08_boxplot_aphy_specific_by_month_bioregion2.pdf")))
 ```
 
--   We can also look at the seasonal variability by bioregion. There are interesting patterns in the data. For instance, in `Northwest Atlantic Bassin ocean (NAB)` we can clearly see the seasonal pattern of `hex19`.
+-   We can also look at the seasonal variability by bioregion. There are interesting patterns in the data. For instance, in `Northwest Atlantic Basin ocean (NAB)` we can clearly see the seasonal pattern of `hex19`.
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs","08_boxplot_hex19_by_month_bioregion.pdf")))
@@ -346,12 +346,6 @@ knitr::include_graphics(pdf2png(
 ```{r}
 knitr::include_graphics(pdf2png(
   here("graphs", "14_scatterplot_chla_vs_avw.pdf")
-))
-```
-
-```{r}
-knitr::include_graphics(pdf2png(
-  here("graphs", "17_temporal_changes_avw_by_season_bioregion.pdf")
 ))
 ```
 

@@ -37,7 +37,7 @@ df <- df %>%
     bioregion_name,
     levels = c(
       "Scotian Shelf",
-      "Northwest Atlantic Bassin ocean (NAB)",
+      "Northwest Atlantic Basin ocean (NAB)",
       "Labrador"
     )
   ))

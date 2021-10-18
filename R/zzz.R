@@ -11,7 +11,7 @@ area_breaks <-
   c(
     "Labrador",
     "Scotian Shelf",
-    "Northwest Atlantic Bassin ocean (NAB)"
+    "Northwest Atlantic Basin ocean (NAB)"
   )
 
 area_colors <-
