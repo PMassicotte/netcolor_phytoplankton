@@ -56,45 +56,56 @@ df_viz <- df %>%
 
 df_viz
 
+formula <- y ~ x + I(x^2)
+
 p <- df_viz %>%
   ggplot(aes(x = avw_aphy, y = aphy_ratio)) +
   geom_point(size = 0.5, color = "#3c3c3c") +
+  geom_smooth(
+    formula = formula,
+    color = "#bf1d28",
+    size = 0.5
+  ) +
+  ggpmisc::stat_poly_eq(
+    formula = formula,
+    aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+    parse = TRUE,
+    coef.digits = 4,
+    f.digits = 5,
+    p.digits = 10,
+    label.x.npc = 1,
+    family = "Montserrat",
+    size = 3
+  ) +
   labs(
     x = "Phytoplankton Apparent Absorption Wavelength (PAAW, nm)",
-    y = quote(a[phi]^"*"~(443) / a[phi]^"*"~(675))
+    y = quote(a[phi]^"*" ~ (443) / a[phi]^"*" ~ (675))
   )
 
 ggsave(
   here::here("graphs","appendix03.pdf"),
   device = cairo_pdf,
-  width = 5,
+  width = 6,
   height = 4
 )
 
-## Make an exponential model ----
+## Model to predict aphy* ratio from PAAW ----
 
-# df_model <- df_viz %>%
-#   group_nest() %>%
-#   mutate(model = map(data, ~ nls(
-#     aphy_ratio ~ a * exp(b * avw_aphy) + c * exp(d * avw_aphy),
-#     data = .,
-#     start = c(a = 15, b = -0.01, c = 12, d = 1)
-#   ))) %>%
-#   mutate(tidied = map(model, tidy)) %>%
-#   mutate(augmented = map(model, augment))
-#
-# df_model
-#
-# df_model %>%
-#   unnest(augmented) %>%
-#   ggplot(aes(x = avw_aphy, y = aphy_ratio)) +
-#   geom_point() +
-#   geom_line(aes(y = .fitted), color = "red")
-#
-#
-# tibble(
-#   avw_aphy = 460:500,
-#   aphy_ratio = 0.8 * exp(-2 * avw_aphy) + 10 * exp(-0.5 * avw_aphy)
-# ) %>%
-#   ggplot(aes(x = avw_aphy, y = aphy_ratio)) +
-#   geom_point()
+df_model <- df_viz %>%
+  group_nest() %>%
+  mutate(model = map(data, ~ lm(aphy_ratio ~ avw_aphy + I(avw_aphy^2), data = .))) %>%
+  mutate(tidied = map(model, tidy)) %>%
+  mutate(augmented = map(model, augment))
+
+df_model
+
+df_model$model[[1]]
+summary(df_model$model[[1]])
+
+df_model %>%
+  unnest(augmented) %>%
+  ggplot(aes(x = avw_aphy, y = aphy_ratio)) +
+  geom_point() +
+  geom_line(aes(y = .fitted), color = "red")
+
+
