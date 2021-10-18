@@ -44,11 +44,17 @@ p1 <- df %>%
   scale_y_log10() +
   annotation_logticks(sides = "bl", size = 0.25) +
   geom_smooth(method = "lm", aes(color = "This study"), se = FALSE) +
-  ggpubr::stat_regline_equation(label.y.npc = 1, size = 3) +
-  ggpubr::stat_regline_equation(
+  ggpmisc::stat_poly_eq(
+    aes(label = ..eq.label..),
+    label.y.npc = 1,
+    size = 3,
+    family = "Montserrat"
+  ) +
+  ggpmisc::stat_poly_eq(
     label.y.npc = 0.93,
     aes(label = ..rr.label..),
-    size = 3
+    size = 3,
+    family = "Montserrat"
   ) +
   labs(
     x = quote("Chlorophyll-a" ~ (mg~m^{-3})),
@@ -84,18 +90,19 @@ p2 <- df %>%
   scale_y_log10() +
   annotation_logticks(sides = "bl", size = 0.1) +
   geom_smooth(method = "lm", color = "#3c3c3c", size = 0.5) +
-  ggpubr::stat_regline_equation(
+  ggpmisc::stat_poly_eq(
+    aes(label = ..eq.label..),
     label.y.npc = 0.15,
     label.x.npc = 1,
     size = 2,
-    hjust = 1
+    family = "Montserrat"
   ) +
-  ggpubr::stat_regline_equation(
-    aes(label = ..rr.label..),
+  ggpmisc::stat_poly_eq(
     label.y.npc = 0.05,
     label.x.npc = 1,
+    aes(label = ..rr.label..),
     size = 2,
-    hjust = 1
+    family = "Montserrat"
   ) +
   scale_color_manual(
     breaks = area_breaks,

@@ -74,18 +74,20 @@ p <- df_viz %>%
     values = area_colors
   ) +
   geom_smooth(method = "lm", color = "#3c3c3c", size = 0.5, alpha = 0.2) +
-  ggpubr::stat_regline_equation(
-    label.x.npc = 0.15,
-    label.y.npc = 0.1,
+  ggpmisc::stat_poly_eq(
+    aes(label = ..eq.label..),
+    label.y.npc = 0.12,
+    label.x.npc = 0.2,
     size = 3,
-    hjust = 0
+    coef.digits = 4,
+    family = "Montserrat"
   ) +
-  ggpubr::stat_regline_equation(
-    label.x.npc = 0.15,
-    label.y.npc = 0,
+  ggpmisc::stat_poly_eq(
+    label.y.npc = 0.05,
+    label.x.npc = 0.2,
     aes(label = ..rr.label..),
     size = 3,
-    hjust = 0
+    family = "Montserrat"
   ) +
   labs(
     x = NULL,

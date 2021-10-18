@@ -51,18 +51,20 @@ p <- df_viz %>%
   scale_y_log10() +
   annotation_logticks(sides = "bl", size = 0.25) +
   geom_smooth(method = "lm", color = "#3c3c3c", size = 0.5) +
-  ggpubr::stat_regline_equation(
-    label.x.npc = 0.6,
-    label.y.npc = 1,
+  ggpmisc::stat_poly_eq(
+    aes(label = ..eq.label..),
+    label.y.npc = 0.95,
+    label.x.npc = 1,
     size = 3,
-    vjust = 1
+    coef.digits = 3,
+    family = "Montserrat"
   ) +
-  ggpubr::stat_regline_equation(
-    label.x.npc = 0.6,
-    label.y.npc = 0.90,
+  ggpmisc::stat_poly_eq(
+    label.y.npc = 0.88,
+    label.x.npc = 1,
     aes(label = ..rr.label..),
     size = 3,
-    vjust = 1
+    family = "Montserrat"
   ) +
   scale_color_manual(
     breaks = area_breaks,
@@ -86,28 +88,6 @@ ggsave(
 )
 
 # Does chla correlates more at 443 or 675 nm? -----------------------------
-
-df %>%
-  select(sample_id, wavelength, aphy, hplcchla) %>%
-  ggplot(aes(x = hplcchla, y = aphy)) +
-  geom_point() +
-  scale_x_log10() +
-  scale_y_log10() +
-  geom_smooth(method = "lm") +
-  ggpubr::stat_regline_equation(
-    label.x.npc = 0,
-    label.y.npc = 1,
-    size = 3,
-    vjust = 1
-  ) +
-  ggpubr::stat_regline_equation(
-    label.x.npc = 0,
-    label.y.npc = 0.90,
-    aes(label = ..rr.label..),
-    size = 3,
-    vjust = 1
-  ) +
-  facet_wrap(~wavelength, scales = "free")
 
 # Numbers for the paper
 df %>%

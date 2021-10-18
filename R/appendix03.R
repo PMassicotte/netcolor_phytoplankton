@@ -29,18 +29,20 @@ df %>%
   geom_point() +
   scale_y_log10() +
   geom_smooth(method = "lm") +
-  ggpubr::stat_regline_equation(
-    label.y.npc = 0.15,
+  ggpmisc::stat_poly_eq(
+    aes(label = ..eq.label..),
+    label.y.npc = 0.95,
     label.x.npc = 1,
     size = 2,
-    hjust = 1
+    coef.digits = 3,
+    family = "Montserrat"
   ) +
-  ggpubr::stat_regline_equation(
-    aes(label = ..rr.label..),
-    label.y.npc = 0.05,
+  ggpmisc::stat_poly_eq(
+    label.y.npc = 0.88,
     label.x.npc = 1,
+    aes(label = ..rr.label..),
     size = 2,
-    hjust = 1
+    family = "Montserrat"
   ) +
   facet_grid(bioregion_name~wavelength)
 
