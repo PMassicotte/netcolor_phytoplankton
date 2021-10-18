@@ -2,7 +2,7 @@
 # AUTHOR:       Philippe Massicotte
 #
 # DESCRIPTION:  The observed nonlinearity between Chl_a and the ratio of
-# phytoplankton absorption aph (443)/aph (670) indicating the packaging effect
+# phytoplankton absorption aph (443)/aph (675) indicating the packaging effect
 # and changes in the intracellular composition of pigments.
 #
 # Vishnu et al., Seasonal Variability in Bio-Optical Properties along the
@@ -14,7 +14,7 @@ rm(list = ls())
 source(here("R","zzz.R"))
 
 df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  filter(wavelength %in% c(443, 670)) %>%
+  filter(wavelength %in% c(443, 675)) %>%
   select(sample_id, bioregion_name, wavelength, aphy, hplcchla, fucox) %>%
   mutate(bioregion_name = factor(
     bioregion_name,
@@ -30,13 +30,13 @@ df %>%
   count(sample_id) %>%
   assertr::verify(n == 2)
 
-# aphy443/aphy670 vs chla -------------------------------------------------
+# aphy443/aphy675 vs chla -------------------------------------------------
 
 df_viz <- df %>%
   dtplyr::lazy_dt() %>%
   group_by(sample_id, bioregion_name, bioregion_name_wrap) %>%
   summarise(
-    aphy_443_670 = aphy[wavelength == 443] / aphy[wavelength == 670],
+    aphy_443_675 = aphy[wavelength == 443] / aphy[wavelength == 675],
     hplcchla = unique(hplcchla)
   ) %>%
   ungroup() %>%
@@ -45,7 +45,7 @@ df_viz <- df %>%
 df_viz
 
 p <- df_viz %>%
-  ggplot(aes(x = hplcchla, y = aphy_443_670)) +
+  ggplot(aes(x = hplcchla, y = aphy_443_675)) +
   geom_point(aes(color = bioregion_name), size = 0.5) +
   scale_x_log10() +
   scale_y_log10() +
@@ -70,7 +70,7 @@ p <- df_viz %>%
   ) +
   labs(
     x = quote("Chlorophyll-a" ~ (mg ~ m^{-3})),
-    y = quote(a[phi](443) / a[phi](670))
+    y = quote(a[phi](443) / a[phi](675))
   ) +
   facet_wrap(~bioregion_name_wrap) +
   theme(
@@ -85,7 +85,7 @@ ggsave(
   height = 3
 )
 
-# Does chla correlates more at 443 or 670 nm? -----------------------------
+# Does chla correlates more at 443 or 675 nm? -----------------------------
 
 df %>%
   select(sample_id, wavelength, aphy, hplcchla) %>%
@@ -112,7 +112,7 @@ df %>%
 # Numbers for the paper
 df %>%
   pivot_wider(names_from = wavelength, values_from = aphy, names_prefix = "wl") %>%
-  select(hplcchla, fucox, wl443, wl670) %>%
+  select(hplcchla, fucox, wl443, wl675) %>%
   mutate(across(everything(), log10)) %>%
   # replace infinite values with NA
   mutate(across(everything(), ~ifelse(is.infinite(.), NA, .))) %>%

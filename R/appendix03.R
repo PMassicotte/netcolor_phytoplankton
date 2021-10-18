@@ -61,7 +61,7 @@ p <- df_viz %>%
   geom_point(size = 0.5, color = "#3c3c3c") +
   labs(
     x = "Phytoplankton Apparent Absorption Wavelength (PAAW, nm)",
-    y = quote(a[phi]^"*"~(443) / a[phi]^"*"~(670))
+    y = quote(a[phi]^"*"~(443) / a[phi]^"*"~(675))
   )
 
 ggsave(
