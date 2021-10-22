@@ -27,8 +27,19 @@ df <- df %>%
 
 # Plot --------------------------------------------------------------------
 
-p1 <- df %>%
-  filter(hplcchla > 0) %>% # TODO: check the minimum plausible value
+df_viz <- df %>%
+  filter(hplcchla > 0) %>%
+  mutate(bioregion_name = factor(
+  bioregion_name,
+  levels = c(
+    "Scotian Shelf",
+    "Northwest Atlantic Basin ocean (NAB)",
+    "Labrador"
+  )
+)) %>%
+  mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
+
+p1 <- df_viz %>%
   ggplot(aes(x = hplcchla, y = aphy)) +
   geom_point(
     color = "#6c6c6c",
@@ -57,7 +68,7 @@ p1 <- df %>%
     family = "Montserrat"
   ) +
   labs(
-    x = quote("Chlorophyll-a" ~ (mg~m^{-3})),
+    x = quote("Chlorophyll-" * italic(a) ~ (mg~m^{-3})),
     y = quote(a[phi] ~ (440) ~ (m^{-1}))
   ) +
   theme(
@@ -73,61 +84,9 @@ p1 <- df %>%
     )
   )
 
-p2 <- df %>%
-  filter(fucox > 0) %>% # TODO: check the minimum plausible value
-  mutate(bioregion_name = factor(
-    bioregion_name,
-    levels = c(
-      "Scotian Shelf",
-      "Northwest Atlantic Basin ocean (NAB)",
-      "Labrador"
-    )
-  )) %>%
-  mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20)) %>%
-  ggplot(aes(x = fucox, y = aphy)) +
-  geom_point(aes(color = bioregion_name), size = 0.25) +
-  scale_x_log10() +
-  scale_y_log10() +
-  annotation_logticks(sides = "bl", size = 0.1) +
-  geom_smooth(method = "lm", color = "#3c3c3c", size = 0.5) +
-  ggpmisc::stat_poly_eq(
-    aes(label = ..eq.label..),
-    label.y.npc = 0.15,
-    label.x.npc = 1,
-    size = 2,
-    family = "Montserrat"
-  ) +
-  ggpmisc::stat_poly_eq(
-    label.y.npc = 0.05,
-    label.x.npc = 1,
-    aes(label = ..rr.label..),
-    size = 2,
-    family = "Montserrat"
-  ) +
-  scale_color_manual(
-    breaks = area_breaks,
-    values = area_colors
-  ) +
-  labs(
-    x = quote("Fucoxanthin" ~ (mg~m^{-3})),
-    y = quote(a[phi] ~ (440) ~ (m^{-1}))
-  ) +
-  facet_wrap(~bioregion_name_wrap) +
-  theme(
-    legend.position = "none",
-    strip.text = element_text(size = 8)
-  )
-
-p <- p1 / p2 +
-  plot_layout(heights = c(1, 0.75)) +
-  plot_annotation(tag_levels = "A") &
-  theme(
-    plot.tag = element_text(face = "bold", size = 14)
-  )
-
 ggsave(
   here::here("graphs","fig04.pdf"),
   device = cairo_pdf,
   width = 5,
-  height = 6
+  height = 4
 )

@@ -1,48 +1,35 @@
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 # AUTHOR:       Philippe Massicotte
 #
-# DESCRIPTION:  Visualize AVW.
+# DESCRIPTION:  Boxplot of apparent visible wavelength (AVW) by bioregion and
+# season.
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 rm(list = ls())
 
 source(here("R", "zzz.R"))
+source(here("R", "zzz_ggboxplot.R"))
 
-df <- read_csv(here("data","clean","apparent_visible_wavelength.csv"))
+# Data --------------------------------------------------------------------
 
-aphy <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  select(sample_id, bioregion_name, season, wavelength, aphy, anap) %>%
-  filter(between(wavelength, 400, 700))
+avw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv"))
 
-df_viz <- df %>%
-  dtplyr::lazy_dt() %>%
-  inner_join(aphy, by = c("sample_id", "bioregion_name")) %>%
-  group_by(sample_id) %>%
-  mutate(across(c(aphy, anap),
-    ~ . / pracma::trapz(wavelength, .),
-    .names = "normalized_{.col}"
-  )) %>%
-  ungroup() %>%
-  as_tibble()
+avw
 
-df_viz <- df_viz %>%
-  group_by(sample_id) %>%
-  filter(all(normalized_aphy[between(wavelength, 400, 600)] > 0)) %>%
-  ungroup()
+bioregions <- read_csv(here("data", "clean", "bioregions.csv"))
 
-df_viz
+metadata <- read_csv(here("data", "clean", "metadata.csv")) %>%
+  select(sample_id, date, season) %>%
+  inner_join(bioregions, by = "sample_id")
 
-# Export the data for later use
-df_viz %>%
-  write_csv(here(
-    "data",
-    "clean",
-    "apparent_visible_wavelength_normalized_spectra.csv"
-  ))
+metadata
 
-# Reorder by season and bioregion -----------------------------------------
+df <- avw %>%
+  inner_join(metadata, by = c("sample_id", "bioregion_name"))
 
-df_viz <- df_viz %>%
+df
+
+df <- df %>%
   mutate(season = factor(season,
     levels = c("Spring", "Summer", "Autumn", "Winter")
   )) %>%
@@ -53,128 +40,47 @@ df_viz <- df_viz %>%
       "Northwest Atlantic Basin ocean (NAB)",
       "Labrador"
     )
-  )) %>%
-  mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
+  ))
 
-# Plot --------------------------------------------------------------------
+# Boxplot AVW -------------------------------------------------------------
 
-p1 <- df_viz %>%
-  ggplot(aes(x = wavelength, y = normalized_aphy, color = avw_aphy, group = sample_id)) +
-  geom_line(size = 0.1) +
-  scale_y_continuous(expand = expansion(mult = c(0, 0.01))) +
-  paletteer::scale_color_paletteer_c(
-    "pals::kovesi.linear_bgyw_15_100_c68",
-    direction = -1,
-    breaks = scales::breaks_pretty(n = 6),
-    guide = guide_colorbar(
-      direction = "horizontal",
-      title.position = "top",
-      title.hjust = 0.5,
-      barwidth = unit(6, "cm"),
-      barheight = unit(0.25, "cm")
-    )
+p1 <- df %>%
+  ggplot(aes(x = season, y = avw_aphy, fill = bioregion_name)) +
+  geom_boxplot(size = 0.1, outlier.size = 0.25) +
+  scale_fill_manual(
+    breaks = area_breaks,
+    values = area_colors
   ) +
-  facet_wrap(~bioregion_name_wrap, ncol = 1) +
+  scale_y_continuous(
+    labels = scales::label_number(accuracy = 1),
+    breaks = scales::breaks_pretty()
+  ) +
   labs(
-    x = "Wavelength (nm)",
-    y = quote(Normalized~a[phi]~(nm^-1)),
-    color = "PAAW (nm)"
+    x = NULL,
+    y = str_wrap("Phytoplankton Apparent Absorption Wavelength (PAAW, nm)", 40)
   ) +
-  theme(
-    strip.text = element_blank(),
-    legend.justification = c(1, 1),
-    legend.position = c(0.99, 0.96),
-    panel.spacing.y = unit(3, "lines", data = NULL)
-  )
-
-# https://wilkelab.org/ggridges/articles/introduction.html
-p2 <- df_viz %>%
-  distinct(sample_id, .keep_all = TRUE) %>%
-  ggplot(aes(avw_aphy, bioregion_name_wrap, fill = stat(x))) +
-  geom_density_ridges_gradient(
-    rel_min_height = 0.01,
-    size = 0.25,
-    quantile_lines = TRUE,
-    quantiles = c(0.025, 0.5, 0.975)
-  ) +
-  # scale_fill_viridis_c(option = "C", direction = -1) +
-  paletteer::scale_fill_paletteer_c(
-    "pals::kovesi.linear_bgyw_15_100_c68",
-    direction = -1
-  ) +
-  scale_y_discrete(expand = expansion(mult = c(0, 0.01))) +
-  labs(
-    x = "Phytoplankton Apparent Absorption Wavelength (PAAW, nm)",
-    y = NULL
-  ) +
-  facet_wrap(~bioregion_name_wrap, ncol = 1, scales = "free_y", strip.position = "right") +
-  coord_cartesian(clip = "off") +
-  theme(
-    legend.position = "none",
-    axis.text.y = element_blank(),
-    panel.spacing.y = unit(3, "lines", data = NULL)
-  )
-
-p <- p1 + p2 +
-  plot_annotation(tag_levels = "A") &
-  theme(
-    plot.tag = element_text(face = "bold", size = 14)
-  )
-
-ggsave(
-  here("graphs", "fig08.pdf"),
-  device = cairo_pdf,
-  width = 10,
-  height = 10
-)
-
-df_viz %>%
-  group_by(bioregion_name) %>%
-  summarise(mean_avw_aphy = mean(avw_aphy, na.rm = TRUE))
-
-
-# Test --------------------------------------------------------------------
-
-p3 <- df_viz %>%
-  distinct(sample_id, .keep_all = TRUE) %>%
-  ggplot(aes(avw_aphy, fct_rev(season), fill = stat(x))) +
-  geom_density_ridges_gradient(
-    rel_min_height = 0.005,
-    size = 0.25,
-    scale = 0.9,
-    quantile_lines = TRUE,
-    quantiles = 0.5
-    # quantiles = c(0.025, 0.5, 0.975)
-  ) +
-  paletteer::scale_fill_paletteer_c(
-    "pals::kovesi.linear_bgyw_15_100_c68",
-    direction = -1
-  ) +
-  scale_y_discrete(expand = expansion(mult = c(0, 0.01))) +
-  labs(
-    x = "Phytoplankton Apparent Absorption Wavelength (PAAW, nm)",
-    y = NULL
-  ) +
-  facet_wrap(
-    ~bioregion_name_wrap,
-    ncol = 1,
-    scales = "free_y",
-    strip.position = "right"
+  facet_wrap(~ str_wrap_factor(bioregion_name, 20),
+    scales = "free_x",
+    ncol = 3
   ) +
   theme(
     legend.position = "none",
-    panel.spacing.y = unit(3, "lines", data = NULL)
-  )
-
-p <- p1 + p3 +
-  plot_annotation(tag_levels = "A") &
-  theme(
-    plot.tag = element_text(face = "bold", size = 14)
+    panel.grid.minor.y = element_blank()
   )
 
 ggsave(
-  here("graphs", "fig08b.pdf"),
+  here("graphs","fig08.pdf"),
   device = cairo_pdf,
-  width = 10,
-  height = 10
+  width = 8,
+  height = 3
 )
+
+df
+
+# Average by season excluding Labrador data (because the seasonal pattern is not
+# the same as in Scotian Shelf and NAB).
+
+df %>%
+  filter(bioregion_name != "Labrador") %>%
+  group_by(season) %>%
+  summarise(across(avw_aphy, .fns = list(mean = mean, sd = sd), na.rm = TRUE))

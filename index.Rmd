@@ -413,12 +413,6 @@ knitr::include_graphics(pdf2png(here("graphs", "fig08.pdf")))
 knitr::include_graphics(pdf2png(here("graphs", "fig09.pdf")))
 ```
 
-### Figure 10
-
-```{r}
-knitr::include_graphics(pdf2png(here("graphs", "fig10.pdf")))
-```
-
 ## Appendix
 
 ### Appendix 1
@@ -431,16 +425,10 @@ knitr::include_graphics(pdf2png(here("graphs", "appendix01.pdf")))
 
 ### Appendix 2
 
-```{r}
-knitr::include_graphics(pdf2png(here("graphs", "appendix02.pdf")))
-```
-
-### Appendix 3
-
 This aphy* ratio was found to correlate with phytoplankton cell size. That is cool to see that PAAW correlates with it! Using PAAW to infer aphy* means that we do not have to measure chla (HPLC or other ways).
 
 ```{r}
-knitr::include_graphics(pdf2png(here("graphs", "appendix03.pdf")))
+knitr::include_graphics(pdf2png(here("graphs", "appendix02.pdf")))
 ```
 
 ## References

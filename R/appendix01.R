@@ -13,75 +13,56 @@ df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
     date,
     bioregion_name,
     wavelength,
-    ap,
+    hplcchla,
     aphy,
-    aphy_specific,
-    anap
+    aphy_specific
   )
 
-df %>%
-  summarise(across(ap:anap, .fns = list(min = min, max = max))) %>%
-  pivot_longer(everything(),
-    names_to = c("variable", "type"),
-    names_pattern = "(.*)_(.*)"
-  ) %>%
-  pivot_wider(names_from = variable, values_from = value)
+gghisto <- function(df, var, label) {
 
-facet_labels <- c(
-  "ap" = "a[P]~(443)~(m^{-1})",
-  "anap" = "a[NAP]~(443)~(m^{-1})",
-  "aphy" = "a[phi]~(443)~(m^{-1})",
-  "aphy_specific" = "a[phi]^'*'~(443)~(m^2~mg^{-1})"
-)
+  df_labels <- df %>%
+    summarise(
+      mean = mean({{var}}),
+      min = min({{var}}),
+      max = max({{var}})
+    ) %>%
+    mutate(across(where(is.numeric), round, digits = 4)) %>%
+    mutate(label = glue("{mean} ({format(min, scientific = FALSE)} - {max})"))
 
-facet_labels <- fct_inorder(facet_labels)
+  df %>%
+    ggplot(aes(x = {{var}}, y = after_stat(density))) +
+    geom_histogram(fill = "#6c6c6c") +
+    geom_text(
+      data = df_labels,
+      aes(label = label),
+      inherit.aes = FALSE,
+      x = -Inf,
+      y = Inf,
+      size = 3,
+      hjust = -0.1,
+      vjust = 3
+    ) +
+    scale_x_log10() +
+    annotation_logticks(sides = "b", size = 0.1) +
+    labs(
+      x = parse(text = label),
+      y = "Density"
+    )
+}
 
-df_viz <- df %>%
-  pivot_longer(c(ap, aphy, aphy_specific, anap)) %>%
-  mutate(absorption_type_label = facet_labels[name])
+p1 <- gghisto(df, aphy, "a[phi]~(443)~(m^{-1})")
+p2 <- gghisto(df, hplcchla, "chlorophyll-italic(a)~(mg~m^{-3})")
+p3 <- gghisto(df, aphy_specific, "a[phi]^'*'~(443)~(m^2~mg^{-1})")
 
-# Calculate mean and some quantiles to display on the histograms
-
-df_labels <- df_viz %>%
-  group_by(absorption_type_label) %>%
-  summarise(
-    mean = mean(value),
-    min = min(value),
-    max = max(value)
-  ) %>%
-  mutate(across(where(is.numeric), round, digits = 4)) %>%
-  mutate(label = glue("{mean} ({format(min, scientific = FALSE)} - {max})"))
-
-df_labels
-
-p <- df_viz %>%
-  ggplot(aes(x = value, y = after_stat(density))) +
-  geom_histogram(fill = "#6c6c6c") +
-  geom_text(
-    data = df_labels,
-    aes(label = label),
-    inherit.aes = FALSE,
-    x = Inf,
-    y = Inf,
-    size = 3,
-    hjust = 1,
-    vjust = 3
-  ) +
-  scale_x_continuous(breaks = scales::breaks_pretty(n = 5)) +
-  labs(
-    x = NULL,
-    y = "Density"
-  ) +
-  facet_wrap(
-    ~absorption_type_label,
-    scales = "free",
-    labeller = labeller(absorption_type_label = label_parsed)
-  ) +
-  theme(strip.text = element_text(size = 10))
+p <- p1 / p2 / p3 +
+  plot_annotation(tag_levels = "A") &
+  theme(
+    plot.tag = element_text(face = "bold", size = 14)
+  )
 
 ggsave(
   here("graphs", "appendix01.pdf"),
   device = cairo_pdf,
-  width = 7,
-  height = 5
+  width = 4,
+  height = 8
 )

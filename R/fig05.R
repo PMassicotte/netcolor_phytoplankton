@@ -71,7 +71,7 @@ p <- df_viz %>%
     values = area_colors
   ) +
   labs(
-    x = quote("Chlorophyll-a" ~ (mg ~ m^{-3})),
+    x = quote("Chlorophyll-" * italic(a) ~ (mg~m^{-3})),
     y = quote(a[phi](443) / a[phi](675))
   ) +
   facet_wrap(~bioregion_name_wrap) +

@@ -1,48 +1,94 @@
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 # AUTHOR:       Philippe Massicotte
 #
-# DESCRIPTION:  Show how the spectral shape of phytoplankton absorption change
-# between 2000 and 2020.
+# DESCRIPTION:  Calculate the PAAW (or AVW) from the normalized absorption
+# spectra derived from two classes of phytoplankton cell size. Data from table 3
+# in Ciotti, Áurea M., Marlon R. Lewis, and John J. Cullen. “Assessment of the
+# Relationships between Dominant Cell Size in Natural Phytoplankton Communities
+# and the Spectral Shape of the Absorption Coefficient.” Limnology and
+# Oceanography 47, no. 2 (March 2002): 404–17.
+# https://doi.org/10.4319/lo.2002.47.2.0404.
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 rm(list = ls())
 
-df <- read_csv(here(
-  "data",
-  "clean",
-  "apparent_visible_wavelength_normalized_spectra.csv"
-)) %>%
-  filter(season %in% c("Spring", "Winter")) %>%
-  filter(bioregion_name != "Labrador")
+file <- here("data","raw","table3_ciotti2002.pdf")
+
+df <- tabulizer::extract_tables(file, pages = 1, output = "data.frame")[[1]]
+
+setDT(df)
+
+df <- melt(
+  df,
+  measure = patterns("(^l)", "(^Micro)", "(^Pico)"),
+  value.name = c("wavelength", "pico", "micro")
+) %>%
+  as_tibble() %>%
+  select(-variable)
 
 df
-
-metadata <- read_csv(
-  here("data", "clean", "metadata.csv"),
-  col_select = c("sample_id", "date")
-)
-
-metadata
 
 df <- df %>%
-  inner_join(metadata, by = "sample_id") %>%
-  mutate(year = lubridate::year(date), .after = sample_id)
+  pivot_longer(-wavelength,
+    names_to = "phyto_cell_size_class",
+    values_to = "normalized_absorption",
+    values_drop_na = TRUE
+  )
 
 df
 
-# Select the earliest and latest years between 2000 and 2020 and calculate the
-# average spectra.
+# Calculate PAAW ----------------------------------------------------------
 
-df_viz <- df %>%
-  group_by(bioregion_name, season) %>%
-  filter(year == min(year) | year == max(year)) %>%
-  group_by(bioregion_name, season, year, wavelength) %>%
-  summarise(across(c(avw_aphy, aphy, normalized_aphy), mean)) %>%
-  ungroup()
+paaw <- df %>%
+  group_by(phyto_cell_size_class) %>%
+  summarise(
+    paaw = sum(normalized_absorption) / sum(normalized_absorption / wavelength),
+    absorption = max(normalized_absorption),
+    wavelength = wavelength[which.max(normalized_absorption)]
+  )
 
-df_viz
+# Interesting!
+paaw
 
-df_viz %>%
-  ggplot(aes(x = wavelength, y = normalized_aphy, color = factor(year), group = year)) +
+# Plot the averaged spectra along with their calculated PAAW --------------
+
+p <- df %>%
+  ggplot(aes(x = wavelength, y = normalized_absorption, color = phyto_cell_size_class)) +
   geom_line() +
-  facet_grid(season ~ bioregion_name)
+  geom_text(
+    data = paaw,
+    aes(
+      x = wavelength,
+      y = absorption,
+      label = glue("PAAW: {round(paaw)} nm")
+    ),
+    show.legend = FALSE,
+    size = 2,
+    hjust = -0.2
+  ) +
+  scale_color_manual(
+    breaks = c("micro", "pico"),
+    labels = c(parse(text = "bar(a)[micro]('> 20 um')"), parse(text = "bar(a)[pico]('< 2 um')")),
+    values = c("red", "blue")
+  ) +
+  labs(
+    x = "Wavelength (nm)",
+    y = "Normalized absorption spectra",
+    subtitle = str_wrap(
+      "Normalized absorption for the smallest and biggest average microplankton cell sizes.",
+      70
+    )
+  ) +
+  theme(
+    legend.title = element_blank(),
+    legend.justification = c(1, 1),
+    legend.position = c(0.95, 0.95)
+  )
+
+ggsave(
+  here("graphs/appendix04.pdf"),
+  device = cairo_pdf,
+  width = 6,
+  height = 4
+)
+
