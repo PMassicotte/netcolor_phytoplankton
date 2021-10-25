@@ -11,13 +11,13 @@
 
 rm(list = ls())
 
-source("R/zzz.R")
+source(here("R","zzz.R"))
 
 # Extract parameters from Bricaud 1995 ------------------------------------
 
 aphy_bricaud_1995 <-
   tabulizer::extract_tables(
-    here::here("data/raw/table2_bricaud1995.pdf"),
+    here("data","raw","table2_bricaud1995.pdf"),
     pages = 1,
     output = "data.frame"
   ) %>%
@@ -48,7 +48,7 @@ aphy_bricaud_1995
 
 # Open data ---------------------------------------------------------------
 
-absorption <- fread(here::here("data/clean/merged_dataset.csv")) %>%
+absorption <- fread(here("data","clean","merged_dataset.csv")) %>%
   as_tibble() %>%
   select(
     sample_id,
@@ -109,7 +109,7 @@ p <- df_viz %>%
   )
 
 ggsave(
-  here::here("graphs/12_specific_phytoplankton_absorption_spectra_vs_fitted.pdf"),
+  here("graphs","12_specific_phytoplankton_absorption_spectra_vs_fitted.pdf"),
   device = cairo_pdf,
   width = 12,
   height = 8
@@ -181,7 +181,7 @@ p <-  df_viz %>%
   )
 
 ggsave(
-  here::here(
+  here(
     "graphs/12_specific_phytoplankton_absorption_vs_chla_bricaud_1995_figure01.pdf"
   ),
   device = cairo_pdf,

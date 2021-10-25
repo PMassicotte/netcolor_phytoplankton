@@ -6,9 +6,9 @@
 
 rm(list = ls())
 
-source("R/read_hplc.R")
-source("R/read_metadata.R")
-source("R/read_absorption.R")
+source(here("R","read_hplc.R"))
+source(here("R","read_metadata.R"))
+source(here("R","read_absorption.R"))
 
 # List the folder in which all the data is --------------------------------
 
@@ -42,11 +42,7 @@ df <- df %>%
   filter(str_detect(hplc_sheet, regex("pigment|jbedits", ignore_case = TRUE))) %>%
   add_count(hplc_file) %>%
   group_by(hplc_file) %>%
-  filter(n == 1 |
-    (n == 2 &
-      str_detect(
-        hplc_sheet, regex("jbedits", ignore_case = TRUE)
-      ))) %>%
+  filter(n == 1 | (n == 2 & str_detect(hplc_sheet, regex("jbedits", ignore_case = TRUE)))) %>%
   ungroup()
 
 df
@@ -234,8 +230,7 @@ absorption <- absorption %>%
 
 absorption <- absorption %>%
   group_by(sample_id) %>%
-  filter(!any((ap <= 0 |
-    aphy <= 0 | anap <= 0) & between(wavelength, 350, 400))) %>%
+  filter(!any((ap <= 0 | aphy <= 0 | anap <= 0) & between(wavelength, 350, 400))) %>%
   ungroup()
 
 absorption %>%
@@ -259,7 +254,7 @@ absorption <- absorption %>%
 
 absorption
 
-# Remove remaining outliers -----------------------------------------------
+# Using 2 times SD
 
 outlier <- absorption %>%
   filter(wavelength == 443) %>%
@@ -302,6 +297,35 @@ absorption %>%
   ggplot(aes(x = aphy)) +
   geom_histogram()
 
+# Remove spectra with a lot of 0. This is happening when the detection limit is
+# reached. Set all values of a spectra to NAs (either ap, aphy or anap) has more
+# than 50 values <= 0 between 600 and 700.
+
+# absorption %>%
+#   filter(sample_id == 476288) %>%
+#   ggplot(aes(x = wavelength)) +
+#   geom_line(aes(y = anap, color = "anap")) +
+#   geom_line(aes(y = aphy, color = "aphy"))
+#
+# absorption %>%
+#   filter(sample_id == 236035) %>%
+#   ggplot(aes(x = wavelength)) +
+#   geom_line(aes(y = anap, color = "anap")) +
+#   geom_line(aes(y = aphy, color = "aphy"))
+#
+# absorption <- absorption %>%
+#   group_by(sample_id) %>%
+#   mutate(anap_detection = sum(anap[between(wavelength, 600, 700)] <= 0)) %>%
+#   ungroup() %>%
+#   mutate(anap = ifelse(anap_detection >= 50, NA_real_, anap)) %>%
+#   select(-anap_detection)
+#
+# # 271 spectra were completely set to NA
+# absorption %>%
+#   group_by(sample_id) %>%
+#   filter(if_any(c(ap, aphy, anap), ~ all(is.na(.))))
+
+
 # Calculate specific phyto absorption -------------------------------------
 
 absorption
@@ -327,7 +351,5 @@ absorption <- absorption %>%
 # Export ------------------------------------------------------------------
 
 write_csv(metadata, here("data", "clean", "metadata.csv"))
-
 write_csv(hplc, here("data", "clean", "hplc.csv"))
-
-data.table::fwrite(absorption, here("data", "clean", "absorption.csv"))
+fwrite(absorption, here("data", "clean", "absorption.csv"))

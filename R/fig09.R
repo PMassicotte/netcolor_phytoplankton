@@ -97,7 +97,7 @@ p <- df_viz %>%
   )
 
 ggsave(
-  here::here("graphs", "fig09.pdf"),
+  here("graphs", "fig09.pdf"),
   device = cairo_pdf,
   width = 5,
   height = 4

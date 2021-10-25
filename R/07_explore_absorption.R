@@ -6,7 +6,7 @@
 
 rm(list = ls())
 
-source("R/zzz.R")
+source(here("R","zzz.R"))
 
 absorption <- fread(here("data","clean","merged_dataset.csv")) %>%
   as_tibble()
@@ -30,7 +30,7 @@ p <- absorption %>%
   )
 
 ggsave(
-  here("graphs/07_aphy_spectral_profiles_per_bioregion.pdf"),
+  here("graphs","07_aphy_spectral_profiles_per_bioregion.pdf"),
   device = cairo_pdf,
   width = 4,
   height = 5
@@ -55,7 +55,7 @@ p <- absorption %>%
   )
 
 ggsave(
-  here("graphs/07_aphy_specific_spectral_profiles_per_bioregion.pdf"),
+  here("graphs","07_aphy_specific_spectral_profiles_per_bioregion.pdf"),
   device = cairo_pdf,
   width = 4,
   height = 5
@@ -80,7 +80,7 @@ p <- absorption %>%
   )
 
 ggsave(
-  here("graphs/07_anap_spectral_profiles_per_bioregion.pdf"),
+  here("graphs","07_anap_spectral_profiles_per_bioregion.pdf"),
   device = cairo_pdf,
   width = 4,
   height = 5
@@ -105,7 +105,7 @@ p <- absorption %>%
   )
 
 ggsave(
-  here("graphs/07_ap_spectral_profiles_per_bioregion.pdf"),
+  here("graphs","07_ap_spectral_profiles_per_bioregion.pdf"),
   device = cairo_pdf,
   width = 4,
   height = 5
@@ -134,7 +134,7 @@ p <- absorption %>%
   theme(legend.position = "none")
 
 ggsave(
-  here("graphs/07_sina_plot_aphy_specific_443nm.pdf"),
+  here("graphs","07_sina_plot_aphy_specific_443nm.pdf"),
   device = cairo_pdf,
   width = 7,
   height = 5

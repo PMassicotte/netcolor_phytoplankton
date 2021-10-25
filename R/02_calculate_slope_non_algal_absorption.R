@@ -6,7 +6,7 @@
 
 rm(list = ls())
 
-absorption <- data.table::fread("data/clean/absorption.csv") %>%
+absorption <- data.table::fread(here("data","clean","absorption.csv")) %>%
   as_tibble()
 
 absorption
@@ -94,7 +94,7 @@ p <- df_viz %>%
   )
 
 ggsave(
-  here::here("graphs/02_non_algal_absorption_spectra_vs_fitted.pdf"),
+  here("graphs","02_non_algal_absorption_spectra_vs_fitted.pdf"),
   device = cairo_pdf,
   width = 12,
   height = 7
@@ -127,4 +127,4 @@ df <- df %>%
 
 df %>%
   select(sample_id, snap) %>%
-  write_csv("data/clean/non_algal_absorption_slope.csv")
+  write_csv(here("data","clean","non_algal_absorption_slope.csv"))

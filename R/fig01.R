@@ -188,7 +188,7 @@ p <- ggplot() +
     legend.spacing = unit(3, "cm")
   )
 
-filename <- here::here("graphs","fig01.pdf")
+filename <- here("graphs","fig01.pdf")
 
 ggsave(
   filename,

@@ -1,10 +1,10 @@
 rm(list = ls())
 
-source("R/zzz.R")
+source(here("R","zzz.R"))
 
 # Prepare the data --------------------------------------------------------
 
-df <- fread(here::here("data/clean/merged_dataset.csv")) %>%
+df <- fread(here("data","clean","merged_dataset.csv")) %>%
   as_tibble() %>%
   filter(wavelength == 443)
 

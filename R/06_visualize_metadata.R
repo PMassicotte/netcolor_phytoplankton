@@ -6,7 +6,7 @@
 
 rm(list = ls())
 
-df <- fread(here("data/clean/merged_dataset.csv")) %>%
+df <- fread(here("data","clean","merged_dataset.csv")) %>%
   as_tibble() %>%
   filter(wavelength == 443)
 
@@ -32,7 +32,7 @@ df %>%
   )
 
 ggsave(
-  here::here("graphs/06_number_measurements_per_year.pdf"),
+  here("graphs","06_number_measurements_per_year.pdf"),
   device = cairo_pdf,
   width = 8,
   height = 5
@@ -55,7 +55,7 @@ df %>%
   )
 
 ggsave(
-  here::here("graphs/06_number_measurements_cruise.pdf"),
+  here("graphs","06_number_measurements_cruise.pdf"),
   device = cairo_pdf,
   height = 7,
   width = 5

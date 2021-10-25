@@ -6,7 +6,7 @@
 
 rm(list = ls())
 
-hplc <- fread(here("data/clean/merged_dataset.csv")) %>%
+hplc <- fread(here("data","clean","merged_dataset.csv")) %>%
   as_tibble() %>%
   filter(wavelength == 443) %>%
   filter(depth <= 2)
@@ -55,7 +55,7 @@ p <- df_viz %>%
   )
 
 ggsave(
-  here("graphs/10_hplc_month_bioregion.pdf"),
+  here("graphs","10_hplc_month_bioregion.pdf"),
   device = cairo_pdf,
   width = 6,
   height = 7

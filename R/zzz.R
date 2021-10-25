@@ -3,7 +3,7 @@
 
 # paletteer::paletteer_d("ggthemes::gdoc")
 #
-# read_csv(here("data/clean/stations.csv")) %>%
+# read_csv(here("data","clean","stations.csv")) %>%
 #   distinct(area) %>%
 #   pull(area)
 
@@ -42,7 +42,6 @@ pdf2png <- function(pdf_file, dpi = 300) {
     dpi = dpi,
     verbose = FALSE
   )
-
 
   return(png_file)
 }

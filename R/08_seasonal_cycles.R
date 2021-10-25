@@ -6,11 +6,11 @@
 
 rm(list = ls())
 
-source("R/zzz.R")
+source(here("R","zzz.R"))
 
 # Prepare the data --------------------------------------------------------
 
-df <- fread(here::here("data/clean/merged_dataset.csv")) %>%
+df <- fread(here("data","clean","merged_dataset.csv")) %>%
   as_tibble() %>%
   filter(wavelength == 443)
 
@@ -43,7 +43,7 @@ p <- df %>%
   )
 
 ggsave(
-  here("graphs/08_number_observations_per_yday_bioregion.pdf"),
+  here("graphs","08_number_observations_per_yday_bioregion.pdf"),
   device = cairo_pdf,
   width = 4,
   height = 5
@@ -209,7 +209,7 @@ p <- df %>%
   )
 
 ggsave(
-  here("graphs/08_boxplot_aphy_specific_by_month_bioregion.pdf"),
+  here("graphs","08_boxplot_aphy_specific_by_month_bioregion.pdf"),
   device = cairo_pdf,
   width = 8,
   height = 8
@@ -239,7 +239,7 @@ p <- df %>%
   )
 
 ggsave(
-  here("graphs/08_boxplot_aphy_specific_by_month_bioregion2.pdf"),
+  here("graphs","08_boxplot_aphy_specific_by_month_bioregion2.pdf"),
   device = cairo_pdf,
   width = 10,
   height = 8
@@ -265,7 +265,7 @@ p <- df %>%
   )
 
 ggsave(
-  here("graphs/08_boxplot_hex19_by_month_bioregion.pdf"),
+  here("graphs","08_boxplot_hex19_by_month_bioregion.pdf"),
   device = cairo_pdf,
   width = 10,
   height = 8

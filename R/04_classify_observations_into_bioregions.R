@@ -6,8 +6,8 @@
 
 rm(list = ls())
 
-metadata <- read_csv(here("data/clean/metadata.csv"))
-bathymetry <- read_csv(here("data/clean/bathymetry.csv"))
+metadata <- read_csv(here("data","clean","metadata.csv"))
+bathymetry <- read_csv(here("data","clean","bathymetry.csv"))
 
 metadata
 bathymetry
@@ -54,7 +54,7 @@ metadata <- metadata %>%
 
 metadata %>%
   select(sample_id, bioregion_name, bioregion_position) %>%
-  write_csv(here::here("data/clean/bioregions.csv"))
+  write_csv(here("data","clean","bioregions.csv"))
 
 p <- metadata %>%
   count(bioregion_name) %>%
@@ -70,7 +70,7 @@ p <- metadata %>%
   )
 
 ggsave(
-  here("graphs/04_number_observations_per_bioregion.pdf"),
+  here("graphs","04_number_observations_per_bioregion.pdf"),
   device = cairo_pdf,
   width = 7,
   height = 4
@@ -93,7 +93,7 @@ metadata %>%
   )
 
 ggsave(
-  here::here("graphs/04_histogram_bathymetry.pdf"),
+  here("graphs","04_histogram_bathymetry.pdf"),
   device = cairo_pdf,
   width = 4,
   height = 5

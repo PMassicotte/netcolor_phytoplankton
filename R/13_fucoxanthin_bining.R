@@ -72,7 +72,7 @@ ggsave(
 
 # Merge the fucox classes with all the data -------------------------------
 
-df <- read_csv(here("data/clean/absorption.csv")) %>%
+df <- read_csv(here("data","clean","absorption.csv")) %>%
   inner_join(hplc_clean)
 
 df
