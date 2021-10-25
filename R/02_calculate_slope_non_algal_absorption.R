@@ -87,8 +87,6 @@ p <- df_viz %>%
   ) +
   theme(
     legend.title = element_blank(),
-    strip.background = element_rect(fill = "#3c3c3c"),
-    strip.text = element_text(color = "white", face = "bold"),
     panel.border = element_blank(),
     axis.ticks = element_blank(),
     plot.title = element_text(hjust = 0),

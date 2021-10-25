@@ -42,10 +42,12 @@ df_viz %>%
 
 # What is the range of PAAW?
 
-df_viz %>%
+paaw <- df_viz %>%
   distinct(sample_id, .keep_all = TRUE) %>%
-  pull(avw_aphy) %>%
-  range()
+  pull(avw_aphy)
+
+range(paaw)
+quantile(paaw)
 
 # Reorder by season and bioregion -----------------------------------------
 
@@ -182,6 +184,6 @@ p <- p1 + p3 +
 ggsave(
   here("graphs", "fig07b.pdf"),
   device = cairo_pdf,
-  width = 10,
-  height = 10
+  width = 7,
+  height = 8
 )

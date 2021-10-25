@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
   echo = FALSE,
   message = FALSE,
   warning = FALSE,
-  fig.pos = "center",
+  fig.align = "center",
   cache = TRUE
 )
 
@@ -116,7 +116,7 @@ bathymetry >= -300 & position == "South" & yday > 180 ~ "Scotian Shelf Fall (SSF
 bathymetry < -300 & position == "South"~ "Northwest Atlantic Basin ocean (NAB)"
 ```
 
-```{r, fig.align='center'}
+```{r}
 knitr::include_graphics(pdf2png(here(
   "graphs", "04_number_observations_per_bioregion.pdf"
 )))
@@ -353,7 +353,7 @@ knitr::include_graphics(pdf2png(
 
 ### Figure 1
 
-```{r, fig.align='center'}
+```{r}
 knitr::include_graphics(pdf2png(here("graphs","fig01.pdf")))
 ```
 
@@ -385,7 +385,7 @@ knitr::include_graphics(pdf2png(here("graphs", "fig04.pdf")))
 
 > The observed nonlinearity between Chl_a and the ratio of phytoplankton absorption aph (443)/aph (670) indicating the packaging effect and changes in the intercellular composition of pigments.
 
-```{r, fig.align='center'}
+```{r}
 knitr::include_graphics(pdf2png(here("graphs", "fig05.pdf")))
 ```
 
@@ -396,6 +396,8 @@ knitr::include_graphics(pdf2png(here("graphs", "fig06.pdf")))
 ```
 
 ### Figure 7
+
+Horizontal black lines in B show the 2.5%, 50% and 97.5% quantiles.
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "fig07.pdf")))
@@ -409,8 +411,16 @@ knitr::include_graphics(pdf2png(here("graphs", "fig08.pdf")))
 
 ### Figure 9
 
+This ratio was found to correlate with phytoplankton cell size.
+
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "fig09.pdf")))
+```
+
+### Figure 10
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "fig10.pdf")))
 ```
 
 ## Appendix
@@ -421,14 +431,6 @@ Numbers at the right represent: mean (min - max).
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "appendix01.pdf")))
-```
-
-### Appendix 2
-
-This aphy* ratio was found to correlate with phytoplankton cell size. That is cool to see that PAAW correlates with it! Using PAAW to infer aphy* means that we do not have to measure chla (HPLC or other ways).
-
-```{r}
-knitr::include_graphics(pdf2png(here("graphs", "appendix02.pdf")))
 ```
 
 ## References

@@ -1,124 +1,131 @@
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 # AUTHOR:       Philippe Massicotte
 #
-# DESCRIPTION:  Check if there are any temporal variability in AVW (both aphy
-# and anap).
+# DESCRIPTION:  Relationship between PAAW and aphy. I want to see if PAAW could
+# be used as an index to eventually get information on phytoplankton cell size.
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+# Note that both aphy and aphy* ratio (443/675) give the same values. Here I
+# will use aphy, but it can be compared with aphy* from other studies.
 
 rm(list = ls())
 
-source(here("R","zzz.R"))
+# Prepare the data --------------------------------------------------------
 
-avw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv"))
+aphy <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
+  filter(wavelength %in% c(443, 675)) %>%
+  select(sample_id, bioregion_name, wavelength, season, aphy)
 
-metadata <- read_csv(here("data", "clean", "metadata.csv")) %>%
-  select(sample_id, date, season)
 
-df <- inner_join(avw, metadata, by = "sample_id")
+paaw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv")) %>%
+  select(sample_id, bioregion_name, avw_aphy)
 
-df
-
-# Order by season and bioregion
-df <- df %>%
-  mutate(season = factor(season,
-    levels = c("Spring", "Summer", "Autumn", "Winter")
-  )) %>%
-  mutate(bioregion_name = factor(
-    bioregion_name,
-    levels = c(
-      "Scotian Shelf",
-      "Northwest Atlantic Basin ocean (NAB)",
-      "Labrador"
-    )
-  ))
+df <- inner_join(aphy, paaw, by = c("sample_id", "bioregion_name"))
 
 df
 
-# Average by year and make sure that at least 10 observations were used for the
-# calculation.
+# Relation between aphy ratio and PAAW ------------------------------------
+
+# It was shown that the aphy* 443/675 could be related to both as a function of
+# cell size and irradiance (Fujiki2002).
 
 df_viz <- df %>%
-  mutate(date2 = clock::date_group(date, "year")) %>%
-  group_by(bioregion_name, date2, season) %>%
-  summarise(across(contains("avw"), mean), n = n()) %>%
-  ungroup() %>%
-  filter(n >= 10)
+  pivot_wider(
+    names_from = wavelength,
+    values_from = aphy,
+    names_prefix = "aphy_wl"
+  ) %>%
+  mutate(aphy_ratio = aphy_wl443 / aphy_wl675)
 
 df_viz
 
-# Need at least 5 points to see a temporal trend?
-
-df_viz <- df_viz %>%
-  group_by(bioregion_name, season) %>%
-  filter(n() >= 5) %>%
-  ungroup()
-
-df_viz
-
-df_viz <- df_viz %>%
-  filter(season %in% c("Autumn", "Spring"))
-
-# Plot --------------------------------------------------------------------
-
-# There are very few measurements in autumn in the Labrador sea (n = 21). That
-# is why these are no plot in the Labrador/Autumn facet.
-
-df %>%
-  count(bioregion_name, season)
+formula <- y ~ x + I(x^2)
 
 p <- df_viz %>%
-  ggplot(aes(x = date2, y = avw_aphy)) +
-  geom_point(aes(color = bioregion_name)) +
-  scale_color_manual(
-    breaks = area_breaks,
-    values = area_colors
+  ggplot(aes(x = avw_aphy, y = aphy_ratio)) +
+  geom_point(
+    aes(fill = season),
+    color = "transparent",
+    size = 1.5,
+    stroke = 0,
+    pch = 21,
+    alpha = 0.3
   ) +
-  geom_smooth(method = "lm", color = "#3c3c3c", size = 0.5, alpha = 0.2) +
+  geom_smooth(
+    formula = formula,
+    color = "#3c3c3c",
+    size = 0.5,
+    alpha = 0.25
+  ) +
   ggpmisc::stat_poly_eq(
+    formula = formula,
     aes(label = ..eq.label..),
-    label.y.npc = 0.12,
-    label.x.npc = 0.2,
-    size = 3,
+    parse = TRUE,
     coef.digits = 4,
-    family = "Montserrat"
+    f.digits = 5,
+    p.digits = 10,
+    label.x.npc = 1,
+    family = "Montserrat",
+    size = 3
   ) +
   ggpmisc::stat_poly_eq(
-    label.y.npc = 0.05,
-    label.x.npc = 0.2,
+    formula = formula,
+    label.y.npc = 0.88,
+    label.x.npc = 1,
     aes(label = ..rr.label..),
     size = 3,
     family = "Montserrat"
   ) +
-  labs(
-    x = NULL,
-    y = "Phytoplankton Apparent Absorption Wavelength (PAAW, nm)"
+  scale_fill_manual(
+    breaks = c("Winter", "Spring", "Summer", "Autumn"),
+    values = c("#014f86", "#40916c", "#ffcb69", "#e76f51"),
+    guide = guide_legend(
+      override.aes = list(size = 2, alpha = 1),
+      label.theme = element_text(size = 8, family = "Montserrat")
+    )
   ) +
-  facet_grid(season ~ str_wrap_factor(bioregion_name, 20), scales = "free_y") +
+  labs(
+    x = "Phytoplankton Apparent Absorption Wavelength (PAAW, nm)",
+    y = quote(a[phi] ~ (443) / a[phi] ~ (675))
+  ) +
+  # facet_wrap(~bioregion_name, ncol = 1) +
   theme(
-    legend.position = "none",
-    panel.spacing = unit(1, "lines", data = NULL)
+    legend.title = element_blank(),
+    legend.justification = c(0, 0),
+    legend.position = c(0.02, 0.02),
+    legend.key.size = unit(0.4, "cm")
   )
 
 ggsave(
-  here("graphs","fig09.pdf"),
+  here::here("graphs", "fig09.pdf"),
   device = cairo_pdf,
-  width = 8,
-  height = 6
+  width = 5,
+  height = 4
 )
 
-# Calculate the average increase/decrease of PAAW in spring and autumn.
+## Model to predict aphy* ratio from PAAW ----
+
+df_model <- df_viz %>%
+  group_nest() %>%
+  mutate(model = map(data, ~ lm(
+    aphy_ratio ~ avw_aphy + I(avw_aphy^2),
+    data = .
+  ))) %>%
+  mutate(tidied = map(model, tidy)) %>%
+  mutate(augmented = map(model, augment))
+
+df_model
+
+df_model$model[[1]]
+summary(df_model$model[[1]])
+
+## Average by season ----
 
 df_viz
 
-# TODO: See if should report these min/max in the manuscript
-df_res <- df_viz %>%
-  mutate(year = lubridate::year(date2)) %>%
-  group_nest(bioregion_name, season) %>%
-  mutate(model = map(data, ~lm(avw_aphy ~ year, data = .))) %>%
-  mutate(augmented = map(model, augment)) %>%
-  mutate(tidied = map(model, tidy))
+df_viz %>%
+  group_by(season) %>%
+  summarise(mean_aphy_ratio = mean(aphy_ratio)) %>%
+  arrange(mean_aphy_ratio)
 
-df_res
-
-df_res %>%
-  unnest(tidied)
+range(df_viz$aphy_ratio)
