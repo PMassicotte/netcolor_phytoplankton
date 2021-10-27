@@ -411,8 +411,6 @@ knitr::include_graphics(pdf2png(here("graphs", "fig08.pdf")))
 
 ### Figure 9
 
-This ratio was found to correlate with phytoplankton cell size.
-
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "fig09.pdf")))
 ```
@@ -431,6 +429,26 @@ Numbers at the right represent: mean (min - max).
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "appendix01.pdf")))
+```
+
+### Appendix 2
+
+Phytoplankton specific absorption measured in autumn and winter in the Labrador Sea.
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "appendix02.pdf")))
+```
+
+### Appendix 3
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "appendix03.pdf")))
+```
+
+### Appendix 4
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "appendix04.pdf")))
 ```
 
 ## References

@@ -1,94 +1,91 @@
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 # AUTHOR:       Philippe Massicotte
 #
-# DESCRIPTION:  Calculate the PAAW (or AVW) from the normalized absorption
-# spectra derived from two classes of phytoplankton cell size. Data from table 3
-# in Ciotti, Áurea M., Marlon R. Lewis, and John J. Cullen. “Assessment of the
-# Relationships between Dominant Cell Size in Natural Phytoplankton Communities
-# and the Spectral Shape of the Absorption Coefficient.” Limnology and
-# Oceanography 47, no. 2 (March 2002): 404–17.
-# https://doi.org/10.4319/lo.2002.47.2.0404.
+# DESCRIPTION:  Show some relationships with PAAW.
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 rm(list = ls())
 
-file <- here("data","raw","table3_ciotti2002.pdf")
+df <- read_csv(here("data","clean","merged_dataset.csv")) %>%
+  filter(wavelength == 443)
 
-df <- tabulizer::extract_tables(file, pages = 1, output = "data.frame")[[1]]
-
-setDT(df)
-
-df <- melt(
-  df,
-  measure = patterns("(^l)", "(^Micro)", "(^Pico)"),
-  value.name = c("wavelength", "pico", "micro")
-) %>%
-  as_tibble() %>%
-  select(-variable)
-
-df
+paaw <- read_csv(here("data","clean","apparent_visible_wavelength.csv"))
 
 df <- df %>%
-  pivot_longer(-wavelength,
-    names_to = "phyto_cell_size_class",
-    values_to = "normalized_absorption",
-    values_drop_na = TRUE
-  )
+  inner_join(paaw, by = c("sample_id", "bioregion_name"))
 
 df
 
-# Calculate PAAW ----------------------------------------------------------
+# Plot --------------------------------------------------------------------
 
-paaw <- df %>%
-  group_by(phyto_cell_size_class) %>%
-  summarise(
-    paaw = sum(normalized_absorption) / sum(normalized_absorption / wavelength),
-    absorption = max(normalized_absorption),
-    wavelength = wavelength[which.max(normalized_absorption)]
+p1 <- df %>%
+  ggplot(aes(x = avw_aphy, y = hplcchla)) +
+  geom_point(size = 1, color = "#4c4c4c") +
+  scale_x_continuous(breaks = scales::breaks_pretty()) +
+  scale_y_log10() +
+  annotation_logticks(sides = "l", size = 0.1) +
+  geom_smooth(method = "lm", color = "red", size = 0.5) +
+  labs(
+    x = NULL,
+    y = quote(Chlorophyll-italic(a)~(mg~m^{-3}))
+  ) +
+  ggpmisc::stat_poly_eq(
+    aes(label = ..eq.label..),
+    parse = TRUE,
+    coef.digits = 4,
+    f.digits = 5,
+    p.digits = 10,
+    label.x.npc = 0.05,
+    family = "Montserrat",
+    size = 3
+  ) +
+  ggpmisc::stat_poly_eq(
+    label.x.npc = 0.05,
+    label.y.npc = 0.88,
+    aes(label = ..rr.label..),
+    size = 3,
+    family = "Montserrat"
   )
 
-# Interesting!
-paaw
-
-# Plot the averaged spectra along with their calculated PAAW --------------
-
-p <- df %>%
-  ggplot(aes(x = wavelength, y = normalized_absorption, color = phyto_cell_size_class)) +
-  geom_line() +
-  geom_text(
-    data = paaw,
-    aes(
-      x = wavelength,
-      y = absorption,
-      label = glue("PAAW: {round(paaw)} nm")
-    ),
-    show.legend = FALSE,
-    size = 2,
-    hjust = -0.2
-  ) +
-  scale_color_manual(
-    breaks = c("micro", "pico"),
-    labels = c(parse(text = "bar(a)[micro]('> 20 um')"), parse(text = "bar(a)[pico]('< 2 um')")),
-    values = c("red", "blue")
-  ) +
+p2 <- df %>%
+  ggplot(aes(x = avw_aphy, y = aphy_specific)) +
+  geom_point(size = 1, color = "#4c4c4c") +
+  scale_x_continuous(breaks = scales::breaks_pretty()) +
+  scale_y_log10() +
+  annotation_logticks(sides = "l", size = 0.1) +
+  geom_smooth(method = "lm", color = "red", size = 0.5) +
   labs(
-    x = "Wavelength (nm)",
-    y = "Normalized absorption spectra",
-    subtitle = str_wrap(
-      "Normalized absorption for the smallest and biggest average microplankton cell sizes.",
-      70
-    )
+    x = "Phytoplankton Apparent Absorption Wavelength (PAAW, nm)",
+    y = quote(a[phi]^'*'~(443)~(m^2~mg^{-1}))
   ) +
+  ggpmisc::stat_poly_eq(
+    aes(label = ..eq.label..),
+    parse = TRUE,
+    coef.digits = 4,
+    f.digits = 5,
+    p.digits = 10,
+    label.x.npc = 0.05,
+    label.y.npc = 0.12,
+    family = "Montserrat",
+    size = 3
+  ) +
+  ggpmisc::stat_poly_eq(
+    label.x.npc = 0.05,
+    label.y.npc = 0.03,
+    aes(label = ..rr.label..),
+    size = 3,
+    family = "Montserrat"
+  )
+
+p <- p1 / p2 +
+  plot_annotation(tag_levels = "A") &
   theme(
-    legend.title = element_blank(),
-    legend.justification = c(1, 1),
-    legend.position = c(0.95, 0.95)
+    plot.tag = element_text(face = "bold")
   )
 
 ggsave(
-  here("graphs/appendix04.pdf"),
+  here("graphs","appendix04.pdf"),
   device = cairo_pdf,
   width = 6,
-  height = 4
+  height = 6
 )
-
