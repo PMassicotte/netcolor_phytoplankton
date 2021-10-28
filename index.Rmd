@@ -445,4 +445,10 @@ knitr::include_graphics(pdf2png(here("graphs", "appendix02.pdf")))
 knitr::include_graphics(pdf2png(here("graphs", "appendix03.pdf")))
 ```
 
+### Appendix 4
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "appendix04.pdf")))
+```
+
 ## References

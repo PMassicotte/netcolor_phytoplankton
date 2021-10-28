@@ -13,7 +13,7 @@ rm(list = ls())
 source(here("R","zzz.R"))
 
 aphy <- read_csv(here("data","clean","merged_dataset.csv")) %>%
-  select(sample_id, bioregion_name, wavelength, aphy, anap) %>%
+  select(sample_id, bioregion_name, wavelength, aphy, ap) %>%
   filter(between(wavelength, 400, 700))
 
 aphy
@@ -40,7 +40,7 @@ df %>%
 # Lets calculate it for all the absorption spectra
 df <- aphy %>%
   group_by(sample_id, bioregion_name) %>%
-  summarise(across(c(aphy, anap), ~sum(.) / sum(. / wavelength), .names = "avw_{.col}")) %>%
+  summarise(across(c(aphy, ap), ~sum(.) / sum(. / wavelength), .names = "avw_{.col}")) %>%
   ungroup()
 
 df
@@ -81,7 +81,7 @@ df_viz <- df %>%
   dtplyr::lazy_dt() %>%
   inner_join(aphy, by = c("sample_id", "bioregion_name")) %>%
   group_by(sample_id) %>%
-  mutate(across(c(aphy, anap),
+  mutate(across(c(aphy, ap),
     ~ . / pracma::trapz(wavelength, .),
     .names = "normalized_{.col}"
   )) %>%
