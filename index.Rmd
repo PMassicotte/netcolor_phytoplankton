@@ -411,7 +411,7 @@ knitr::include_graphics(pdf2png(here("graphs", "fig08.pdf")))
 
 ### Figure 9
 
-```{r}
+```{r, out.width="70%"}
 knitr::include_graphics(pdf2png(here("graphs", "fig09.pdf")))
 ```
 
@@ -443,12 +443,6 @@ knitr::include_graphics(pdf2png(here("graphs", "appendix02.pdf")))
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "appendix03.pdf")))
-```
-
-### Appendix 4
-
-```{r}
-knitr::include_graphics(pdf2png(here("graphs", "appendix04.pdf")))
 ```
 
 ## References
