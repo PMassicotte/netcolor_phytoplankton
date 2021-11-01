@@ -65,14 +65,16 @@ p1 <- df %>%
   ) +
   theme(
     legend.position = "none",
-    panel.grid.minor.y = element_blank()
+    panel.grid.minor.y = element_blank(),
+    strip.text = element_text(size = 10)
   )
 
 ggsave(
   here("graphs","fig08.pdf"),
   device = cairo_pdf,
-  width = 8,
-  height = 3
+  width = 180,
+  height = 75,
+  units = "mm"
 )
 
 df

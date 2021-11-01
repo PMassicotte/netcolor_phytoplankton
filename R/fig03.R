@@ -108,6 +108,7 @@ p <- df_viz %>%
 ggsave(
   here("graphs", "fig03.pdf"),
   device = cairo_pdf,
-  width = 7,
-  height = 5
+  width = 180,
+  height = 120,
+  units = "mm"
 )

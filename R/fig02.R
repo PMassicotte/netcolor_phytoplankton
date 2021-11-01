@@ -146,6 +146,7 @@ p <- p1 / p2 / p3 +
 ggsave(
   here("graphs", "fig02.pdf"),
   device = cairo_pdf,
-  width = 8,
-  height = 8
+  width = 180,
+  height = 180,
+  units = "mm"
 )

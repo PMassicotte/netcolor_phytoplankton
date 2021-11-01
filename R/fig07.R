@@ -79,8 +79,10 @@ p1 <- df_viz %>%
       direction = "horizontal",
       title.position = "top",
       title.hjust = 0.5,
-      barwidth = unit(6, "cm"),
-      barheight = unit(0.25, "cm")
+      barwidth = unit(4, "cm"),
+      barheight = unit(0.2, "cm"),
+      label.theme = element_text(size = 7, family = "Montserrat Light"),
+      title.theme = element_text(size = 9, family = "Montserrat")
     )
   ) +
   facet_wrap(~bioregion_name_wrap, ncol = 1) +
@@ -113,7 +115,7 @@ p2 <- df_viz %>%
   ) +
   scale_y_discrete(expand = expansion(mult = c(0, 0.01))) +
   labs(
-    x = "Phytoplankton Apparent Absorption Wavelength (PAAW, nm)",
+    x = str_wrap("Phytoplankton Apparent Absorption Wavelength (PAAW, nm)", 40),
     y = NULL
   ) +
   facet_wrap(~bioregion_name_wrap, ncol = 1, scales = "free_y", strip.position = "right") +
@@ -121,7 +123,8 @@ p2 <- df_viz %>%
   theme(
     legend.position = "none",
     axis.text.y = element_blank(),
-    panel.spacing.y = unit(3, "lines", data = NULL)
+    panel.spacing.y = unit(3, "lines", data = NULL),
+    strip.text = element_text(size = 10)
   )
 
 p <- p1 + p2 +
@@ -133,8 +136,9 @@ p <- p1 + p2 +
 ggsave(
   here("graphs", "fig07.pdf"),
   device = cairo_pdf,
-  width = 10,
-  height = 10
+  width = 180,
+  height = 180,
+  units = "mm"
 )
 
 df_viz %>%

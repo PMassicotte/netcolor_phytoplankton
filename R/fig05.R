@@ -49,7 +49,7 @@ p <- df_viz %>%
   geom_point(aes(color = bioregion_name), size = 0.5) +
   scale_x_log10() +
   scale_y_log10() +
-  annotation_logticks(sides = "bl", size = 0.25) +
+  annotation_logticks(sides = "bl", size = 0.1) +
   geom_smooth(method = "lm", color = "#3c3c3c", size = 0.5) +
   ggpmisc::stat_poly_eq(
     aes(label = ..eq.label..),
@@ -77,14 +77,16 @@ p <- df_viz %>%
   facet_wrap(~bioregion_name_wrap) +
   theme(
     panel.spacing.y = unit(3, "lines"),
-    legend.position = "none"
+    legend.position = "none",
+    strip.text = element_text(size = 10)
   )
 
 ggsave(
   here("graphs", "fig05.pdf"),
   device = cairo_pdf,
-  width = 8,
-  height = 3
+  width = 180,
+  height = 70,
+  units = "mm"
 )
 
 # Does chla correlates more at 443 or 675 nm? -----------------------------

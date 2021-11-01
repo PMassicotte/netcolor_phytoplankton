@@ -9,12 +9,12 @@ rm(list = ls())
 
 source(here("R/zzz.R"))
 
-stations <- read_csv(here("data","clean","metadata.csv"))
-bioregions <- read_csv(here("data","clean","bioregions.csv"))
+stations <- read_csv(here("data", "clean", "metadata.csv"))
+bioregions <- read_csv(here("data", "clean", "bioregions.csv"))
 
 # crs_string <- "+proj=lcc +lat_1=49 +lat_2=77 +lon_0=-91.52 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"
 
-bbox <- st_read(here("data","clean","bbox_sampling_area.json")) %>%
+bbox <- st_read(here("data", "clean", "bbox_sampling_area.json")) %>%
   st_transform(crs = 4326)
 
 # crs_string <- 4326
@@ -84,6 +84,7 @@ p <- ggplot() +
   paletteer::scale_fill_paletteer_c(
     "ggthemes::Blue",
     direction = -1,
+    breaks = scales::breaks_pretty(n = 5),
     oob = scales::squish,
     guide = guide_colorbar(
       title = "Depth (m)",
@@ -100,7 +101,7 @@ p <- ggplot() +
         color = "black"
       ),
       barheight = unit(0.15, "cm"),
-      barwidth = unit(4, "cm"),
+      barwidth = unit(3.5, "cm"),
       direction = "horizontal"
     ),
     na.value = "#B9DDF1"
@@ -185,16 +186,17 @@ p <- ggplot() +
       face = "bold",
       family = "Montserrat Light"
     ),
-    legend.spacing = unit(3, "cm")
+    legend.spacing = unit(2.5, "cm")
   )
 
-filename <- here("graphs","fig01.pdf")
+filename <- here("graphs", "fig01.pdf")
 
 ggsave(
   filename,
   device = cairo_pdf,
-  width = 8,
-  height = 5.2
+  width = 180,
+  height = 120,
+  units = "mm"
 )
 
 knitr::plot_crop(filename)

@@ -49,7 +49,7 @@ p1 <- df %>%
     values = c("#014f86", "#40916c", "#ffcb69", "#e76f51"),
     guide = guide_legend(
       override.aes = list(size = 2, alpha = 1),
-      label.theme = element_text(size = 8, family = "Montserrat")
+      label.theme = element_text(size = 7, family = "Montserrat Light")
     )
   ) +
   scale_x_continuous(breaks = scales::breaks_pretty()) +
@@ -73,13 +73,13 @@ p1 <- df %>%
     p.digits = 10,
     label.x.npc = 0.05,
     family = "Montserrat",
-    size = 3
+    size = 2.5
   ) +
   ggpmisc::stat_poly_eq(
     label.x.npc = 0.05,
     label.y.npc = 0.88,
     aes(label = ..rr.label..),
-    size = 3,
+    size = 2.5,
     family = "Montserrat"
   ) +
   theme(
@@ -129,13 +129,13 @@ p2 <- df %>%
     label.x.npc = 1,
     label.y.npc = 0.88,
     family = "Montserrat",
-    size = 3
+    size = 2.5
   ) +
   ggpmisc::stat_poly_eq(
     label.x.npc = 1,
     label.y.npc = 0.8,
     aes(label = ..rr.label..),
-    size = 3,
+    size = 2.5,
     family = "Montserrat"
   ) +
   theme(
@@ -187,14 +187,14 @@ p3 <- df_viz %>%
     label.x.npc = 1,
     label.y.npc = 0.88,
     family = "Montserrat",
-    size = 3
+    size = 2.5
   ) +
   ggpmisc::stat_poly_eq(
     formula = formula,
     label.y.npc = 0.8,
     label.x.npc = 1,
     aes(label = ..rr.label..),
-    size = 3,
+    size = 2.5,
     family = "Montserrat"
   ) +
   scale_fill_manual(
@@ -202,7 +202,7 @@ p3 <- df_viz %>%
     values = c("#014f86", "#40916c", "#ffcb69", "#e76f51")
   ) +
   labs(
-    x = "Phytoplankton Apparent Absorption Wavelength (PAAW, nm)",
+    x = str_wrap("Phytoplankton Apparent Absorption Wavelength (PAAW, nm)", 40),
     y = quote(a[phi] ~ (443) / a[phi] ~ (675))
   ) +
   theme(
@@ -247,6 +247,7 @@ p <- p1 / p2 / p3 +
 ggsave(
   here("graphs", "fig09.pdf"),
   device = cairo_pdf,
-  width = 5,
-  height = 8
+  width = 85,
+  height = 180,
+  units = "mm"
 )

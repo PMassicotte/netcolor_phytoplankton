@@ -48,23 +48,25 @@ p <- df %>%
     p.digits = 10,
     label.x.npc = 0.05,
     family = "Montserrat",
-    size = 3
+    size = 2.5
   ) +
   ggpmisc::stat_poly_eq(
     label.x.npc = 0.05,
     label.y.npc = 0.88,
     aes(label = ..rr.label..),
-    size = 3,
+    size = 2.5,
     family = "Montserrat"
   ) +
   facet_wrap(~ str_wrap_factor(bioregion_name, 20)) +
   theme(
-    legend.position = "none"
+    legend.position = "none",
+    strip.text = element_text(size = 10)
   )
 
 ggsave(
   here("graphs","appendix04.pdf"),
   device = cairo_pdf,
-  width = 8,
-  height = 3
+  width = 180,
+  height = 70,
+  units = "mm"
 )

@@ -43,7 +43,7 @@ p1 <- ggboxlpot(df,
   season,
   aphy,
   bioregion_name,
-  strip.text = element_text(),
+  strip.text = element_text(size = 10),
   ylab = "a[phi]~(443)~(m^{-1})"
 )
 
@@ -71,8 +71,9 @@ p <- p1 + p2 + p3 +
 ggsave(
   here("graphs","fig06.pdf"),
   device = cairo_pdf,
-  width = 8,
-  height = 8
+  width = 190,
+  height = 180,
+  units = "mm"
 )
 
 # p2 <- ggboxlpot(df,

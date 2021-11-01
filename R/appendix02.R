@@ -22,11 +22,16 @@ p <- df %>%
     x = "Wavelength (nm)",
     y = quote(a[phi]~(lambda)~(m^{-1}))
   ) +
-  facet_wrap(~season)
+  facet_wrap(~season, ncol = 1) +
+  theme(
+    strip.text = element_text(size = 10),
+    panel.spacing.y = unit(0.75, "cm")
+  )
 
 ggsave(
   here("graphs","appendix02.pdf"),
   device = cairo_pdf,
-  width = 5.5,
-  height = 3
+  width = 80,
+  height = 90,
+  units = "mm"
 )

@@ -21,8 +21,8 @@ df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
 # Add prediction from other models found in the literature ----------------
 
 df <- df %>%
-  mutate(bricaud_1998 = 0.0378 * hplcchla^0.627) %>%
-  mutate(bricaud_2004 = 0.0654 * hplcchla^0.728) %>%
+  mutate(bricaud_1998 = 0.0378 * hplcchla ^ 0.627) %>%
+  mutate(bricaud_2004 = 0.0654 * hplcchla ^ 0.728) %>%
   mutate(devred_2006 = ((0.0839 - 0.0176) / 1.613) * (1 - exp(-1.613 * hplcchla)) + 0.0176 * hplcchla)
 
 # Plot --------------------------------------------------------------------
@@ -39,7 +39,7 @@ df_viz <- df %>%
 )) %>%
   mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
 
-p1 <- df_viz %>%
+p <- df_viz %>%
   ggplot(aes(x = hplcchla, y = aphy)) +
   geom_point(
     color = "#6c6c6c",
@@ -58,35 +58,44 @@ p1 <- df_viz %>%
   ggpmisc::stat_poly_eq(
     aes(label = ..eq.label..),
     label.y.npc = 1,
-    size = 3,
+    size = 2.5,
     family = "Montserrat"
   ) +
   ggpmisc::stat_poly_eq(
     label.y.npc = 0.93,
     aes(label = ..rr.label..),
-    size = 3,
+    size = 2.5,
     family = "Montserrat"
   ) +
   labs(
     x = quote("Chlorophyll-" * italic(a) ~ (mg~m^{-3})),
     y = quote(a[phi] ~ (440) ~ (m^{-1}))
   ) +
-  theme(
-    legend.position = "top",
-    legend.title = element_blank()
-  ) +
   paletteer::scale_color_paletteer_d(
     "nbapalettes::pacers_venue",
     guide = guide_legend(
       label.position = "top",
-      override.aes = list(size = 2, lty = 1),
-      keywidth = unit(2, "cm")
+      override.aes = list(size = 1, lty = 1),
+      keywidth = unit(1, "cm"),
+      keyheight = unit(0.5, "cm"),
+      ncol = 2,
+      label.theme = element_text(size = 6, family = "Montserrat")
     )
+  ) +
+  theme(
+    legend.title = element_blank(),
+    legend.justification = c(1, 0),
+    legend.position = c(1, 0),
+    legend.background = element_blank(),
+    legend.key = element_blank(),
+    legend.spacing.x = unit(0.1, "cm"),
+    legend.spacing.y = unit(0, "cm")
   )
 
 ggsave(
   here("graphs","fig04.pdf"),
   device = cairo_pdf,
-  width = 5,
-  height = 4
+  width = 85,
+  height = 80,
+  units = "mm"
 )

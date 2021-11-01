@@ -71,8 +71,9 @@ p <- p1 + p2 + p3 + p4 + p5 + p6 +
   )
 
 ggsave(
-  here("graphs", "appendix01.pdf"),
+  here("graphs","appendix01.pdf"),
   device = cairo_pdf,
-  width = 7,
-  height = 8
+  width = 180,
+  height = 180,
+  units = "mm"
 )

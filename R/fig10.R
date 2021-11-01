@@ -78,7 +78,7 @@ p <- df_viz %>%
     aes(label = ..eq.label..),
     label.y.npc = 0.12,
     label.x.npc = 0.2,
-    size = 3,
+    size = 2.5,
     coef.digits = 4,
     family = "Montserrat"
   ) +
@@ -86,7 +86,7 @@ p <- df_viz %>%
     label.y.npc = 0.05,
     label.x.npc = 0.2,
     aes(label = ..rr.label..),
-    size = 3,
+    size = 2.5,
     family = "Montserrat"
   ) +
   labs(
@@ -96,14 +96,16 @@ p <- df_viz %>%
   facet_grid(season ~ str_wrap_factor(bioregion_name, 20), scales = "free_y") +
   theme(
     legend.position = "none",
-    panel.spacing = unit(1, "lines", data = NULL)
+    panel.spacing = unit(1, "lines", data = NULL),
+    strip.text = element_text(size = 10)
   )
 
 ggsave(
   here("graphs","fig10.pdf"),
   device = cairo_pdf,
-  width = 8,
-  height = 6
+  width = 180,
+  height = 120,
+  units = "mm"
 )
 
 # Calculate the average increase/decrease of PAAW in spring and autumn.

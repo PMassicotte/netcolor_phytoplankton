@@ -49,14 +49,16 @@ p <- df_viz %>%
   ) +
   facet_wrap(~bioregion_name_wrap, scales = "free_y") +
   theme(
-    legend.position = "none"
+    legend.position = "none",
+    strip.text = element_text(size = 10)
   )
 
 ggsave(
   here("graphs","appendix03.pdf"),
   device = cairo_pdf,
-  width = 8,
-  height = 3
+  width = 180,
+  height = 70,
+  units = "mm"
 )
 
 # Ratio between blue and red peaks (R) was 3.4 (± 0.61) on average in summer,

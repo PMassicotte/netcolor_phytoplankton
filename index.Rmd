@@ -405,13 +405,13 @@ knitr::include_graphics(pdf2png(here("graphs", "fig07.pdf")))
 
 ### Figure 8
 
-```{r, out.width="90%", fig.align='center'}
+```{r}
 knitr::include_graphics(pdf2png(here("graphs", "fig08.pdf")))
 ```
 
 ### Figure 9
 
-```{r, out.width="70%"}
+```{r}
 knitr::include_graphics(pdf2png(here("graphs", "fig09.pdf")))
 ```
 
