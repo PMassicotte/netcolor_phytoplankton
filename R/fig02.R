@@ -1,152 +1,114 @@
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 # AUTHOR:       Philippe Massicotte
 #
-# DESCRIPTION:  Overview of the sampling and bathymetry.
+# DESCRIPTION:  Show averaged absorption by bioregion.
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 rm(list = ls())
 
 source(here("R", "zzz.R"))
 
-stations <- read_csv(here("data", "clean", "metadata.csv"))
-bioregions <- read_csv(here("data", "clean", "bioregions.csv"))
-station_bathymetry <- read_csv(here("data", "clean", "bathymetry.csv"))
-
-df <- stations %>%
-  select(sample_id, date, season) %>%
-  inner_join(bioregions, by = "sample_id") %>%
-  inner_join(station_bathymetry, by = "sample_id")
+df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
+  select(
+    sample_id,
+    date,
+    bioregion_name,
+    wavelength,
+    ap,
+    aphy,
+    aphy_specific,
+    anap
+  ) %>%
+  filter(between(wavelength, 400, 700))
 
 df
 
 df %>%
-  count(sample_id) %>%
+  dtplyr::lazy_dt() %>%
+  count(sample_id, wavelength) %>%
+  as_tibble() %>%
   assertr::verify(n == 1)
 
-# Number of observations per bioregion/year -------------------------------
-
 df_viz <- df %>%
-  mutate(date_month = clock::date_group(date, "year"), .after = date) %>%
-  count(bioregion_name, date_month)
+  group_by(bioregion_name, wavelength) %>%
+  summarise(across(c(ap, aphy, aphy_specific, anap), mean)) %>%
+  ungroup() %>%
+  pivot_longer(c(ap, aphy, aphy_specific, anap),
+    names_to = "absorption_type",
+    values_to = "absorption"
+  )
 
-df_viz
+# Plot --------------------------------------------------------------------
 
-p1 <- df_viz %>%
-  ggplot(aes(x = date_month, y = bioregion_name, color = bioregion_name)) +
-  geom_point(aes(size = n)) +
-  geom_text(aes(label = n), color = "white", size = 3) +
-  scale_x_date(breaks = scales::breaks_pretty(n = 10)) +
-  scale_y_discrete(labels = ~ str_wrap(., width = 15)) +
+facet_labels <- c(
+  "ap" = "a[P]~(m^{-1})",
+  "anap" = "a[NAP]~(m^{-1})",
+  "aphy" = "a[phi]~(m^{-1})",
+  "aphy_specific" = "a[phi]^'*'~(m^2~mg^{-1})"
+)
+
+facet_labels <- fct_inorder(facet_labels)
+
+set.seed(123)
+
+df_all <- df %>%
+  pivot_longer(c(ap, aphy, aphy_specific, anap),
+    names_to = "absorption_type",
+    values_to = "absorption"
+  ) %>%
+  nest_by(bioregion_name, sample_id, absorption_type) %>%
+  group_by(bioregion_name, absorption_type) %>%
+  slice_sample(n = 100) %>%
+  ungroup() %>%
+  unnest(data) %>%
+  mutate(absorption_type_label = facet_labels[absorption_type])
+
+p <- df_viz %>%
+  mutate(absorption_type_label = facet_labels[absorption_type]) %>%
+  ggplot(aes(
+    x = wavelength,
+    y = absorption,
+    group = bioregion_name,
+    color = bioregion_name
+  )) +
+  geom_line(
+    data = df_all,
+    aes(group = sample_id),
+    size = 0.1,
+    alpha = 0.1
+  ) +
+  geom_line() +
   scale_color_manual(
     breaks = area_breaks,
     values = area_colors,
+    labels = ~ str_wrap(., width = 20),
     guide = guide_legend(
-      order = 1,
-      label.position = "top",
-      keyheight = unit(0.1, "cm"),
-      keywidth = unit(3, "cm"),
-      label.theme = element_text(size = 5, family = "Montserrat Light"),
-      nrow = 3
+      override.aes = list(size = 1),
+      label.theme = element_text(size = 7, family = "Montserrat Light")
     )
   ) +
-  scale_size(range = c(4, 10)) +
   labs(
-    x = "Sampling year",
-    y = NULL
+    x = "Wavelength (nm)",
+    y = "Absorption (or specific absorption)",
+    color = NULL
+  ) +
+  facet_wrap(
+    ~absorption_type_label,
+    scales = "free_y",
+    labeller = labeller(absorption_type_label = label_parsed)
   ) +
   theme(
-    legend.position = "none"
-  )
-
-# Number of observations per bioregion/month ------------------------------
-
-df
-
-p2 <- df %>%
-  count(bioregion_name, season) %>%
-  mutate(
-    month = case_when(
-      season == "Spring" ~ "Mar, Apr, May",
-      season == "Summer" ~ "Jun, Jul, Aug",
-      season == "Autumn" ~ "Sep, Oct, Nov",
-      season == "Winter" ~ "Dec, Jan, Feb",
-      TRUE ~ NA_character_
-    )
-  ) %>%
-  mutate(
-    label = glue::glue(
-      "{season}<br><span style = 'font-size:6pt; color:grey50'>({month})</span>"
-    )
-  ) %>%
-  mutate(season = factor(season,
-    levels =
-      c(
-        "Winter",
-        "Spring",
-        "Summer",
-        "Autumn"
-      )
-  )) %>%
-  mutate(label = fct_reorder(label, as.numeric(season))) %>%
-  ggplot(aes(x = n, y = label, fill = bioregion_name)) +
-  geom_col(position = "dodge") +
-  geom_text(
-    aes(label = n),
-    size = 2.5,
-    position = position_dodge(width = 0.9),
-    hjust = -0.5
-  ) +
-  scale_x_continuous(breaks = scales::pretty_breaks(n = 11)) +
-  scale_fill_manual(
-    breaks = area_breaks,
-    values = area_colors
-  ) +
-  labs(
-    x = "Number of observations",
-    y = NULL
-  ) +
-  theme(
-    legend.position = "none",
-    axis.text.y = element_markdown()
-  )
-
-p2
-
-# Bathymetry --------------------------------------------------------------
-
-df
-
-p3 <- df %>%
-  ggplot(aes(x = -bathymetry, y = bioregion_name, color = bioregion_name)) +
-  ggbeeswarm::geom_quasirandom(size = 0.25, groupOnX = FALSE) +
-  scale_x_log10() +
-  scale_y_discrete(labels = ~ str_wrap(., width = 15)) +
-  annotation_logticks(sides = "b", size = 0.1) +
-  scale_color_manual(
-    breaks = area_breaks,
-    values = area_colors
-  ) +
-  labs(
-    x = "Bathymetry (m)",
-    y = NULL
-  ) +
-  theme(
-    legend.position = "none"
-  )
-
-# Combine plots -----------------------------------------------------------
-
-p <- p1 / p2 / p3 +
-  # plot_layout(widths = c(1, 5, 5)) +
-  plot_annotation(tag_levels = "A") &
-  theme(
-    plot.tag = element_text(face = "bold")
+    legend.justification = c(1, 1),
+    legend.position = c(0.45, 1),
+    legend.background = element_blank(),
+    legend.key = element_blank(),
+    strip.text = element_text(size = 10)
   )
 
 ggsave(
   here("graphs", "fig02.pdf"),
   device = cairo_pdf,
   width = 180,
-  height = 180,
+  height = 120,
   units = "mm"
 )

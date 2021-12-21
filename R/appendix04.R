@@ -1,17 +1,16 @@
-# <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-# AUTHOR:       Philippe Massicotte
-#
-# DESCRIPTION:  Compare PAAW calculated on aphy and ap absorption spectra. Given
-# that ap can be measured continually in situ with autonomous vehicles, this
-# would open the door to use PAAW on ap to easily get information on the
-# phytoplankton community.
-# <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-
 rm(list = ls())
 
-source(here("R","zzz.R"))
+source(here("R", "zzz.R"))
+source(here("R", "zzz_ggboxplot.R"))
 
-df <- read_csv(here("data","clean","apparent_visible_wavelength.csv")) %>%
+# Load data ---------------------------------------------------------------
+
+df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
+  select(sample_id, bioregion_name, wavelength, season, aphy) %>%
+  filter(wavelength %in% c(443, 675)) %>%
+  mutate(season = factor(season,
+    levels = c("Spring", "Summer", "Autumn", "Winter")
+  )) %>%
   mutate(bioregion_name = factor(
     bioregion_name,
     levels = c(
@@ -19,45 +18,36 @@ df <- read_csv(here("data","clean","apparent_visible_wavelength.csv")) %>%
       "Northwest Atlantic Basin ocean (NAB)",
       "Labrador"
     )
-  ))
+  )) %>%
+  mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
 
-# Plot --------------------------------------------------------------------
+# df <- read_csv(here("data","clean","merged_dataset.csv")) %>%
+#   filter(wavelength %in% c(443, 675)) %>%
+#   select(sample_id, bioregion_name, wavelength, season, aphy, hplcchla) %>%
+#   mutate(aphy_specific = aphy / hplcchla)
 
-p <- df %>%
-  ggplot(aes(x = avw_aphy, y = avw_ap)) +
-  geom_point(aes(color = bioregion_name), size = 0.5) +
-  labs(
-    x = quote(PAAW[a[phi]]~(nm)),
-    y = quote(PAAW[a[p]]~(nm))
-  ) +
-  scale_color_manual(
+df
+
+df_viz <- df %>%
+  pivot_wider(
+    names_from = wavelength,
+    values_from = aphy,
+    names_prefix = "wl"
+  ) %>%
+  mutate(ratio_443_675 = wl443 / wl675)
+
+p <- df_viz %>%
+  ggplot(aes(x = season, y = ratio_443_675, fill = bioregion_name)) +
+  geom_boxplot(size = 0.1, outlier.size = 0.25) +
+  scale_fill_manual(
     breaks = area_breaks,
     values = area_colors
   ) +
-  geom_smooth(
-    color = "#3c3c3c",
-    size = 0.5,
-    alpha = 0.25,
-    method = "lm"
+  labs(
+    x = NULL,
+    y = quote(a[phi](443) / a[phi](675))
   ) +
-  ggpmisc::stat_poly_eq(
-    aes(label = ..eq.label..),
-    parse = TRUE,
-    coef.digits = 4,
-    f.digits = 5,
-    p.digits = 10,
-    label.x.npc = 0.05,
-    family = "Montserrat",
-    size = 2.5
-  ) +
-  ggpmisc::stat_poly_eq(
-    label.x.npc = 0.05,
-    label.y.npc = 0.88,
-    aes(label = ..rr.label..),
-    size = 2.5,
-    family = "Montserrat"
-  ) +
-  facet_wrap(~ str_wrap_factor(bioregion_name, 20)) +
+  facet_wrap(~bioregion_name_wrap, scales = "free_y") +
   theme(
     legend.position = "none",
     strip.text = element_text(size = 10)
@@ -70,3 +60,25 @@ ggsave(
   height = 70,
   units = "mm"
 )
+
+# Ratio between blue and red peaks (R) was 3.4 (± 0.61) on average in summer,
+# which was significantly higher than in winter (2.2 ± 0.45) (Figure 3). --
+# Churilova2017
+
+df_viz
+
+df_viz %>%
+  group_by(season) %>%
+  summarise(mean_ratio = mean(ratio_443_675))
+
+ttest <- df_viz %>%
+  filter(season %in% c("Winter", "Summer"))
+
+t.test(ratio_443_675 ~ season, data = ttest) %>%
+  report::report()
+
+
+df %>%
+  ggplot(aes(x = season, y = aphy, fill = factor(wavelength))) +
+  geom_boxplot() +
+  scale_y_log10()

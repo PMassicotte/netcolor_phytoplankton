@@ -356,20 +356,14 @@ knitr::include_graphics(pdf2png(
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs","fig01.pdf")))
 ```
-
 ### Figure 2
 
-**Attention**: These numbers are based on the total number of reported stations. For example, in 2019, there are a total of 217 stations, but only 71 of them have absorption measurements.
+- Within each panel, we can see the averaged spectra and a subset of 100 randomly selected spectra by bioregion and type of absorption.
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "fig02.pdf")))
 ```
-
 ### Figure 3
-
--   There are some unusual bumps around 530 nm. We should have a closer look at the raw data.
-
--   Within each panel, we can see the averaged spectra and a subset of 100 randomly selected spectra by bioregion and type of absorption.
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "fig03.pdf")))
@@ -425,7 +419,7 @@ knitr::include_graphics(pdf2png(here("graphs", "fig10.pdf")))
 
 ### Appendix 1
 
-Numbers at the right represent: mean (min - max).
+**Attention**: These numbers are based on the total number of reported stations. For example, in 2019, there are a total of 217 stations, but only 71 of them have absorption measurements.
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "appendix01.pdf")))
@@ -433,13 +427,15 @@ knitr::include_graphics(pdf2png(here("graphs", "appendix01.pdf")))
 
 ### Appendix 2
 
-Phytoplankton specific absorption measured in autumn and winter in the Labrador Sea.
+Numbers at the right represent: mean (min - max).
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "appendix02.pdf")))
 ```
 
 ### Appendix 3
+
+Phytoplankton specific absorption measured in autumn and winter in the Labrador Sea.
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "appendix03.pdf")))
@@ -449,6 +445,12 @@ knitr::include_graphics(pdf2png(here("graphs", "appendix03.pdf")))
 
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "appendix04.pdf")))
+```
+
+### Appendix 5
+
+```{r}
+knitr::include_graphics(pdf2png(here("graphs", "appendix05.pdf")))
 ```
 
 ## References

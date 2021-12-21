@@ -1,0 +1,1 @@
+- Decide what to do with a lot of zeros (more than often in aNAP spectra).

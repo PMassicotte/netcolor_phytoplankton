@@ -1,107 +1,62 @@
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 # AUTHOR:       Philippe Massicotte
 #
-# DESCRIPTION:  Show averaged absorption by bioregion.
+# DESCRIPTION:  Show the aphy/anap ratio across the bioregions.
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 rm(list = ls())
 
 source(here("R", "zzz.R"))
 
-df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  select(
-    sample_id,
-    date,
+absorption <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
+  filter(wavelength == 443) %>%
+  mutate(bioregion_name = factor(
     bioregion_name,
-    wavelength,
-    ap,
-    aphy,
-    aphy_specific,
-    anap
-  ) %>%
-  filter(between(wavelength, 400, 700))
-
-df
-
-df %>%
-  dtplyr::lazy_dt() %>%
-  count(sample_id, wavelength) %>%
-  as_tibble() %>%
-  assertr::verify(n == 1)
-
-df_viz <- df %>%
-  group_by(bioregion_name, wavelength) %>%
-  summarise(across(c(ap, aphy, aphy_specific, anap), mean)) %>%
-  ungroup() %>%
-  pivot_longer(c(ap, aphy, aphy_specific, anap),
-    names_to = "absorption_type",
-    values_to = "absorption"
-  )
+    levels = c(
+      "Scotian Shelf",
+      "Northwest Atlantic Basin ocean (NAB)",
+      "Labrador"
+    )
+  )) %>%
+  mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
 
 # Plot --------------------------------------------------------------------
 
-facet_labels <- c(
-  "ap" = "a[P]~(m^{-1})",
-  "anap" = "a[NAP]~(m^{-1})",
-  "aphy" = "a[phi]~(m^{-1})",
-  "aphy_specific" = "a[phi]^'*'~(m^2~mg^{-1})"
-)
-
-facet_labels <- fct_inorder(facet_labels)
-
-set.seed(123)
-
-df_all <- df %>%
-  pivot_longer(c(ap, aphy, aphy_specific, anap),
-    names_to = "absorption_type",
-    values_to = "absorption"
-  ) %>%
-  nest_by(bioregion_name, sample_id, absorption_type) %>%
-  group_by(bioregion_name, absorption_type) %>%
-  slice_sample(n = 100) %>%
-  ungroup() %>%
-  unnest(data) %>%
-  mutate(absorption_type_label = facet_labels[absorption_type])
-
-p <- df_viz %>%
-  mutate(absorption_type_label = facet_labels[absorption_type]) %>%
-  ggplot(aes(
-    x = wavelength,
-    y = absorption,
-    group = bioregion_name,
-    color = bioregion_name
-  )) +
-  geom_line(
-    data = df_all,
-    aes(group = sample_id),
-    size = 0.1,
-    alpha = 0.1
+p <- absorption %>%
+  filter(if_all(c(aphy, anap), ~. > 0)) %>%
+  ggplot(aes(x = aphy, y = anap)) +
+  geom_point(aes(color = bioregion_name), size = 0.5) +
+  scale_x_log10(labels = scales::label_number()) +
+  scale_y_log10(labels = scales::label_number()) +
+  annotation_logticks(sides = "bl", size = 0.1) +
+  geom_smooth(method = "lm", color = "#3c3c3c", size = 0.5) +
+  ggpmisc::stat_poly_eq(
+    aes(label = ..eq.label..),
+    label.y.npc = 0.15,
+    label.x.npc = 1,
+    size = 3,
+    coef.digits = 3,
+    family = "Montserrat"
   ) +
-  geom_line() +
+  ggpmisc::stat_poly_eq(
+    label.y.npc = 0.05,
+    label.x.npc = 1,
+    aes(label = ..rr.label..),
+    size = 3,
+    family = "Montserrat"
+  ) +
   scale_color_manual(
     breaks = area_breaks,
-    values = area_colors,
-    labels = ~ str_wrap(., width = 20),
-    guide = guide_legend(
-      override.aes = list(size = 1),
-      label.theme = element_text(size = 7, family = "Montserrat Light")
-    )
+    values = area_colors
   ) +
   labs(
-    x = "Wavelength (nm)",
-    y = "Absorption (or specific absorption)",
-    color = NULL
+    x = quote(a[phi](443)),
+    y = quote(a[NAP](443))
   ) +
-  facet_wrap(
-    ~absorption_type_label,
-    scales = "free_y",
-    labeller = labeller(absorption_type_label = label_parsed)
-  ) +
+  facet_wrap(~bioregion_name_wrap) +
   theme(
-    legend.justification = c(1, 1),
-    legend.position = c(0.45, 1),
-    legend.background = element_blank(),
-    legend.key = element_blank(),
+    panel.spacing.y = unit(3, "lines"),
+    legend.position = "none",
     strip.text = element_text(size = 10)
   )
 
@@ -109,6 +64,7 @@ ggsave(
   here("graphs", "fig03.pdf"),
   device = cairo_pdf,
   width = 180,
-  height = 120,
+  height = 70,
   units = "mm"
 )
+
