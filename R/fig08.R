@@ -63,7 +63,9 @@ p1 <- df %>%
   ) +
   labs(
     x = NULL,
-    y = quote(Chlorophyll-italic(a)~(mg~m^{-3}))
+    y = quote(Chlorophyll - italic(a) ~ (mg ~ m^{
+      -3
+    }))
   ) +
   ggpmisc::stat_poly_eq(
     aes(label = ..eq.label..),
@@ -118,7 +120,9 @@ p2 <- df %>%
   ) +
   labs(
     x = NULL,
-    y = quote(a[phi]^'*'~(443)~(m^2~mg^{-1}))
+    y = quote(a[phi]^"*" ~ (443) ~ (m^2 ~ mg^{
+      -1
+    }))
   ) +
   ggpmisc::stat_poly_eq(
     aes(label = ..eq.label..),
@@ -236,9 +240,113 @@ df_viz %>%
 
 range(df_viz$aphy_ratio)
 
+
+# Bootstraping confidence intervals ---------------------------------------
+
+df_443 <- df %>%
+  filter(wavelength == 443)
+
+# Model 1 for chla --------------------------------------------------------
+
+mod1_bootstrap <- reg_intervals(
+  log10(hplcchla) ~ avw_aphy,
+  data = df_443,
+  type = "percentile",
+  keep_reps = TRUE
+)
+
+mod1_bootstrap
+
+p4 <- mod1_bootstrap %>%
+  unnest(.replicates) %>%
+  ggplot(aes(x = estimate)) +
+  geom_histogram() +
+  geom_vline(
+    aes(xintercept = 0.05621, color = "Fitted with all data"),
+    lty = 2
+  ) +
+  geom_vline(
+    aes(xintercept = mod1_bootstrap$.estimate, color = "Average from bootstrap"),
+    lty = 2
+  ) +
+  theme(
+    legend.title = element_blank(),
+    # legend.justification = c(1, 1),
+    legend.position = "top",
+    legend.text = element_text(size = 6)
+  )
+
+# Model 2 for aphy specific -----------------------------------------------
+
+mod2_bootstrap <- reg_intervals(
+  log10(aphy_specific) ~ avw_aphy,
+  data = df_443,
+  type = "percentile",
+  keep_reps = TRUE
+)
+
+mod2_bootstrap
+
+p5 <- mod2_bootstrap %>%
+  unnest(.replicates) %>%
+  ggplot(aes(x = estimate)) +
+  geom_histogram() +
+  geom_vline(
+    aes(xintercept = -0.02926, color = "Fitted with all data"),
+    lty = 2
+  ) +
+  geom_vline(aes(xintercept = mod2_bootstrap$.estimate, color = "Average from bootstrap"),
+    lty = 2
+  ) +
+  theme(
+    legend.position = "none"
+  )
+
+# Model 3 for aphy ratio --------------------------------------------------
+
+df_443_675 <- df %>%
+  filter(wavelength %in% c(443, 675)) %>%
+  select(-aphy_specific, -hplcchla) %>%
+  pivot_wider(
+    names_from = wavelength,
+    values_from = aphy,
+    names_prefix = "aphy_wl"
+  ) %>%
+  mutate(aphy_ratio = aphy_wl443 / aphy_wl675)
+
+mod3_bootstrap <- reg_intervals(
+  aphy_ratio ~ avw_aphy + I(avw_aphy^2),
+  data = df_443_675,
+  type = "percentile",
+  keep_reps = TRUE
+)
+
+mod3_bootstrap
+
+df_model %>%
+  unnest(tidied)
+
+p6 <- mod3_bootstrap %>%
+  unnest(.replicates) %>%
+  ggplot(aes(x = estimate)) +
+  geom_histogram() +
+  geom_vline(
+    data = unnest(df_model, tidied) %>% filter(term != "(Intercept)"),
+    aes(xintercept = estimate, color = "Fitted with all data"),
+    lty = 2
+  ) +
+  geom_vline(
+    data = mod3_bootstrap,
+    aes(xintercept = .estimate, color = "Average from bootstrap"),
+    lty = 2
+  ) +
+  facet_wrap(~term, scales = "free") +
+  theme(legend.position = "none")
+
 # Save plots --------------------------------------------------------------
 
-p <- p1 / p2 / p3 +
+p <- p1 + p2 + p3 + p4 + p5 + p6 +
+  plot_layout(ncol = 2, byrow = FALSE) +
   plot_annotation(tag_levels = "A") &
   theme(
     plot.tag = element_text(face = "bold")
@@ -247,7 +355,7 @@ p <- p1 / p2 / p3 +
 ggsave(
   here("graphs", "fig08.pdf"),
   device = cairo_pdf,
-  width = 85,
-  height = 180,
+  width = 190,
+  height = 200,
   units = "mm"
 )

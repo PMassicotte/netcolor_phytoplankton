@@ -356,6 +356,7 @@ knitr::include_graphics(pdf2png(
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs","fig01.pdf")))
 ```
+
 ### Figure 2
 
 - Within each panel, we can see the averaged spectra and a subset of 100 randomly selected spectra by bioregion and type of absorption.
@@ -363,6 +364,7 @@ knitr::include_graphics(pdf2png(here("graphs","fig01.pdf")))
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "fig02.pdf")))
 ```
+
 ### Figure 3
 
 ```{r}
