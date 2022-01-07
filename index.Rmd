@@ -437,8 +437,6 @@ knitr::include_graphics(pdf2png(here("graphs", "appendix02.pdf")))
 
 ### Appendix 3
 
-Phytoplankton specific absorption measured in autumn and winter in the Labrador Sea.
-
 ```{r}
 knitr::include_graphics(pdf2png(here("graphs", "appendix03.pdf")))
 ```

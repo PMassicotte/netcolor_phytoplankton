@@ -99,3 +99,8 @@ ggsave(
   height = 80,
   units = "mm"
 )
+
+# Model stats -------------------------------------------------------------
+
+mod <- lm(log10(aphy) ~ log10(hplcchla), data = df_viz)
+summary(mod)

@@ -1,37 +1,73 @@
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 # AUTHOR:       Philippe Massicotte
 #
-# DESCRIPTION:  Compare aphy spectra autumn vs winter in the Labrador Sea.
+# DESCRIPTION:  Relationships between aphy(440) and fucoxanthin.
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 rm(list = ls())
 
-df <- read_csv(here("data","clean","merged_dataset.csv"))
+source(here("R","zzz.R"))
+
+df <- read_csv(here("data","clean","merged_dataset.csv")) %>%
+  filter(wavelength == 440) %>%
+  mutate(bioregion_name = factor(
+    bioregion_name,
+    levels = c(
+      "Scotian Shelf",
+      "Northwest Atlantic Basin ocean (NAB)",
+      "Labrador"
+    )
+  )) %>%
+  mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
 
 df
 
 # Plot --------------------------------------------------------------------
 
+df
+
 p <- df %>%
-  filter(bioregion_name == "Labrador") %>%
-  filter(season %in% c("Autumn", "Winter")) %>%
-  filter(between(wavelength, 400, 700)) %>%
-  ggplot(aes(x = wavelength, y = aphy, group = sample_id)) +
-  geom_line(size = 0.2, color = "#3c3c3c") +
-  labs(
-    x = "Wavelength (nm)",
-    y = quote(a[phi]~(lambda)~(m^{-1}))
+  filter(if_all(c(aphy, fucox), ~. > 0)) %>%
+  ggplot(aes(x = aphy, y = fucox)) +
+  geom_point(aes(color = bioregion_name), size = 0.5) +
+  scale_x_log10() +
+  scale_y_log10() +
+  annotation_logticks(sides = "bl", size = 0.1) +
+  geom_smooth(method = "lm", color = "#3c3c3c", size = 0.5) +
+  ggpmisc::stat_poly_eq(
+    aes(label = ..eq.label..),
+    label.y.npc = 0.95,
+    label.x.npc = 0.05,
+    size = 3,
+    coef.digits = 3,
+    family = "Montserrat"
   ) +
-  facet_wrap(~season, ncol = 1) +
+  ggpmisc::stat_poly_eq(
+    label.y.npc = 0.88,
+    label.x.npc = 0.05,
+    aes(label = ..rr.label..),
+    size = 3,
+    family = "Montserrat"
+  ) +
+  scale_color_manual(
+    breaks = area_breaks,
+    values = area_colors
+  ) +
+  labs(
+    x = quote(a[phi](440) ~ (m^{-1})),
+    y = quote("Fucoxanthin" ~ (mg~m^{-3}))
+  ) +
+  facet_wrap(~bioregion_name_wrap) +
   theme(
-    strip.text = element_text(size = 10),
-    panel.spacing.y = unit(0.75, "cm")
+    panel.spacing.y = unit(3, "lines"),
+    legend.position = "none",
+    strip.text = element_text(size = 10)
   )
 
 ggsave(
   here("graphs","appendix03.pdf"),
   device = cairo_pdf,
-  width = 80,
-  height = 90,
+  width = 180,
+  height = 70,
   units = "mm"
 )
