@@ -13,7 +13,7 @@ class: center, middle, inverse, title-slide
 
 # Seasonal and decadal variability in bio-optical properties in the Northwest Atlantic
 ### Philippe Massicotte
-### 2022-01-21 (updated on: 2022-01-14)
+### 2022-01-21 (updated on: 2022-01-20)
 
 ---
 
@@ -53,46 +53,71 @@ a {
 }
 &lt;/style&gt;
 
-## Background
+## Motivations (1/2)
 
-- Many optical indices used to study the spatial and seasonal response of phytoplankton communities to the **underwater lightscape**.
+- A rich literature has used optical indices used to study the spatial and seasonal response of phytoplankton communities to the **underwater lightscape**:
+
+--
+
+  - Positive relationships between ** `\(a_{\phi}\)` ** and **chlorophyll-*a*** extensively documented (phytoplankton biomass).
+
+--
+
+  - ** `\(a_{\phi}^*\)` ** vary due to changes in phytoplankton intracellular composition and pigment packaging effect (**used to determine phytoplankton size classes and taxonomic groups**).
 
 &lt;br&gt;
 
-- Positive relationships between ** `\(a_{\phi}\)` ** and **chlorophyll-*a*** extensively documented (phytoplankton biomass).
+--
 
-&lt;br&gt;
-
-- ** `\(a_{\phi}^*\)` ** vary due to changes in phytoplankton intracellular composition and pigment packaging effect (used to determine phytoplankton size classes and taxonomic groups).
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#EFCA08;overflow:visible;position:relative;"><path d="M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zm-248 50c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"/></svg> Long-time series at high spatial resolution are difficult to acquire due to financial and logistical constraints (**often limited around the algal spring bloom**).
 
 ---
 
-## The motivations (1/n)
+## Motivations (2/3)
 
-- Phytoplankton absorption at 440 nm and  675 nm useful to study the phytoplankton dynamics in several aquatic ecosystems:
+Phytoplankton absorption at 440 nm and  675 nm is useful to study the phytoplankton dynamics in several aquatic ecosystems:
 
-  - **Do not fully exploiting the spectral information contained in absorption measurements.**
+&lt;img src="presentation_files/figure-html/unnamed-chunk-2-1.svg" width="45%" style="display: block; margin: auto;" /&gt;
 
-&lt;img src="presentation_files/figure-html/unnamed-chunk-2-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+--
+
+**Do not fully exploit the spectral information contained in absorption measurements.**
 
 ---
 
-## The motivations (2/n)
+## Motivations (3/3)
 
-- Phytoplankton absorption is becoming routinely measured by in situ by autonomous profilers and **the emergence of hyperspectral satellite**.
+- Phytoplankton absorption is becoming routinely measured by *in situ* by autonomous profilers and **the emergence of hyperspectral satellites**.
 
-- Long-time series at high spatial resolution are difficult to acquire due to financial and logistical constraints (**often limited around the algal spring bloom**).
+- There is a need to develop new indices **to syntheses all the information contained in a phytoplankton absorption spectrum**.
 
-- There is a need to develop new indices **to syntheses of all the information contained in a phytoplankton absorption spectrum**.
+&lt;img src="presentation_files/figure-html/unnamed-chunk-3-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+
+class: inverse, center, middle
+
+## Two objectives
+
+### 1. Explore the seasonal variability of the phytoplankton in the Northwest Atlantic
+
+### 2. Evaluate the ability of a **new spectral index** to get insights of the phytoplankton dynamics
 
 ---
 
 ## The sampling
 
 .pull-left[
-More than **20 years of data** to provide a detailed picture of the seasonal and the decadal variability bio-optical indices in Northwest Atlantic.
+- **20 years of data** to provide a detailed picture of the seasonal and the decadal variability bio-optical indices in Northwest Atlantic.
 
-More than **3200 observations** of pigments, chlorophyll-*a* and absorption measurements.
+&lt;br&gt;
+
+- More than **3200 observations** of pigments, chlorophyll-*a* and absorption measurements.
+
+&lt;br&gt;
+
+- **Three bioregions** sampled in autumn, summer, spring and winter.
+
 ]
 
 .pull-right[
@@ -117,7 +142,7 @@ Agreement with previously reported models in coastal and marine environments.
 
 ## Packaging effect
 
-Negative relations between this ratio and chlorophyll-*a* is an **indication of packaging effect and changes in the intercellular composition of pigments**.
+The negative relation between this ratio and chlorophyll-*a* is an **indication of packaging effect and changes in the intercellular composition of pigments**.
 
 &lt;img src="graphs/png/fig05.png" width="90%" style="display: block; margin: auto;" /&gt;
 
@@ -125,9 +150,9 @@ Negative relations between this ratio and chlorophyll-*a* is an **indication of 
 
 ## Packaging effect (seasonal variability)
 
-- Indications that the cell size of the phytoplankton is significantly higher in the summer compared to the winter.
+- Indications that the cell size of the phytoplankton is significantly higher in the summer compared to the winter:
 
-- Literature: **acclimating to increasing solar irradiance by reducing intracellular chlorophyll-*a* content and increasing carotenoid content**.
+  - **acclimating to increasing solar irradiance by reducing intracellular chlorophyll-*a* content and increasing carotenoid content**
 
 &lt;img src="graphs/png/appendix04.png" width="80%" style="display: block; margin: auto;" /&gt;
 
@@ -135,13 +160,13 @@ Negative relations between this ratio and chlorophyll-*a* is an **indication of 
 
 class: inverse, center, middle
 
-## Please welcome the phytoplankton apparent absorption wavelength (PAAW)
+## The phytoplankton apparent absorption wavelength (PAAW)
 
 ---
 
 ## Phytoplankton apparent absorption wavelength (PAAW)
 
-Weighted harmonic mean to **enable equal weighting of the wavelengths in the calculation**.
+Weighted harmonic mean to **enables equal weighting of the wavelengths in the calculation**.
 
 `\begin{equation}
 \text{PAAW} = \frac{\sum\limits_{i=\lambda_1}^{\lambda_n} a_\phi(\lambda_i)}{\sum\limits_{i=\lambda_1}^{\lambda_n} \frac{a_\phi(\lambda_i)}{\lambda_i}}
@@ -153,11 +178,12 @@ In units of nanometres, simply **represents the wavelength balance point around 
 
 ## Phytoplankton apparent absorption wavelength (PAAW)
 
-Show what it looks like here.
+Results suggest that **PAAW is a better proxy** to predict pigments compared to just using a single wavelength (fucoxanthin is a proxy often used to estimate diatoms biomass).
 
+&lt;img src="presentation_files/figure-html/unnamed-chunk-9-1.svg" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 
-## A better index
+## Phytoplankton apparent absorption wavelength (PAAW)
 
 &lt;img src="graphs/png/fig08.png" width="45%" style="display: block; margin: auto;" /&gt;
 
@@ -165,9 +191,17 @@ Show what it looks like here.
 
 ## Decadal variability (last 20 years)
 
-**Spring**: shift toward the red part of the spectrum. **Autumn**: shift toward the blue part of the spectrum.
+.left-column[
 
-&lt;img src="graphs/png/fig10.png" width="60%" style="display: block; margin: auto;" /&gt;
+- **Spring**: shift toward the &lt;font color="#F93943"&gt;red part of the spectrum&lt;/font&gt;. 
+
+- **Autumn**: shift toward the &lt;font color="#7EB2DD"&gt;blue part of the spectrum&lt;/font&gt;.
+
+]
+
+.right-column[
+&lt;img src="graphs/png/fig10.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

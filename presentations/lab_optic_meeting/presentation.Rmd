@@ -23,20 +23,20 @@ knitr::opts_chunk$set(
   fig.width = 5, 
   fig.height = 3.5,
   fig.align = "center",
-  dev = "png",
-  dpi = 300,
-  cache = FALSE,
+  dev = "svg",
+  cache = TRUE,
   echo = FALSE,
   message = FALSE, 
-  warning = FALSE,
-  hiline = TRUE
+  warning = FALSE
 )
 
 library(tidyverse)
 library(ggpmthemes)
 library(here)
+library(showtext)
+library(patchwork)
 
-theme_set(theme_minimal(base_family = "Montserrat"))
+theme_set(theme_minimal(base_family = "Roboto"))
 
 theme_update(
   panel.border = element_blank(),
@@ -44,6 +44,9 @@ theme_update(
 )
 
 source(here("R","zzz.R"))
+
+# install.packages("remotes")
+# remotes::install_github("gadenbuie/xaringanthemer")
 ```
 
 ```{r xaringan-themer, include=FALSE, warning=FALSE}
@@ -96,25 +99,29 @@ a {
 }
 ```
 
-## Background
+## Motivations (1/2)
 
-- Many optical indices used to study the spatial and seasonal response of phytoplankton communities to the **underwater lightscape**.
+- A rich literature has used optical indices used to study the spatial and seasonal response of phytoplankton communities to the **underwater lightscape**:
+
+--
+
+  - Positive relationships between ** $a_{\phi}$ ** and **chlorophyll-*a*** extensively documented (phytoplankton biomass).
+
+--
+
+  - ** $a_{\phi}^*$ ** vary due to changes in phytoplankton intracellular composition and pigment packaging effect (**used to determine phytoplankton size classes and taxonomic groups**).
 
 <br>
 
-- Positive relationships between ** $a_{\phi}$ ** and **chlorophyll-*a*** extensively documented (phytoplankton biomass).
+--
 
-<br>
-
-- ** $a_{\phi}^*$ ** vary due to changes in phytoplankton intracellular composition and pigment packaging effect (used to determine phytoplankton size classes and taxonomic groups).
+`r fontawesome::fa("exclamation-circle", fill = "#EFCA08")` Long-time series at high spatial resolution are difficult to acquire due to financial and logistical constraints (**often limited around the algal spring bloom**).
 
 ---
 
-## The motivations (1/n)
+## Motivations (2/3)
 
-- Phytoplankton absorption at 440 nm and  675 nm useful to study the phytoplankton dynamics in several aquatic ecosystems:
-
-  - **Do not fully exploiting the spectral information contained in absorption measurements.**
+Phytoplankton absorption at 440 nm and  675 nm is useful to study the phytoplankton dynamics in several aquatic ecosystems:
 
 ```{r, out.width="45%"}
 df <- read_csv(here("data", "clean", "absorption.csv")) %>% 
@@ -129,28 +136,73 @@ df %>%
   geom_point(data = df_peaks, size = 5, color = "red") +
   labs(
     x = "Wavelength (nm)",
-    y = quote(a[phi]~(lambda))
+    y = quote(a[phi]~(lambda)~(m^{-1}))
+  )
+```
+
+--
+
+**Do not fully exploit the spectral information contained in absorption measurements.**
+
+---
+
+## Motivations (3/3)
+
+- Phytoplankton absorption is becoming routinely measured by *in situ* by autonomous profilers and **the emergence of hyperspectral satellites**.
+
+- There is a need to develop new indices **to syntheses all the information contained in a phytoplankton absorption spectrum**.
+
+```{r}
+# https://doi.pangaea.de/10.1594/PANGAEA.915747?format=html#download
+
+df <- read_table(
+  "https://store.pangaea.de/Publications/Craig-etal_2020/HL_Rrs_sun10_.txt",
+  skip = 25,
+  col_names = TRUE
+) %>%
+  rowid_to_column() %>% 
+  pivot_longer(
+    -rowid,
+    names_to = "wavelength",
+    values_to = "rrs",
+    names_transform = list(wavelength = parse_number)
+  ) %>% 
+  drop_na()
+
+df %>% 
+  ggplot(aes(x = wavelength, y = rrs, group = rowid)) +
+  geom_line(size = 0.1) +
+  labs(
+    x = "Wavelength (nm)",
+    y = quote("Rrs"~(sr^{-1}))
   )
 ```
 
 ---
 
-## The motivations (2/n)
+class: inverse, center, middle
 
-- Phytoplankton absorption is becoming routinely measured by in situ by autonomous profilers and **the emergence of hyperspectral satellite**.
+## Two objectives
 
-- Long-time series at high spatial resolution are difficult to acquire due to financial and logistical constraints (**often limited around the algal spring bloom**).
+### 1. Explore the seasonal variability of the phytoplankton in the Northwest Atlantic
 
-- There is a need to develop new indices **to syntheses of all the information contained in a phytoplankton absorption spectrum**.
+### 2. Evaluate the ability of a **new spectral index** to get insights of the phytoplankton dynamics
 
 ---
 
 ## The sampling
 
 .pull-left[
-More than **20 years of data** to provide a detailed picture of the seasonal and the decadal variability bio-optical indices in Northwest Atlantic.
+- **20 years of data** to provide a detailed picture of the seasonal and the decadal variability bio-optical indices in Northwest Atlantic.
 
-More than **3200 observations** of pigments, chlorophyll-*a* and absorption measurements.
+<br>
+
+- More than **3200 observations** of pigments, chlorophyll-*a* and absorption measurements.
+
+<br>
+
+- **Three bioregions** sampled in autumn, summer, spring and winter.
+
 ]
 
 .pull-right[
@@ -181,7 +233,7 @@ knitr::include_graphics(pdf2png(here("graphs","fig04.pdf")))
 
 ## Packaging effect
 
-Negative relations between this ratio and chlorophyll-*a* is an **indication of packaging effect and changes in the intercellular composition of pigments**.
+The negative relation between this ratio and chlorophyll-*a* is an **indication of packaging effect and changes in the intercellular composition of pigments**.
 
 ```{r, out.width="90%"}
 knitr::include_graphics(pdf2png(here("graphs","fig05.pdf")))
@@ -191,9 +243,9 @@ knitr::include_graphics(pdf2png(here("graphs","fig05.pdf")))
 
 ## Packaging effect (seasonal variability)
 
-- Indications that the cell size of the phytoplankton is significantly higher in the summer compared to the winter.
+- Indications that the cell size of the phytoplankton is significantly higher in the summer compared to the winter:
 
-- Literature: **acclimating to increasing solar irradiance by reducing intracellular chlorophyll-*a* content and increasing carotenoid content**.
+  - **acclimating to increasing solar irradiance by reducing intracellular chlorophyll-*a* content and increasing carotenoid content**
 
 ```{r, out.width="80%"}
 knitr::include_graphics(pdf2png(here("graphs","appendix04.pdf")))
@@ -203,13 +255,13 @@ knitr::include_graphics(pdf2png(here("graphs","appendix04.pdf")))
 
 class: inverse, center, middle
 
-## Please welcome the phytoplankton apparent absorption wavelength (PAAW)
+## The phytoplankton apparent absorption wavelength (PAAW)
 
 ---
 
 ## Phytoplankton apparent absorption wavelength (PAAW)
 
-Weighted harmonic mean to **enable equal weighting of the wavelengths in the calculation**.
+Weighted harmonic mean to **enables equal weighting of the wavelengths in the calculation**.
 
 \begin{equation}
 \text{PAAW} = \frac{\sum\limits_{i=\lambda_1}^{\lambda_n} a_\phi(\lambda_i)}{\sum\limits_{i=\lambda_1}^{\lambda_n} \frac{a_\phi(\lambda_i)}{\lambda_i}}
@@ -221,13 +273,81 @@ In units of nanometres, simply **represents the wavelength balance point around 
 
 ## Phytoplankton apparent absorption wavelength (PAAW)
 
-- Show what it looks like here.
+Results suggest that **PAAW is a better proxy** to predict pigments compared to just using a single wavelength (fucoxanthin is a proxy often used to estimate diatoms biomass).
 
-- Maybe a graph showing the relationship between PAAW and fucox vs aphy440 and fucox.
+```{r, out.width="70%", fig.width=8}
+paaw <- read_csv(here("data/clean/apparent_visible_wavelength.csv"))
 
+df <- read_csv(here("data/clean/merged_dataset.csv")) %>% 
+  filter(wavelength == 440)
+
+df <- df %>% 
+  inner_join(paaw, by = c("sample_id", "bioregion_name"))
+
+p1 <- df %>% 
+  filter(fucox > 0) %>% 
+  ggplot(aes(x = avw_aphy, y = fucox)) +
+  geom_point(size = 0.5) +
+  scale_y_log10() +
+  annotation_logticks(sides = "l", size = 0.25) +
+  geom_smooth(method = "lm") +
+  ggpmisc::stat_poly_eq(
+    aes(label = ..eq.label..),
+    parse = TRUE,
+    coef.digits = 4,
+    f.digits = 5,
+    p.digits = 10,
+    label.x.npc = 0.05,
+    family = "Montserrat",
+    size = 2.5
+  ) +
+  ggpmisc::stat_poly_eq(
+    label.x.npc = 0.05,
+    label.y.npc = 0.88,
+    aes(label = ..rr.label..),
+    size = 2.5,
+    family = "Montserrat"
+  ) +
+  labs(
+    x = "PAAW (nm)",
+    y = quote(Fucoxanthin ~ (mg ~ m^{-3}))
+  )
+
+p2 <- df %>% 
+  filter(fucox > 0) %>% 
+  ggplot(aes(x = aphy, y = fucox)) +
+  geom_point(size = 0.5) +
+  scale_x_log10() +
+  scale_y_log10() +
+  annotation_logticks(sides = "l", size = 0.25) +
+  geom_smooth(method = "lm") +
+  ggpmisc::stat_poly_eq(
+    aes(label = ..eq.label..),
+    parse = TRUE,
+    coef.digits = 4,
+    f.digits = 5,
+    p.digits = 10,
+    label.x.npc = 0.05,
+    family = "Montserrat",
+    size = 2.5
+  ) +
+  ggpmisc::stat_poly_eq(
+    label.x.npc = 0.05,
+    label.y.npc = 0.88,
+    aes(label = ..rr.label..),
+    size = 2.5,
+    family = "Montserrat"
+  ) +
+  labs(
+    x = quote(aphy(440)),
+    y = quote(Fucoxanthin ~ (mg ~ m^{-3}))
+  )
+
+p1 + p2
+```
 ---
 
-## A better index
+## Phytoplankton apparent absorption wavelength (PAAW)
 
 ```{r, out.width="45%"}
 knitr::include_graphics(pdf2png(here("graphs","fig08.pdf")))
@@ -237,8 +357,16 @@ knitr::include_graphics(pdf2png(here("graphs","fig08.pdf")))
 
 ## Decadal variability (last 20 years)
 
-**Spring**: shift toward the red part of the spectrum. **Autumn**: shift toward the blue part of the spectrum.
+.left-column[
 
-```{r, out.width="60%"}
+- **Spring**: shift toward the <font color="#F93943">red part of the spectrum</font>. 
+
+- **Autumn**: shift toward the <font color="#7EB2DD">blue part of the spectrum</font>.
+
+]
+
+.right-column[
+```{r, out.width="80%"}
 knitr::include_graphics(pdf2png(here("graphs","fig10.pdf")))
 ```
+]
