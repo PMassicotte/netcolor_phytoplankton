@@ -339,7 +339,7 @@ p2 <- df %>%
     family = "Montserrat"
   ) +
   labs(
-    x = quote(aphy(440)),
+    x = quote(a[phi]~(440)~(m^{-1})),
     y = quote(Fucoxanthin ~ (mg ~ m^{-3}))
   )
 
