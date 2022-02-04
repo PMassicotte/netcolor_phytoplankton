@@ -294,17 +294,10 @@ df_model %>%
 p4 <- mod1_bootstrap %>%
   unnest(.replicates) %>%
   ggplot(aes(x = estimate)) +
-  geom_histogram() +
-  geom_vline(
-    aes(xintercept = 0.05621, color = "All data"),
-    lty = 2,
-    key_glyph = draw_key_point
-  ) +
-  geom_vline(
-    aes(xintercept = mod1_bootstrap$.estimate, color = "Bootstrap"),
-    lty = 2,
-    key_glyph = draw_key_point
-  ) +
+  geom_histogram(fill = "gray65") +
+  geom_vline(aes(xintercept = .estimate), lty = 2) +
+  geom_vline(aes(xintercept = .lower), lty = 2) +
+  geom_vline(aes(xintercept = .upper), lty = 2) +
   scale_color_discrete(guide = guide_legend(
     override.aes = list(size = 1.5, alpha = 1))) +
   labs(
@@ -321,44 +314,42 @@ p4 <- mod1_bootstrap %>%
 p5 <- mod2_bootstrap %>%
   unnest(.replicates) %>%
   ggplot(aes(x = estimate)) +
-  geom_histogram() +
-  geom_vline(
-    aes(xintercept = -0.02926, color = "All data"),
-    lty = 2
-  ) +
-  geom_vline(aes(xintercept = mod2_bootstrap$.estimate, color = "Bootstrap"),
-    lty = 2
-  ) +
+  geom_histogram(fill = "gray65") +
+  geom_vline(aes(xintercept = .estimate), lty = 2) +
+  geom_vline(aes(xintercept = .lower), lty = 2) +
+  geom_vline(aes(xintercept = .upper), lty = 2) +
+  scale_color_discrete(guide = guide_legend(
+    override.aes = list(size = 1.5, alpha = 1))) +
   labs(
     x = "Estimate",
     y = "Count"
   ) +
   theme(
-    legend.position = "none"
+    legend.title = element_blank(),
+    legend.justification = c(0, 0),
+    legend.position = c(0.01, 0.1),
+    legend.text = element_text(size = 7, family = "Montserrat Light")
   )
 
 p6 <- mod3_bootstrap %>%
   unnest(.replicates) %>%
   ggplot(aes(x = estimate)) +
-  geom_histogram() +
-  scale_x_continuous(breaks = scales::breaks_pretty(n = 4)) +
-  geom_vline(
-    data = unnest(df_model, tidied) %>% filter(term != "(Intercept)"),
-    aes(xintercept = estimate, color = "All data"),
-    lty = 2
-  ) +
-  geom_vline(
-    data = mod3_bootstrap,
-    aes(xintercept = .estimate, color = "Bootstrap"),
-    lty = 2
-  ) +
+  geom_histogram(fill = "gray65") +
+  geom_vline(aes(xintercept = .estimate), lty = 2) +
+  geom_vline(aes(xintercept = .lower), lty = 2) +
+  geom_vline(aes(xintercept = .upper), lty = 2) +
+  scale_color_discrete(guide = guide_legend(
+    override.aes = list(size = 1.5, alpha = 1))) +
   labs(
     x = "Estimate",
     y = "Count"
   ) +
-  facet_wrap(~term, scales = "free") +
+  facet_wrap(~term, scales = "free", ncol = 1) +
   theme(
-    legend.position = "none",
+    legend.title = element_blank(),
+    legend.justification = c(0, 0),
+    legend.position = c(0.01, 0.1),
+    legend.text = element_text(size = 7, family = "Montserrat Light"),
     strip.text = element_blank()
   )
 
