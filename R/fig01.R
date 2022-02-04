@@ -7,7 +7,7 @@
 
 rm(list = ls())
 
-source(here("R/zzz.R"))
+source(here("R", "zzz.R"))
 
 stations <- read_csv(here("data", "clean", "metadata.csv"))
 bioregions <- read_csv(here("data", "clean", "bioregions.csv"))

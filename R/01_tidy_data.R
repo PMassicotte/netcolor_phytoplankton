@@ -284,8 +284,11 @@ outlier <- outlier %>%
   filter(between(anap, anap_mean - 2 * anap_sd, anap_mean + 2 * anap_sd)) %>%
   filter(between(aphy, aphy_mean - 2 * aphy_sd, aphy_mean + 2 * aphy_sd))
 
-absorption <- absorption %>%
-  semi_join(outlier, by = "sample_id")
+# After discussion with Emmanuel, it was decided that we will not remove
+# observations that are 2*SD off the mean.
+
+# absorption <- absorption %>%
+#   semi_join(outlier, by = "sample_id")
 
 absorption %>%
   filter(wavelength == 443) %>%

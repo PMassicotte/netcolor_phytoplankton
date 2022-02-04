@@ -72,6 +72,8 @@ source(here("R","14_apparent_visible_wavelength.R"))
 source(here("R","14a_aphy_vs_aphy_specific_on_apparent_visible_wavelength.R"))
 source(here("R","15_calculate_station_distance_to_shore.R"))
 source(here("R","16_simulate_daily_data_from_loess.R"))
+source(here("R", "17_northwest_atlantic_temperature.R"))
+source(here("R", "18_aphy_vs_avw.R"))
 
 # Figures for the manuscript ----------------------------------------------
 

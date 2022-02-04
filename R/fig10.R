@@ -67,6 +67,7 @@ df %>%
   count(bioregion_name, season)
 
 p <- df_viz %>%
+  filter(avw_aphy < 490) %>% # ?
   ggplot(aes(x = date2, y = avw_aphy)) +
   geom_point(aes(color = bioregion_name)) +
   scale_color_manual(

@@ -74,7 +74,7 @@ p1 <- df_viz %>%
   paletteer::scale_color_paletteer_c(
     "pals::kovesi.linear_bgyw_15_100_c68",
     direction = -1,
-    breaks = scales::breaks_pretty(n = 6),
+    breaks = scales::breaks_pretty(n = 4),
     guide = guide_colorbar(
       direction = "horizontal",
       title.position = "top",
