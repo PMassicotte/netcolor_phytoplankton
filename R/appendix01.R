@@ -23,6 +23,11 @@ df %>%
   count(sample_id) %>%
   assertr::verify(n == 1)
 
+# How many observation per season
+
+df %>%
+  count(season)
+
 # Number of observations per bioregion/year -------------------------------
 
 df_viz <- df %>%

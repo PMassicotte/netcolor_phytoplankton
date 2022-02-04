@@ -101,3 +101,7 @@ df %>%
   correlate(use = "pairwise.complete.obs") %>%
   focus(starts_with("wl"))
 
+# What is the average R2? -------------------------------------------------
+
+mod <- lm(log10(aphy_443_675) ~ log10(hplcchla), data = df_viz)
+summary(mod)
