@@ -65,11 +65,29 @@ df_viz <- df_viz %>%
   )) %>%
   mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
 
+
+# Mean PAAW spectra -------------------------------------------------------
+
+df_viz
+
+mean_paaw <- df_viz %>%
+  group_by(bioregion_name_wrap, wavelength) %>%
+  summarise(mean_normalized_aphy = mean(normalized_aphy)) %>%
+  ungroup()
+
+mean_paaw
+
 # Plot --------------------------------------------------------------------
 
 p1 <- df_viz %>%
   ggplot(aes(x = wavelength, y = normalized_aphy, color = avw_aphy, group = sample_id)) +
   geom_line(size = 0.1) +
+  geom_line(
+    data = mean_paaw,
+    aes(x = wavelength, y = mean_normalized_aphy, group = bioregion_name_wrap),
+    inherit.aes = FALSE,
+    size = 0.5
+  ) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.01))) +
   paletteer::scale_color_paletteer_c(
     "pals::kovesi.linear_bgyw_15_100_c68",
