@@ -15,7 +15,7 @@ source(here("R","zzz.R"))
 
 df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
   filter(wavelength %in% c(443, 675)) %>%
-  select(sample_id, bioregion_name, wavelength, aphy, hplcchla, fucox) %>%
+  select(sample_id, bioregion_name, season, wavelength, aphy, hplcchla, fucox) %>%
   mutate(bioregion_name = factor(
     bioregion_name,
     levels = c(
@@ -34,7 +34,7 @@ df %>%
 
 df_viz <- df %>%
   dtplyr::lazy_dt() %>%
-  group_by(sample_id, bioregion_name, bioregion_name_wrap) %>%
+  group_by(sample_id, bioregion_name, bioregion_name_wrap, season) %>%
   summarise(
     aphy_443_675 = aphy[wavelength == 443] / aphy[wavelength == 675],
     hplcchla = unique(hplcchla)
@@ -46,7 +46,14 @@ df_viz
 
 p <- df_viz %>%
   ggplot(aes(x = hplcchla, y = aphy_443_675)) +
-  geom_point(aes(color = bioregion_name), size = 0.5) +
+  geom_point(
+    aes(fill = season),
+    color = "transparent",
+    size = 1.5,
+    stroke = 0,
+    pch = 21,
+    alpha = 0.3
+  ) +
   scale_x_log10() +
   scale_y_log10() +
   annotation_logticks(sides = "bl", size = 0.1) +
@@ -66,18 +73,22 @@ p <- df_viz %>%
     size = 3,
     family = "Montserrat"
   ) +
-  scale_color_manual(
-    breaks = area_breaks,
-    values = area_colors
+  scale_fill_manual(
+    breaks = c("Winter", "Spring", "Summer", "Autumn"),
+    values = c("#014f86", "#40916c", "#ffcb69", "#e76f51"),
+    guide = guide_legend(
+      override.aes = list(size = 2, alpha = 1),
+      label.theme = element_text(size = 7, family = "Montserrat Light")
+    )
   ) +
   labs(
     x = quote("Chlorophyll-" * italic(a) ~ (mg~m^{-3})),
-    y = quote(a[phi](443) / a[phi](675))
+    y = quote(a[phi](443) / a[phi](675)),
+    fill = NULL
   ) +
   facet_wrap(~bioregion_name_wrap) +
   theme(
     panel.spacing.y = unit(3, "lines"),
-    legend.position = "none",
     strip.text = element_text(size = 10)
   )
 

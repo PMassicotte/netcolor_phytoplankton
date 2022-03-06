@@ -42,11 +42,12 @@ df_viz <- df %>%
 p <- df_viz %>%
   ggplot(aes(x = hplcchla, y = aphy)) +
   geom_point(
-    color = "#6c6c6c",
-    size = 1,
-    shape = 16,
+    aes(fill = season),
+    color = "transparent",
+    size = 1.5,
     stroke = 0,
-    alpha = 0.5
+    pch = 21,
+    alpha = 0.3
   ) +
   geom_line(aes(y = bricaud_1998, color = "Bricaud 1998"), lty = 2) +
   geom_line(aes(y = bricaud_2004, color = "Bricaud 2004"), lty = 2) +
@@ -67,6 +68,14 @@ p <- df_viz %>%
     size = 2.5,
     family = "Montserrat"
   ) +
+  scale_fill_manual(
+    breaks = c("Winter", "Spring", "Summer", "Autumn"),
+    values = c("#014f86", "#40916c", "#ffcb69", "#e76f51"),
+    guide = guide_legend(
+      override.aes = list(size = 2, alpha = 1),
+      label.theme = element_text(size = 7, family = "Montserrat Light")
+    )
+  ) +
   labs(
     x = quote("Chlorophyll-" * italic(a) ~ (mg~m^{-3})),
     y = quote(a[phi] ~ (440) ~ (m^{-1}))
@@ -84,8 +93,6 @@ p <- df_viz %>%
   ) +
   theme(
     legend.title = element_blank(),
-    legend.justification = c(1, 0),
-    legend.position = c(1, 0),
     legend.background = element_blank(),
     legend.key = element_blank(),
     legend.spacing.x = unit(0.1, "cm"),
@@ -95,7 +102,7 @@ p <- df_viz %>%
 ggsave(
   here("graphs","fig04.pdf"),
   device = cairo_pdf,
-  width = 85,
+  width = 120,
   height = 80,
   units = "mm"
 )
