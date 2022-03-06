@@ -22,28 +22,37 @@ absorption <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
 
 # Plot --------------------------------------------------------------------
 
+formula <- y ~ x
+
 p <- absorption %>%
-  filter(if_all(c(aphy, anap), ~. > 0)) %>%
+  filter(if_all(c(aphy, anap), ~ . > 0)) %>%
   ggplot(aes(x = aphy, y = anap)) +
   geom_point(aes(color = bioregion_name), size = 0.5) +
-  scale_x_log10(labels = scales::label_number()) +
-  scale_y_log10(labels = scales::label_number()) +
-  annotation_logticks(sides = "bl", size = 0.1) +
-  geom_smooth(method = "lm", color = "#3c3c3c", size = 0.5) +
-  ggpmisc::stat_poly_eq(
-    aes(label = ..eq.label..),
-    label.y.npc = 0.15,
-    label.x.npc = 1,
-    size = 3,
-    coef.digits = 3,
-    family = "Montserrat"
+  geom_smooth(
+    method = "glm",
+    se = FALSE,
+    method.args = list(family = Gamma(link = "log")),
+    color = "#3c3c3c",
+    size = 0.5
   ) +
-  ggpmisc::stat_poly_eq(
-    label.y.npc = 0.05,
-    label.x.npc = 1,
-    aes(label = ..rr.label..),
-    size = 3,
-    family = "Montserrat"
+  ggpmisc::stat_fit_tidy(
+    method = "glm",
+    method.args = list(formula = formula, family = Gamma(link = "log")),
+    label.x = "left",
+    label.y = "top",
+    family = "Montserrat",
+    size = 2.5,
+    aes(
+      label = paste(
+        "y~`=`~ italic(e)^{",
+        signif(stat(Intercept_estimate), digits = 3),
+        "~+~",
+        signif(after_stat(x_estimate), digits = 3),
+        "~x}",
+        sep = ""
+      )
+    ),
+    parse = TRUE
   ) +
   scale_color_manual(
     breaks = area_breaks,
@@ -68,3 +77,35 @@ ggsave(
   units = "mm"
 )
 
+
+# GLM ---------------------------------------------------------------------
+# easystats::install_suggested()
+library(easystats)
+
+df <- absorption %>%
+  filter(if_all(c(aphy, anap), ~. > 0)) %>%
+  filter(bioregion_name == "Scotian Shelf")
+
+df
+
+df %>%
+  glm(anap ~ aphy, data = ., family = "gaussian") %>%
+  summary()
+
+df %>%
+  glm(log(anap) ~ aphy, data = ., family = "gaussian") %>%
+  summary()
+
+mod <-df %>%
+  glm(anap ~ aphy, data = ., family = Gamma(link = "log"))
+
+summary(mod)
+
+mod %>%
+  augment(type.predict = c("response")) %>%
+  ggplot(aes(x = aphy, y = anap)) +
+  geom_point() +
+  geom_line(aes(y = .fitted))
+
+tidy(mod, exponentiate = TRUE)
+report(mod)
