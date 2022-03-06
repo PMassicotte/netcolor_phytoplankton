@@ -49,21 +49,30 @@ p1 <- ggboxlpot(df,
 
 p2 <- ggboxlpot(df,
   season,
-  hplcchla,
-  bioregion_name,
-  strip.text = element_blank(),
-  ylab = "Chlorophyll-italic(a)~(mg~m^{-3})"
-)
-
-p3 <- ggboxlpot(df,
-  season,
   aphy_specific,
   bioregion_name,
   strip.text = element_blank(),
   ylab = "a[phi]^'*'~(443)~(m^{2}~mg^{-1})"
 )
 
-p <- p1 + p2 + p3 +
+p3 <- ggboxlpot(df,
+  season,
+  anap,
+  bioregion_name,
+  strip.text = element_text(size = 10),
+  ylab = "a[NAP]~(443)~(m^{-1})"
+)
+
+# There is 1 obvious outlier
+p4 <- ggboxlpot(df %>% filter(snap > 0.00100),
+  season,
+  snap,
+  bioregion_name,
+  strip.text = element_text(size = 10),
+  ylab = "s[NAP]~(nm^{-1})"
+)
+
+p <- p1 + p2 + p3 + p4 +
   plot_layout(ncol = 1) +
   plot_annotation(tag_levels = "A") &
   theme(plot.tag = element_text(size = 16, face = "bold"))
@@ -72,7 +81,7 @@ ggsave(
   here("graphs","fig06.pdf"),
   device = cairo_pdf,
   width = 190,
-  height = 180,
+  height = 240,
   units = "mm"
 )
 
