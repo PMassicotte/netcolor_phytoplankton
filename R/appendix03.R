@@ -57,7 +57,7 @@ p <- df %>%
     x = quote(a[phi](440) ~ (m^{-1})),
     y = quote("Fucoxanthin" ~ (mg~m^{-3}))
   ) +
-  facet_wrap(~bioregion_name_wrap) +
+  facet_wrap(~bioregion_name_wrap + season) +
   theme(
     panel.spacing.y = unit(3, "lines"),
     legend.position = "none",
@@ -68,6 +68,6 @@ ggsave(
   here("graphs","appendix03.pdf"),
   device = cairo_pdf,
   width = 180,
-  height = 70,
+  height = 240,
   units = "mm"
 )
