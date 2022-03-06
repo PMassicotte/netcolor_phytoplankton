@@ -16,7 +16,7 @@ rm(list = ls())
 source(here("R","zzz.R"))
 
 df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  filter(wavelength == 440)
+  filter(wavelength == 443)
 
 # Add prediction from other models found in the literature ----------------
 
