@@ -26,6 +26,7 @@ formula <- y ~ x
 
 p <- absorption %>%
   filter(if_all(c(aphy, anap), ~ . > 0)) %>%
+  filter(anap <= 0.05) %>% # 1 obvious outlier
   ggplot(aes(x = aphy, y = anap)) +
   geom_point(
     aes(fill = season),
@@ -91,33 +92,21 @@ ggsave(
 
 
 # GLM ---------------------------------------------------------------------
-# easystats::install_suggested()
-library(easystats)
+
+# Create the models for Emmanuel. He wants the outputs for the paper.
 
 df <- absorption %>%
-  filter(if_all(c(aphy, anap), ~. > 0)) %>%
-  filter(bioregion_name == "Scotian Shelf")
+  filter(if_all(c(aphy, anap), ~ . > 0)) %>%
+  filter(anap <= 0.05) %>% # 1 obvious outlier
+  group_nest(bioregion_name) %>%
+  mutate(mod_glm = map(data, ~ glm(
+    anap ~ aphy,
+    family = Gamma(link = "log"), data = .
+  )))
 
 df
 
 df %>%
-  glm(anap ~ aphy, data = ., family = "gaussian") %>%
-  summary()
-
-df %>%
-  glm(log(anap) ~ aphy, data = ., family = "gaussian") %>%
-  summary()
-
-mod <-df %>%
-  glm(anap ~ aphy, data = ., family = Gamma(link = "log"))
-
-summary(mod)
-
-mod %>%
-  augment(type.predict = c("response")) %>%
-  ggplot(aes(x = aphy, y = anap)) +
-  geom_point() +
-  geom_line(aes(y = .fitted))
-
-tidy(mod, exponentiate = TRUE)
-report(mod)
+  mutate(glm_tidy = map(mod_glm, tidy)) %>%
+  unnest(glm_tidy) %>%
+  select(-where(is.list))
