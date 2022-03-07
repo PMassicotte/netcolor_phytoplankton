@@ -185,9 +185,11 @@ p <- p1 + p3 +
     plot.tag = element_text(face = "bold", size = 14)
   )
 
-ggsave(
-  here("graphs", "fig07b.pdf"),
-  device = cairo_pdf,
-  width = 7,
-  height = 8
-)
+p
+
+# ggsave(
+#   here("graphs", "fig07b.pdf"),
+#   device = cairo_pdf,
+#   width = 7,
+#   height = 8
+# )
