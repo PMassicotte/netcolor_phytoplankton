@@ -18,8 +18,12 @@ df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
     aphy_specific,
     ap,
     anap,
+    snap,
     fucox
-  )
+  ) %>%
+  mutate(fucox_hplcchla_ratio = fucox / hplcchla)
+
+df
 
 gghisto <- function(df, var, label) {
 
@@ -57,14 +61,18 @@ gghisto <- function(df, var, label) {
 
 p1 <- gghisto(df, aphy, "a[phi]~(443)~(m^{-1})")
 p2 <- gghisto(df, hplcchla, "Chlorophyll-italic(a)~(mg~m^{-3})")
+
 p3 <- gghisto(df, aphy_specific, "a[phi]^'*'~(443)~(m^2~mg^{-1})")
-
 p4 <- gghisto(df, ap, "a[p]~(443)~(m^{-1})")
-p5 <- gghisto(df, anap, "a[NAP]~(443)~(m^{-1})")
-p6 <- gghisto(df, fucox, "Fucoxanthin~(mg~m^{-3})")
 
-p <- p1 + p2 + p3 + p4 + p5 + p6 +
-  plot_layout(byrow = FALSE, ncol = 2) +
+p5 <- gghisto(df, anap, "a[NAP]~(443)~(m^{-1})")
+p6 <- gghisto(df, snap, "S[NAP]~(nm^{-1})")
+
+p7 <- gghisto(df, fucox, "Fucoxanthin~(mg~m^{-3})")
+p8 <- gghisto(df, fucox_hplcchla_ratio, "Chlorophyll-italic(a)/Fucoxanthin")
+
+p <- p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 +
+  plot_layout(byrow = TRUE, ncol = 2) +
   plot_annotation(tag_levels = "A") &
   theme(
     plot.tag = element_text(face = "bold", size = 14)
@@ -74,6 +82,6 @@ ggsave(
   here("graphs","appendix02.pdf"),
   device = cairo_pdf,
   width = 180,
-  height = 180,
+  height = 240,
   units = "mm"
 )
