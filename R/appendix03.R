@@ -30,11 +30,8 @@ p <- df %>%
   filter(if_all(c(aphy, fucox), ~. > 0)) %>%
   ggplot(aes(x = aphy, y = fucox)) +
   geom_point(
-    aes(fill = season),
-    color = "transparent",
+    aes(color = season, shape = bioregion_name),
     size = 1.5,
-    stroke = 0,
-    pch = 21,
     alpha = 0.3
   ) +
   scale_x_log10() +
@@ -57,12 +54,16 @@ p <- df %>%
     family = "Montserrat"
   ) +
   scale_fill_manual(
-    breaks = c("Winter", "Spring", "Summer", "Autumn"),
-    values = c("#014f86", "#40916c", "#ffcb69", "#e76f51"),
+    breaks = season_breaks,
+    values = season_colors,
     guide = guide_legend(
       override.aes = list(size = 2, alpha = 1),
       label.theme = element_text(size = 7, family = "Montserrat Light")
     )
+  ) +
+  scale_shape_manual(
+    breaks = area_breaks,
+    values = area_pch
   ) +
   labs(
     x = quote(a[phi](440) ~ (m^{-1})),

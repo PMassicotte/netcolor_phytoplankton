@@ -14,12 +14,10 @@ area_breaks <-
     "Northwest Atlantic Basin ocean (NAB)"
   )
 
-area_colors <-
-  c(
-    "#DC3912FF",
-    "#FF9900FF",
-    "#109618FF"
-  )
+area_pch <- c(2, 0, 3)
+
+season_breaks <- c("Winter", "Spring", "Summer", "Autumn")
+season_colors <- c("#041E42FF", "#00A9E0FF", "#BE3A34FF", "#FFA400FF")
 
 str_wrap_factor <- function(x, ...) {
   levels(x) <- str_wrap(levels(x), ...)

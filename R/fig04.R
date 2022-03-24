@@ -49,13 +49,19 @@ p <- df_viz %>%
     pch = 21,
     alpha = 0.3
   ) +
-  geom_line(aes(y = bricaud_1998, color = "Bricaud 1998"), lty = 2) +
-  geom_line(aes(y = bricaud_2004, color = "Bricaud 2004"), lty = 2) +
-  geom_line(aes(y = devred_2006, color = "Devred 2006"), lty = 2) +
+  geom_line(aes(y = bricaud_1998, lty = "Bricaud 1998")) +
+  geom_line(aes(y = bricaud_2004, lty = "Bricaud 2004")) +
+  geom_line(aes(y = devred_2006, lty = "Devred 2006")) +
+  geom_smooth(
+    method = "lm",
+    aes(lty = "This study"),
+    se = FALSE,
+    show.legend = FALSE,
+    color = "black"
+  ) +
   scale_x_log10() +
   scale_y_log10() +
   annotation_logticks(sides = "bl", size = 0.25) +
-  geom_smooth(method = "lm", aes(color = "This study"), se = FALSE) +
   ggpmisc::stat_poly_eq(
     aes(label = ..eq.label..),
     label.y.npc = 1,
@@ -69,10 +75,18 @@ p <- df_viz %>%
     family = "Montserrat"
   ) +
   scale_fill_manual(
-    breaks = c("Winter", "Spring", "Summer", "Autumn"),
-    values = c("#014f86", "#40916c", "#ffcb69", "#e76f51"),
+    breaks = season_breaks,
+    values = season_colors,
     guide = guide_legend(
       override.aes = list(size = 2, alpha = 1),
+      label.theme = element_text(size = 7, family = "Montserrat Light")
+    )
+  ) +
+  scale_linetype_manual(
+    breaks = c("This study", "Bricaud 1998", "Bricaud 2004", "Devred 2006"),
+    values = c(1, 2, 3, 4),
+    guide = guide_legend(
+      override.aes = list(size = 0.5, alpha = 1),
       label.theme = element_text(size = 7, family = "Montserrat Light")
     )
   ) +

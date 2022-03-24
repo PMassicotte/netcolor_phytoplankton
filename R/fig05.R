@@ -47,12 +47,9 @@ df_viz
 p <- df_viz %>%
   ggplot(aes(x = hplcchla, y = aphy_443_675)) +
   geom_point(
-    aes(fill = season),
-    color = "transparent",
-    size = 1.5,
-    stroke = 0,
-    pch = 21,
-    alpha = 0.3
+    aes(color = season, pch = bioregion_name),
+    alpha = 0.5,
+    stroke = 0.25
   ) +
   scale_x_log10() +
   scale_y_log10() +
@@ -73,20 +70,25 @@ p <- df_viz %>%
     size = 3,
     family = "Montserrat"
   ) +
-  scale_fill_manual(
-    breaks = c("Winter", "Spring", "Summer", "Autumn"),
-    values = c("#014f86", "#40916c", "#ffcb69", "#e76f51"),
+  scale_color_manual(
+    breaks = season_breaks,
+    values = season_colors,
     guide = guide_legend(
       override.aes = list(size = 2, alpha = 1),
       label.theme = element_text(size = 7, family = "Montserrat Light")
     )
   ) +
+  scale_shape_manual(
+    breaks = area_breaks,
+    values = area_pch
+  ) +
   labs(
     x = quote("Chlorophyll-" * italic(a) ~ (mg~m^{-3})),
     y = quote(a[phi](443) / a[phi](675)),
-    fill = NULL
+    color = NULL
   ) +
   facet_wrap(~bioregion_name_wrap) +
+  guides(shape = "none") +
   theme(
     panel.spacing.y = unit(3, "lines"),
     strip.text = element_text(size = 10)

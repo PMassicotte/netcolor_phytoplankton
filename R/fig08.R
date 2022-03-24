@@ -10,6 +10,8 @@
 
 rm(list = ls())
 
+source(here("R/zzz.R"))
+
 # Prepare the data --------------------------------------------------------
 
 aphy <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
@@ -45,8 +47,8 @@ p1 <- df %>%
     alpha = 0.3
   ) +
   scale_fill_manual(
-    breaks = c("Winter", "Spring", "Summer", "Autumn"),
-    values = c("#014f86", "#40916c", "#ffcb69", "#e76f51"),
+    breaks = season_breaks,
+    values = season_colors,
     guide = guide_legend(
       override.aes = list(size = 2, alpha = 1),
       label.theme = element_text(size = 7, family = "Montserrat Light")
@@ -104,8 +106,12 @@ p2 <- df %>%
     alpha = 0.3
   ) +
   scale_fill_manual(
-    breaks = c("Winter", "Spring", "Summer", "Autumn"),
-    values = c("#014f86", "#40916c", "#ffcb69", "#e76f51")
+    breaks = season_breaks,
+    values = season_colors,
+    guide = guide_legend(
+      override.aes = list(size = 2, alpha = 1),
+      label.theme = element_text(size = 7, family = "Montserrat Light")
+    )
   ) +
   scale_x_continuous(breaks = scales::breaks_pretty()) +
   scale_y_log10() +
@@ -200,8 +206,12 @@ p3 <- df_viz %>%
     family = "Montserrat"
   ) +
   scale_fill_manual(
-    breaks = c("Winter", "Spring", "Summer", "Autumn"),
-    values = c("#014f86", "#40916c", "#ffcb69", "#e76f51")
+    breaks = season_breaks,
+    values = season_colors,
+    guide = guide_legend(
+      override.aes = list(size = 2, alpha = 1),
+      label.theme = element_text(size = 7, family = "Montserrat Light")
+    )
   ) +
   labs(
     x = str_wrap("Phytoplankton Apparent Absorption Wavelength (PAAW, nm)", 40),

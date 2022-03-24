@@ -69,7 +69,7 @@ p <- df_viz %>%
     x = wavelength,
     y = absorption,
     group = bioregion_name,
-    color = bioregion_name
+    linetype = bioregion_name
   )) +
   geom_line(
     data = df_all,
@@ -78,9 +78,9 @@ p <- df_viz %>%
     alpha = 0.1
   ) +
   geom_line() +
-  scale_color_manual(
-    breaks = area_breaks,
-    values = area_colors,
+  scale_linetype_discrete(
+    # breaks = area_breaks,
+    # values = area_colors,
     labels = ~ str_wrap(., width = 20),
     guide = guide_legend(
       override.aes = list(size = 1),
@@ -90,7 +90,7 @@ p <- df_viz %>%
   labs(
     x = "Wavelength (nm)",
     y = "Absorption (or specific absorption)",
-    color = NULL
+    linetype = NULL
   ) +
   facet_wrap(
     ~absorption_type_label,

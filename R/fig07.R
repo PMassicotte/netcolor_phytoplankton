@@ -89,9 +89,8 @@ p1 <- df_viz %>%
     size = 0.5
   ) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.01))) +
-  paletteer::scale_color_paletteer_c(
-    "pals::kovesi.linear_bgyw_15_100_c68",
-    direction = -1,
+  scale_color_viridis_c(
+    option = "A",
     breaks = scales::breaks_pretty(n = 4),
     guide = guide_colorbar(
       direction = "horizontal",
@@ -127,10 +126,7 @@ p2 <- df_viz %>%
     quantiles = c(0.025, 0.5, 0.975)
   ) +
   # scale_fill_viridis_c(option = "C", direction = -1) +
-  paletteer::scale_fill_paletteer_c(
-    "pals::kovesi.linear_bgyw_15_100_c68",
-    direction = -1
-  ) +
+  scale_fill_viridis_c(option = "A") +
   scale_y_discrete(expand = expansion(mult = c(0, 0.01))) +
   labs(
     x = str_wrap("Phytoplankton Apparent Absorption Wavelength (PAAW, nm)", 40),
@@ -177,10 +173,7 @@ p3 <- df_viz %>%
     quantiles = 0.5
     # quantiles = c(0.025, 0.5, 0.975)
   ) +
-  paletteer::scale_fill_paletteer_c(
-    "pals::kovesi.linear_bgyw_15_100_c68",
-    direction = -1
-  ) +
+  scale_fill_viridis_c() +
   scale_y_discrete(expand = expansion(mult = c(0, 0.01))) +
   labs(
     x = "Phytoplankton Apparent Absorption Wavelength (PAAW, nm)",

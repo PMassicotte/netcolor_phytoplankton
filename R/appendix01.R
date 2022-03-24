@@ -37,23 +37,11 @@ df_viz <- df %>%
 df_viz
 
 p1 <- df_viz %>%
-  ggplot(aes(x = date_month, y = bioregion_name, color = bioregion_name)) +
+  ggplot(aes(x = date_month, y = bioregion_name)) +
   geom_point(aes(size = n)) +
   geom_text(aes(label = n), color = "white", size = 3) +
   scale_x_date(breaks = scales::breaks_pretty(n = 10)) +
   scale_y_discrete(labels = ~ str_wrap(., width = 15)) +
-  scale_color_manual(
-    breaks = area_breaks,
-    values = area_colors,
-    guide = guide_legend(
-      order = 1,
-      label.position = "top",
-      keyheight = unit(0.1, "cm"),
-      keywidth = unit(3, "cm"),
-      label.theme = element_text(size = 5, family = "Montserrat Light"),
-      nrow = 3
-    )
-  ) +
   scale_size(range = c(4, 10)) +
   labs(
     x = "Sampling year",
@@ -93,26 +81,27 @@ p2 <- df %>%
       )
   )) %>%
   mutate(label = fct_reorder(label, as.numeric(season))) %>%
-  ggplot(aes(x = n, y = label, fill = bioregion_name)) +
-  geom_col(position = "dodge") +
+  ggplot(aes(x = n, y = label)) +
+  geom_col(position = "dodge", fill = "gray75") +
   geom_text(
     aes(label = n),
     size = 2.5,
     position = position_dodge(width = 0.9),
     hjust = -0.5
   ) +
-  scale_x_continuous(breaks = scales::pretty_breaks(n = 11)) +
-  scale_fill_manual(
-    breaks = area_breaks,
-    values = area_colors
+  scale_x_continuous(
+    breaks = scales::pretty_breaks(),
+    expand = expansion(mult = c(0, 0.2))
   ) +
   labs(
     x = "Number of observations",
     y = NULL
   ) +
+  facet_wrap(~str_wrap(bioregion_name, 20)) +
   theme(
     legend.position = "none",
-    axis.text.y = element_markdown()
+    axis.text.y = element_markdown(),
+    strip.text = element_text(size = 10)
   )
 
 p2
@@ -122,15 +111,11 @@ p2
 df
 
 p3 <- df %>%
-  ggplot(aes(x = -bathymetry, y = bioregion_name, color = bioregion_name)) +
+  ggplot(aes(x = -bathymetry, y = bioregion_name)) +
   ggbeeswarm::geom_quasirandom(size = 0.25, groupOnX = FALSE) +
   scale_x_log10() +
   scale_y_discrete(labels = ~ str_wrap(., width = 15)) +
   annotation_logticks(sides = "b", size = 0.1) +
-  scale_color_manual(
-    breaks = area_breaks,
-    values = area_colors
-  ) +
   labs(
     x = "Bathymetry (m)",
     y = NULL

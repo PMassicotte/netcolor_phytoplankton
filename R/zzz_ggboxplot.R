@@ -1,9 +1,9 @@
-ggboxlpot <- function(df, season, y, bioregion_name, strip.text = element_blank(), ylab) {
-  p <- ggplot(df, aes(x = {{ season }}, y = {{ y }}, fill = {{ bioregion_name }})) +
+ggboxlpot <- function(df, season, y, strip.text = element_blank(), ylab) {
+  p <- ggplot(df, aes(x = {{ season }}, y = {{ y }}, fill = {{ season }})) +
     geom_boxplot(size = 0.1, outlier.size = 0.25) +
     scale_fill_manual(
-      breaks = area_breaks,
-      values = area_colors
+      breaks = season_breaks,
+      values = season_colors
     ) +
     scale_y_log10(labels = scales::label_number()) +
     annotation_logticks(sides = "l", size = 0.1) +

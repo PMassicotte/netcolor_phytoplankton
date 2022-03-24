@@ -69,10 +69,14 @@ df %>%
 p <- df_viz %>%
   filter(avw_aphy < 490) %>% # ?
   ggplot(aes(x = date2, y = avw_aphy)) +
-  geom_point(aes(color = bioregion_name)) +
+  geom_point(aes(color = season, pch = bioregion_name)) +
   scale_color_manual(
+    breaks = season_breaks,
+    values = season_colors
+  ) +
+  scale_shape_manual(
     breaks = area_breaks,
-    values = area_colors
+    values = area_pch
   ) +
   geom_smooth(method = "lm", color = "#3c3c3c", size = 0.5, alpha = 0.2) +
   ggpmisc::stat_poly_eq(

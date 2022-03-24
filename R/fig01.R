@@ -65,9 +65,9 @@ p <- ggplot() +
     bins = 10,
     color = NA
   ) +
-  scale_color_manual(
+  scale_shape_manual(
     breaks = area_breaks,
-    values = area_colors,
+    values = area_pch,
     labels = ~ str_wrap(., 20),
     guide = guide_legend(
       order = 1,
@@ -78,7 +78,7 @@ p <- ggplot() +
         color = "white"
       ),
       nrow = 3,
-      override.aes = list(size = 2)
+      override.aes = list(stroke = 0.5, color = "white")
     )
   ) +
   paletteer::scale_fill_paletteer_c(
@@ -126,8 +126,9 @@ p <- ggplot() +
   ) +
   geom_sf(
     data = stations_sf,
-    aes(color = bioregion_name),
-    size = 0.25
+    aes(shape = bioregion_name),
+    size = 1,
+    stroke = 0.2
   ) +
   geom_hline(
     yintercept = 48,

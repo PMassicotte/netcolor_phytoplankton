@@ -42,7 +42,6 @@ df %>%
 p1 <- ggboxlpot(df,
   season,
   aphy,
-  bioregion_name,
   strip.text = element_text(size = 10),
   ylab = "a[phi]~(443)~(m^{-1})"
 )
@@ -50,7 +49,6 @@ p1 <- ggboxlpot(df,
 p2 <- ggboxlpot(df,
   season,
   aphy_specific,
-  bioregion_name,
   strip.text = element_blank(),
   ylab = "a[phi]^'*'~(443)~(m^{2}~mg^{-1})"
 )
@@ -58,7 +56,6 @@ p2 <- ggboxlpot(df,
 p3 <- ggboxlpot(df,
   season,
   anap,
-  bioregion_name,
   strip.text = element_text(size = 10),
   ylab = "a[NAP]~(443)~(m^{-1})"
 )
@@ -67,7 +64,6 @@ p3 <- ggboxlpot(df,
 p4 <- ggboxlpot(df %>% filter(snap > 0.00100),
   season,
   snap,
-  bioregion_name,
   strip.text = element_text(size = 10),
   ylab = "s[NAP]~(nm^{-1})"
 )

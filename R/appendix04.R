@@ -37,11 +37,11 @@ df_viz <- df %>%
   mutate(ratio_443_675 = wl443 / wl675)
 
 p <- df_viz %>%
-  ggplot(aes(x = season, y = ratio_443_675, fill = bioregion_name)) +
+  ggplot(aes(x = season, y = ratio_443_675, fill = season)) +
   geom_boxplot(size = 0.1, outlier.size = 0.25) +
   scale_fill_manual(
-    breaks = area_breaks,
-    values = area_colors
+    breaks = season_breaks,
+    values = season_colors
   ) +
   labs(
     x = NULL,

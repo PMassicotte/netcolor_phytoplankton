@@ -31,25 +31,26 @@ df <- read_csv(here("data","clean","apparent_visible_wavelength.csv")) %>%
 p <- df %>%
   ggplot(aes(x = avw_aphy, y = avw_ap)) +
   geom_point(
-    aes(fill = season),
-    color = "transparent",
+    aes(color = season, shape = bioregion_name),
     size = 1.5,
-    stroke = 0,
-    pch = 21,
     alpha = 0.3
   ) +
   labs(
     x = quote(PAAW[a[phi]]~(nm)),
     y = quote(PAAW[a[p]]~(nm)),
-    fill = NULL
+    color = NULL
   ) +
-  scale_fill_manual(
-    breaks = c("Winter", "Spring", "Summer", "Autumn"),
-    values = c("#014f86", "#40916c", "#ffcb69", "#e76f51"),
+  scale_color_manual(
+    breaks = season_breaks,
+    values = season_colors,
     guide = guide_legend(
       override.aes = list(size = 2, alpha = 1),
       label.theme = element_text(size = 7, family = "Montserrat Light")
     )
+  ) +
+  scale_shape_manual(
+    breaks = area_breaks,
+    values = area_pch
   ) +
   geom_smooth(
     color = "#3c3c3c",
@@ -75,6 +76,7 @@ p <- df %>%
     family = "Montserrat"
   ) +
   facet_wrap(~ str_wrap_factor(bioregion_name, 20)) +
+  guides(shape = "none") +
   theme(
     strip.text = element_text(size = 10)
   )

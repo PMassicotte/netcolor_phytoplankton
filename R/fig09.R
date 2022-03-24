@@ -45,11 +45,11 @@ df <- df %>%
 # Boxplot AVW -------------------------------------------------------------
 
 p1 <- df %>%
-  ggplot(aes(x = season, y = avw_aphy, fill = bioregion_name)) +
+  ggplot(aes(x = season, y = avw_aphy, fill = season)) +
   geom_boxplot(size = 0.1, outlier.size = 0.25) +
   scale_fill_manual(
-    breaks = area_breaks,
-    values = area_colors
+    breaks = season_breaks,
+    values = season_colors
   ) +
   scale_y_continuous(
     labels = scales::label_number(accuracy = 1),
