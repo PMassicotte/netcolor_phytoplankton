@@ -1,114 +1,101 @@
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 # AUTHOR:       Philippe Massicotte
 #
-# DESCRIPTION:  Show averaged absorption by bioregion.
+# DESCRIPTION:  Boxplot showing the seasonal evolution of selected variables.
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 rm(list = ls())
 
 source(here("R", "zzz.R"))
+source(here("R", "zzz_ggboxplot.R"))
+
+# Load data ---------------------------------------------------------------
 
 df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  select(
-    sample_id,
-    date,
+  filter(wavelength == 443) %>%
+  mutate(season = factor(season,
+    levels = c("Spring", "Summer", "Autumn", "Winter")
+  )) %>%
+  mutate(bioregion_name = factor(
     bioregion_name,
-    wavelength,
-    ap,
-    aphy,
-    aphy_specific,
-    anap
-  ) %>%
-  filter(between(wavelength, 400, 700))
-
-df
+    levels = c(
+      "Scotian Shelf",
+      "Northwest Atlantic Basin ocean (NAB)",
+      "Labrador"
+    )
+  )) %>%
+  mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
 
 df %>%
-  dtplyr::lazy_dt() %>%
   count(sample_id, wavelength) %>%
-  as_tibble() %>%
   assertr::verify(n == 1)
 
-df_viz <- df %>%
-  group_by(bioregion_name, wavelength) %>%
-  summarise(across(c(ap, aphy, aphy_specific, anap), mean)) %>%
-  ungroup() %>%
-  pivot_longer(c(ap, aphy, aphy_specific, anap),
-    names_to = "absorption_type",
-    values_to = "absorption"
-  )
+# Range
+df %>%
+  filter(snap > 0.001) %>%
+  pull(snap) %>%
+  range() %>%
+  round(digits = 3)
 
-# Plot --------------------------------------------------------------------
+# Fig 7 Boxplots on absorption --------------------------------------------
 
-facet_labels <- c(
-  "ap" = "a[P]~(m^{-1})",
-  "anap" = "a[NAP]~(m^{-1})",
-  "aphy" = "a[phi]~(m^{-1})",
-  "aphy_specific" = "a[phi]^'*'~(m^2~mg^{-1})"
+p1 <- ggboxlpot(df,
+  season,
+  aphy,
+  strip.text = element_text(size = 10),
+  ylab = "a[phi]~(443)~(m^{-1})"
 )
 
-facet_labels <- fct_inorder(facet_labels)
+p2 <- ggboxlpot(df,
+  season,
+  aphy_specific,
+  strip.text = element_blank(),
+  ylab = "a[phi]^'*'~(443)~(m^{2}~mg^{-1})"
+)
 
-set.seed(123)
+p3 <- ggboxlpot(df,
+  season,
+  anap,
+  strip.text = element_text(size = 10),
+  ylab = "a[NAP]~(443)~(m^{-1})"
+)
 
-df_all <- df %>%
-  pivot_longer(c(ap, aphy, aphy_specific, anap),
-    names_to = "absorption_type",
-    values_to = "absorption"
-  ) %>%
-  nest_by(bioregion_name, sample_id, absorption_type) %>%
-  group_by(bioregion_name, absorption_type) %>%
-  slice_sample(n = 100) %>%
-  ungroup() %>%
-  unnest(data) %>%
-  mutate(absorption_type_label = facet_labels[absorption_type])
+# There is 1 obvious outlier
+p4 <- ggboxlpot(df %>% filter(snap > 0.00100),
+  season,
+  snap,
+  strip.text = element_text(size = 10),
+  ylab = "s[NAP]~(nm^{-1})"
+)
 
-p <- df_viz %>%
-  mutate(absorption_type_label = facet_labels[absorption_type]) %>%
-  ggplot(aes(
-    x = wavelength,
-    y = absorption,
-    group = bioregion_name,
-    linetype = bioregion_name
-  )) +
-  geom_line(
-    data = df_all,
-    aes(group = sample_id),
-    size = 0.1,
-    alpha = 0.1
-  ) +
-  geom_line() +
-  scale_linetype_discrete(
-    # breaks = area_breaks,
-    # values = area_colors,
-    labels = ~ str_wrap(., width = 20),
-    guide = guide_legend(
-      override.aes = list(size = 1),
-      label.theme = element_text(size = 7, family = "Montserrat Light")
-    )
-  ) +
-  labs(
-    x = "Wavelength (nm)",
-    y = "Absorption (or specific absorption)",
-    linetype = NULL
-  ) +
-  facet_wrap(
-    ~absorption_type_label,
-    scales = "free_y",
-    labeller = labeller(absorption_type_label = label_parsed)
-  ) +
-  theme(
-    legend.justification = c(1, 1),
-    legend.position = c(0.45, 1),
-    legend.background = element_blank(),
-    legend.key = element_blank(),
-    strip.text = element_text(size = 10)
-  )
+p <- p1 + p2 + p3 + p4 +
+  plot_layout(ncol = 1) +
+  plot_annotation(tag_levels = "A") &
+  theme(plot.tag = element_text(size = 16, face = "bold"))
 
 ggsave(
-  here("graphs", "fig02.pdf"),
+  here("graphs","fig02.pdf"),
   device = cairo_pdf,
-  width = 180,
-  height = 120,
+  width = 190,
+  height = 240,
   units = "mm"
 )
+
+# p2 <- ggboxlpot(df,
+#   season,
+#   fucox,
+#   bioregion_name,
+#   strip.text = element_blank(),
+#   ylab = "Fucoxanthin~(mg~m^{-3})"
+# )
+#
+# p <- p1 / p2 +
+#   plot_annotation(tag_levels = "A") &
+#   theme(plot.tag = element_text(size = 16, face = "bold"))
+#
+# ggsave(
+#   here("graphs","fig07.pdf"),
+#   device = cairo_pdf,
+#   width = 8,
+#   height = 6
+# )

@@ -1,117 +1,127 @@
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 # AUTHOR:       Philippe Massicotte
 #
-# DESCRIPTION:  Show the aphy/anap ratio across the bioregions.
+# DESCRIPTION:
+
+# Beaucoup de relation aph(443)-chl ont été etablie avec quelques
+# croisieres seulement, ici avec une serie temporelle de 10-20ans, ca serait
+# bien de voir si ces relations tiennent toujours la route, je vais commencer a
+# remplir le google doc avec ce genre de relations, e.g., Bricaud et al., 1998 &
+# 2004 et on pourra ajouter une figure aph440 vs chl (bricaud utilise 440 et non
+# 443).
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 rm(list = ls())
 
-source(here("R", "zzz.R"))
+source(here("R","zzz.R"))
 
-absorption <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  filter(wavelength == 443) %>%
-  mutate(bioregion_name = factor(
-    bioregion_name,
-    levels = c(
-      "Scotian Shelf",
-      "Northwest Atlantic Basin ocean (NAB)",
-      "Labrador"
-    )
-  )) %>%
-  mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
+df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
+  filter(wavelength == 443)
+
+# Add prediction from other models found in the literature ----------------
+
+df <- df %>%
+  mutate(bricaud_1998 = 0.0378 * hplcchla ^ 0.627) %>%
+  mutate(bricaud_2004 = 0.0654 * hplcchla ^ 0.728) %>%
+  mutate(devred_2006 = ((0.0839 - 0.0176) / 1.613) * (1 - exp(-1.613 * hplcchla)) + 0.0176 * hplcchla)
 
 # Plot --------------------------------------------------------------------
 
-formula <- y ~ x
+df_viz <- df %>%
+  filter(hplcchla > 0) %>%
+  mutate(bioregion_name = factor(
+  bioregion_name,
+  levels = c(
+    "Scotian Shelf",
+    "Northwest Atlantic Basin ocean (NAB)",
+    "Labrador"
+  )
+)) %>%
+  mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
 
-p <- absorption %>%
-  filter(if_all(c(aphy, anap), ~ . > 0)) %>%
-  filter(anap <= 0.05) %>% # 1 obvious outlier
-  ggplot(aes(x = aphy, y = anap)) +
+p <- df_viz %>%
+  ggplot(aes(x = hplcchla, y = aphy)) +
   geom_point(
-    aes(color = season, pch = bioregion_name),
-    alpha = 0.5,
-    stroke = 0.25
+    aes(fill = season),
+    color = "transparent",
+    size = 1.5,
+    stroke = 0,
+    pch = 21,
+    alpha = 0.3
   ) +
+  geom_line(aes(y = bricaud_1998, lty = "Bricaud 1998")) +
+  geom_line(aes(y = bricaud_2004, lty = "Bricaud 2004")) +
+  geom_line(aes(y = devred_2006, lty = "Devred 2006")) +
   geom_smooth(
-    method = "glm",
+    method = "lm",
+    aes(lty = "This study"),
     se = FALSE,
-    method.args = list(family = Gamma(link = "log")),
-    color = "#3c3c3c",
-    size = 0.5
+    show.legend = FALSE,
+    color = "black"
   ) +
-  ggpmisc::stat_fit_tidy(
-    method = "glm",
-    method.args = list(formula = formula, family = Gamma(link = "log")),
-    label.x = "left",
-    label.y = "top",
-    family = "Montserrat",
+  scale_x_log10() +
+  scale_y_log10() +
+  annotation_logticks(sides = "bl", size = 0.25) +
+  ggpmisc::stat_poly_eq(
+    aes(label = ..eq.label..),
+    label.y.npc = 1,
     size = 2.5,
-    aes(
-      label = paste(
-        "y~`=`~ italic(e)^{",
-        signif(stat(Intercept_estimate), digits = 3),
-        "~+~",
-        signif(after_stat(x_estimate), digits = 3),
-        "~x}",
-        sep = ""
-      )
-    ),
-    parse = TRUE
+    family = "Montserrat"
   ) +
-  scale_color_manual(
+  ggpmisc::stat_poly_eq(
+    label.y.npc = 0.93,
+    aes(label = ..rr.label..),
+    size = 2.5,
+    family = "Montserrat"
+  ) +
+  scale_fill_manual(
     breaks = season_breaks,
     values = season_colors,
     guide = guide_legend(
       override.aes = list(size = 2, alpha = 1),
-      label.theme = element_text(size = 5, family = "Montserrat Light")
+      label.theme = element_text(size = 7, family = "Montserrat Light")
     )
   ) +
-  scale_shape_manual(
-    breaks = area_breaks,
-    values = area_pch
+  scale_linetype_manual(
+    breaks = c("This study", "Bricaud 1998", "Bricaud 2004", "Devred 2006"),
+    values = c(1, 2, 3, 4),
+    guide = guide_legend(
+      override.aes = list(size = 0.5, alpha = 1),
+      label.theme = element_text(size = 7, family = "Montserrat Light")
+    )
   ) +
   labs(
-    x = quote(a[phi](443)),
-    y = quote(a[NAP](443)),
-    color = NULL
+    x = quote("Chlorophyll-" * italic(a) ~ (mg~m^{-3})),
+    y = quote(a[phi] ~ (440) ~ (m^{-1}))
   ) +
-  facet_wrap(~bioregion_name_wrap) +
-  guides(shape = "none") +
+  paletteer::scale_color_paletteer_d(
+    "nbapalettes::pacers_venue",
+    guide = guide_legend(
+      label.position = "top",
+      override.aes = list(size = 1, lty = 1),
+      keywidth = unit(1, "cm"),
+      keyheight = unit(0.5, "cm"),
+      ncol = 2,
+      label.theme = element_text(size = 6, family = "Montserrat")
+    )
+  ) +
   theme(
-    panel.spacing.y = unit(3, "lines"),
-    strip.text = element_text(size = 10),
-    legend.justification = c(1, 1),
-    legend.position = c(0.96, 0.98),
-    legend.key.size = unit(0.5, "lines"),
-    legend.background = element_blank()
+    legend.title = element_blank(),
+    legend.background = element_blank(),
+    legend.key = element_blank(),
+    legend.spacing.x = unit(0.1, "cm"),
+    legend.spacing.y = unit(0, "cm")
   )
 
 ggsave(
-  here("graphs", "fig03.pdf"),
+  here("graphs","fig03.pdf"),
   device = cairo_pdf,
-  width = 180,
-  height = 70,
+  width = 120,
+  height = 80,
   units = "mm"
 )
 
+# Model stats -------------------------------------------------------------
 
-# GLM ---------------------------------------------------------------------
-
-# Create the models for Emmanuel. He wants the outputs for the paper.
-
-df <- absorption %>%
-  filter(if_all(c(aphy, anap), ~ . > 0)) %>%
-  filter(anap <= 0.05) %>% # 1 obvious outlier
-  group_nest(bioregion_name) %>%
-  mutate(mod_glm = map(data, ~ glm(
-    anap ~ aphy,
-    family = Gamma(link = "log"), data = .
-  )))
-
-df
-
-df %>%
-  mutate(glm_tidy = map(mod_glm, tidy)) %>%
-  unnest(glm_tidy) %>%
-  select(-where(is.list))
+mod <- lm(log10(aphy) ~ log10(hplcchla), data = df_viz)
+summary(mod)
