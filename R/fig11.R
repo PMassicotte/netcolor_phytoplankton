@@ -16,6 +16,7 @@ p1 <- df %>%
     pch = 21,
     alpha = 0.3
   ) +
+  scale_x_log10() +
   scale_fill_manual(
     breaks = c("Winter", "Spring", "Summer", "Autumn"),
     values = c("#014f86", "#40916c", "#ffcb69", "#e76f51"),
@@ -35,6 +36,7 @@ p2 <- df %>%
     pch = 21,
     alpha = 0.3
   ) +
+  scale_x_log10() +
   scale_fill_manual(
     breaks = c("Winter", "Spring", "Summer", "Autumn"),
     values = c("#014f86", "#40916c", "#ffcb69", "#e76f51"),
