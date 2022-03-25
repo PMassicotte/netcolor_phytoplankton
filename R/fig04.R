@@ -22,8 +22,6 @@ absorption <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
 
 # Plot --------------------------------------------------------------------
 
-formula <- y ~ x
-
 p <- absorption %>%
   filter(if_all(c(aphy, anap), ~ . > 0)) %>%
   filter(anap <= 0.05) %>% # 1 obvious outlier
@@ -33,31 +31,27 @@ p <- absorption %>%
     alpha = 0.5,
     stroke = 0.25
   ) +
+  scale_x_log10() +
+  scale_y_log10() +
+  annotation_logticks(sides = "bl", size = 0.25) +
   geom_smooth(
-    method = "glm",
+    method = "lm",
+    aes(lty = "This study"),
     se = FALSE,
-    method.args = list(family = Gamma(link = "log")),
-    color = "#3c3c3c",
-    size = 0.5
+    show.legend = FALSE,
+    color = "black"
   ) +
-  ggpmisc::stat_fit_tidy(
-    method = "glm",
-    method.args = list(formula = formula, family = Gamma(link = "log")),
-    label.x = "left",
-    label.y = "top",
-    family = "Montserrat",
+  ggpmisc::stat_poly_eq(
+    aes(label = ..eq.label..),
+    label.y.npc = 1,
     size = 2.5,
-    aes(
-      label = paste(
-        "y~`=`~ italic(e)^{",
-        signif(stat(Intercept_estimate), digits = 3),
-        "~+~",
-        signif(after_stat(x_estimate), digits = 3),
-        "~x}",
-        sep = ""
-      )
-    ),
-    parse = TRUE
+    family = "Montserrat"
+  ) +
+  ggpmisc::stat_poly_eq(
+    label.y.npc = 0.93,
+    aes(label = ..rr.label..),
+    size = 2.5,
+    family = "Montserrat"
   ) +
   scale_color_manual(
     breaks = season_breaks,
@@ -81,8 +75,8 @@ p <- absorption %>%
   theme(
     panel.spacing.y = unit(3, "lines"),
     strip.text = element_text(size = 10),
-    legend.justification = c(1, 1),
-    legend.position = c(0.96, 0.98),
+    legend.justification = c(1, 0),
+    legend.position = c(0.98, 0.06),
     legend.key.size = unit(0.5, "lines"),
     legend.background = element_blank()
   )

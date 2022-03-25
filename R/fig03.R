@@ -39,14 +39,11 @@ df_viz <- df %>%
 )) %>%
   mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
 
-p <- df_viz %>%
+p1 <- df_viz %>%
   ggplot(aes(x = hplcchla, y = aphy)) +
   geom_point(
-    aes(fill = season),
-    color = "transparent",
+    aes(color = season, shape = bioregion_name),
     size = 1.5,
-    stroke = 0,
-    pch = 21,
     alpha = 0.3
   ) +
   geom_line(aes(y = bricaud_1998, lty = "Bricaud 1998")) +
@@ -74,13 +71,17 @@ p <- df_viz %>%
     size = 2.5,
     family = "Montserrat"
   ) +
-  scale_fill_manual(
+  scale_color_manual(
     breaks = season_breaks,
     values = season_colors,
     guide = guide_legend(
       override.aes = list(size = 2, alpha = 1),
       label.theme = element_text(size = 7, family = "Montserrat Light")
     )
+  ) +
+  scale_shape_manual(
+    breaks = area_breaks,
+    values = area_pch
   ) +
   scale_linetype_manual(
     breaks = c("This study", "Bricaud 1998", "Bricaud 2004", "Devred 2006"),
@@ -92,32 +93,35 @@ p <- df_viz %>%
   ) +
   labs(
     x = quote("Chlorophyll-" * italic(a) ~ (mg~m^{-3})),
-    y = quote(a[phi] ~ (440) ~ (m^{-1}))
+    y = quote(a[phi] ~ (443) ~ (m^{-1}))
   ) +
-  paletteer::scale_color_paletteer_d(
-    "nbapalettes::pacers_venue",
-    guide = guide_legend(
-      label.position = "top",
-      override.aes = list(size = 1, lty = 1),
-      keywidth = unit(1, "cm"),
-      keyheight = unit(0.5, "cm"),
-      ncol = 2,
-      label.theme = element_text(size = 6, family = "Montserrat")
-    )
-  ) +
+  guides(shape = "none", ncol = 1) +
   theme(
     legend.title = element_blank(),
     legend.background = element_blank(),
     legend.key = element_blank(),
     legend.spacing.x = unit(0.1, "cm"),
-    legend.spacing.y = unit(0, "cm")
+    legend.spacing.y = unit(0, "cm"),
+    legend.position = "top",
+    legend.box = "vertical"
   )
+
+p2 <- p1 +
+  facet_wrap(~str_wrap(bioregion_name, 20)) +
+  theme(
+    legend.position = "none",
+    strip.text = element_text(
+      size = 8
+    )
+  )
+
+p <- p1 / p2
 
 ggsave(
   here("graphs","fig03.pdf"),
   device = cairo_pdf,
-  width = 120,
-  height = 80,
+  width = 180,
+  height = 180,
   units = "mm"
 )
 

@@ -12,7 +12,8 @@ source(here("R","zzz.R"))
 avw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv"))
 
 metadata <- read_csv(here("data", "clean", "metadata.csv")) %>%
-  select(sample_id, date, season)
+  select(sample_id, date, season, longitude, latitude, date) %>%
+  mutate(yday = lubridate::yday(date))
 
 df <- inner_join(avw, metadata, by = "sample_id")
 
@@ -40,7 +41,7 @@ df
 df_viz <- df %>%
   mutate(date2 = clock::date_group(date, "year")) %>%
   group_by(bioregion_name, date2, season) %>%
-  summarise(across(contains("avw"), mean), n = n()) %>%
+  summarise(across(c(contains("avw"), longitude, latitude, yday), mean), n = n()) %>%
   ungroup() %>%
   filter(n >= 10)
 
@@ -68,7 +69,10 @@ df %>%
 
 p <- df_viz %>%
   filter(avw_aphy < 490) %>% # ?
-  ggplot(aes(x = date2, y = avw_aphy)) +
+  group_by(season, bioregion_name) %>%
+  mutate(date_from_zero = date2 - lubridate::years(2000)) %>%
+  ungroup() %>%
+  ggplot(aes(x = date_from_zero, y = avw_aphy)) +
   geom_point(aes(color = season, pch = bioregion_name)) +
   scale_color_manual(
     breaks = season_breaks,
@@ -129,3 +133,86 @@ df_res
 
 df_res %>%
   unnest(tidied)
+
+# Weighted lm ------------------------------------------------------------- I
+
+# I have some comments here, I think we should 1) weight the linear regression
+# by the number of data used in the mean of a given year/region 2) perhaps do a
+# GLM rather than a lm and used the mean lat/lon and day of year of a given
+# region/year to include errors due to the sampling strategy, i have some code
+# for this if you want.
+
+df_viz
+
+mod <- df_viz %>%
+  filter(avw_aphy < 490) %>% # ?
+  mutate(date_from_zero = date2 - lubridate::years(2000)) %>%
+  group_by(bioregion_name, season) %>%
+  mutate(prop_n = n / sum(n)) %>%
+  nest() %>%
+  mutate(mod = map(data, ~ lm(
+    avw_aphy ~ date_from_zero,
+    data = ., weights = prop_n
+  ))) %>%
+  mutate(mod_spatial = map(
+    data,
+    ~ lm(
+      avw_aphy ~ date_from_zero + longitude + latitude + yday,
+      data = .,
+      weights = prop_n
+    )
+  )) %>%
+  mutate(tidied = map(mod, tidy)) %>%
+  mutate(glanced = map(mod, glance)) %>%
+  mutate(augmented = map(mod, augment))
+
+coeffs <- mod %>%
+  unnest(tidied)
+
+mod %>%
+  unnest(augmented) %>%
+  ggplot(aes(x = date_from_zero, y = avw_aphy)) +
+  geom_point(aes(color = season, pch = bioregion_name)) +
+  scale_color_manual(
+    breaks = season_breaks,
+    values = season_colors
+  ) +
+  scale_shape_manual(
+    breaks = area_breaks,
+    values = area_pch
+  ) +
+  geom_line(aes(y = .fitted)) +
+  geom_text(
+    data = coeffs %>% filter(term == "(Intercept)"),
+    aes(x = as.Date("0-01-01"), y = 470, label = round(estimate, digits = 2), hjust = -0.1)
+  ) +
+  geom_text(
+    data = coeffs %>% filter(term == "date_from_zero"),
+    aes(x = as.Date("0-01-01"), y = 467, label = round(estimate, digits = 7), hjust = -0.1)
+  ) +
+  labs(
+    x = NULL,
+    y = "Phytoplankton Apparent Absorption Wavelength (PAAW, nm)",
+    title = "Weighted lm"
+  ) +
+  facet_grid(season ~ str_wrap_factor(bioregion_name, 20), scales = "free_y") +
+  theme(
+    legend.position = "none",
+    panel.spacing = unit(1, "lines", data = NULL),
+    strip.text = element_text(size = 10)
+  )
+
+ggsave(
+  here("graphs","fig08b.pdf"),
+  device = cairo_pdf,
+  width = 180,
+  height = 120,
+  units = "mm"
+)
+
+mod %>%
+  select(bioregion_name, season, mod_spatial) %>%
+  mutate(tidied = map(mod_spatial, tidy)) %>%
+  unnest(tidied) %>%
+  select(-mod_spatial) %>%
+  gt::gt()
