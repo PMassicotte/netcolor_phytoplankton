@@ -31,9 +31,9 @@ p <- absorption %>%
     alpha = 0.5,
     stroke = 0.25
   ) +
-  scale_x_log10() +
-  scale_y_log10() +
-  annotation_logticks(sides = "bl", size = 0.25) +
+  # scale_x_log10() +
+  # scale_y_log10() +
+  # annotation_logticks(sides = "bl", size = 0.25) +
   geom_smooth(
     method = "lm",
     aes(lty = "This study"),
@@ -76,7 +76,7 @@ p <- absorption %>%
     panel.spacing.y = unit(3, "lines"),
     strip.text = element_text(size = 10),
     legend.justification = c(1, 0),
-    legend.position = c(0.98, 0.06),
+    legend.position = c(0.99, 0.65),
     legend.key.size = unit(0.5, "lines"),
     legend.background = element_blank()
   )
