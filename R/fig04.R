@@ -31,9 +31,9 @@ p <- absorption %>%
     alpha = 0.5,
     stroke = 0.25
   ) +
-  # scale_x_log10() +
-  # scale_y_log10() +
-  # annotation_logticks(sides = "bl", size = 0.25) +
+  scale_x_log10() +
+  scale_y_log10() +
+  annotation_logticks(sides = "bl", size = 0.25) +
   geom_smooth(
     method = "lm",
     aes(lty = "This study"),

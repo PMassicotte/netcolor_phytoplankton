@@ -20,21 +20,42 @@ df <- inner_join(avw, metadata, by = "sample_id")
 
 df
 
-# All the data
 df %>%
-  ggplot(aes(x = date, y = avw_aphy)) +
+  group_by(year = lubridate::year(date)) %>%
+  summarise(mean_avw_aphy = mean(avw_aphy, na.rm = TRUE)) %>%
+  ggplot(aes(x = year - 2000, y = mean_avw_aphy)) +
   geom_point() +
-  geom_smooth()
+  geom_smooth(method = "lm") +
+  ggpmisc::stat_poly_eq(
+    aes(label = ..eq.label..),
+    label.y.npc = 1,
+    size = 2.5,
+    family = "Montserrat"
+  ) +
+  ggpmisc::stat_poly_eq(
+    label.y.npc = 0.93,
+    aes(label = ..rr.label..),
+    size = 2.5,
+    family = "Montserrat"
+  )
+
 
 df %>%
-  ggplot(aes(x = date, y = avw_aphy, shape = bioregion_name)) +
+  group_by(year = lubridate::year(date), bioregion_name) %>%
+  summarise(mean_avw_aphy = mean(avw_aphy, na.rm = TRUE)) %>%
+  ggplot(aes(x = year - 2000, y = mean_avw_aphy)) +
   geom_point() +
-  geom_smooth() +
-  scale_shape_manual(
-    breaks = area_breaks,
-    values = area_pch
+  geom_smooth(method = "lm") +
+  ggpmisc::stat_poly_eq(
+    aes(label = ..eq.label..),
+    label.y.npc = 1,
+    size = 2.5,
+    family = "Montserrat"
   ) +
-  facet_wrap(~bioregion_name, ncol = 1) +
-  theme(
-    legend.position = "none"
-  )
+  ggpmisc::stat_poly_eq(
+    label.y.npc = 0.93,
+    aes(label = ..rr.label..),
+    size = 2.5,
+    family = "Montserrat"
+  ) +
+  facet_wrap(~bioregion_name)

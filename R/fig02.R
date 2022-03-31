@@ -26,6 +26,13 @@ df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
   )) %>%
   mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
 
+# PAAW
+
+paaw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv"))
+
+df <- df %>%
+  left_join(paaw, by = c("sample_id", "bioregion_name"))
+
 df %>%
   count(sample_id, wavelength) %>%
   assertr::verify(n == 1)
@@ -79,7 +86,15 @@ p5 <- ggboxlpot(df %>% filter(snap > 0.00100),
   ylab = "s[NAP]~(nm^{-1})"
 )
 
-p <- p1 + p2 + p3 + p4 + p5 +
+p6 <- ggboxlpot(
+  df,
+  season,
+  avw_aphy,
+  strip.text = element_text(size = 10),
+  ylab = "PAAW~(nm)"
+)
+
+p <- p1 + p2 + p3 + p4 + p5 + p6 +
   plot_layout(ncol = 1) +
   plot_annotation(tag_levels = "A") &
   theme(plot.tag = element_text(size = 16, face = "bold"))
@@ -88,7 +103,7 @@ ggsave(
   here("graphs","fig02.pdf"),
   device = cairo_pdf,
   width = 190,
-  height = 280,
+  height = 330,
   units = "mm"
 )
 
