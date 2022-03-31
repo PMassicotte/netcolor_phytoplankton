@@ -87,12 +87,22 @@ p <- df_viz %>%
     y = quote(a[phi](443) / a[phi](675)),
     color = NULL
   ) +
-  facet_wrap(~bioregion_name_wrap) +
   guides(shape = "none") +
   theme(
     panel.spacing.y = unit(3, "lines"),
     strip.text = element_text(size = 10)
   )
+
+ggsave(
+  here("graphs", "fig05b.pdf"),
+  device = cairo_pdf,
+  width = 180,
+  height = 70,
+  units = "mm"
+)
+
+p2 <- p +
+  facet_wrap(~bioregion_name_wrap)
 
 ggsave(
   here("graphs", "fig05.pdf"),

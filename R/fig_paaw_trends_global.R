@@ -20,7 +20,7 @@ df <- inner_join(avw, metadata, by = "sample_id")
 
 df
 
-df %>%
+p1 <- df %>%
   group_by(year = lubridate::year(date)) %>%
   summarise(mean_avw_aphy = mean(avw_aphy, na.rm = TRUE)) %>%
   ggplot(aes(x = year - 2000, y = mean_avw_aphy)) +
@@ -40,7 +40,7 @@ df %>%
   )
 
 
-df %>%
+p2 <- df %>%
   group_by(year = lubridate::year(date), bioregion_name) %>%
   summarise(mean_avw_aphy = mean(avw_aphy, na.rm = TRUE)) %>%
   ggplot(aes(x = year - 2000, y = mean_avw_aphy)) +
@@ -59,3 +59,12 @@ df %>%
     family = "Montserrat"
   ) +
   facet_wrap(~bioregion_name)
+
+p1 / p2
+
+ggsave(
+  here("graphs", "fig11.pdf"),
+  device = cairo_pdf,
+  width = 6,
+  height = 6
+)
