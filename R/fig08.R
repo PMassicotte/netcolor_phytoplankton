@@ -70,7 +70,7 @@ df %>%
 p <- df_viz %>%
   filter(avw_aphy < 490) %>% # ?
   group_by(season, bioregion_name) %>%
-  mutate(date_from_zero = date2 - lubridate::years(2000)) %>%
+  mutate(date_from_zero = lubridate::year(date2 - lubridate::years(2000))) %>%
   ungroup() %>%
   ggplot(aes(x = date_from_zero, y = avw_aphy)) +
   geom_point(aes(color = season, pch = bioregion_name)) +
@@ -146,7 +146,7 @@ df_viz
 
 mod <- df_viz %>%
   filter(avw_aphy < 490) %>% # ?
-  mutate(date_from_zero = date2 - lubridate::years(2000)) %>%
+  mutate(date_from_zero = lubridate::year(date2 - lubridate::years(2000))) %>%
   group_by(bioregion_name, season) %>%
   mutate(prop_n = n / sum(n)) %>%
   nest() %>%
@@ -184,11 +184,11 @@ mod %>%
   geom_line(aes(y = .fitted)) +
   geom_text(
     data = coeffs %>% filter(term == "(Intercept)"),
-    aes(x = as.Date("0-01-01"), y = 470, label = round(estimate, digits = 2), hjust = -0.1)
+    aes(x = 0, y = 470, label = round(estimate, digits = 2), hjust = -0.1)
   ) +
   geom_text(
     data = coeffs %>% filter(term == "date_from_zero"),
-    aes(x = as.Date("0-01-01"), y = 467, label = round(estimate, digits = 7), hjust = -0.1)
+    aes(x = 0, y = 467, label = round(estimate, digits = 7), hjust = -0.1)
   ) +
   labs(
     x = NULL,
