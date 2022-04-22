@@ -60,7 +60,7 @@ gghisto <- function(df, var, label) {
 }
 
 p1 <- gghisto(df, aphy, "a[phi]~(443)~(m^{-1})")
-p2 <- gghisto(df, hplcchla, "Chlorophyll-italic(a)~(mg~m^{-3})")
+p2 <- gghisto(df, hplcchla, "'[Chl-a]'~(mg~m^{-3})")
 
 p3 <- gghisto(df, aphy_specific, "a[phi]^'*'~(443)~(m^2~mg^{-1})")
 p4 <- gghisto(df, ap, "a[p]~(443)~(m^{-1})")
@@ -68,8 +68,8 @@ p4 <- gghisto(df, ap, "a[p]~(443)~(m^{-1})")
 p5 <- gghisto(df, anap, "a[NAP]~(443)~(m^{-1})")
 p6 <- gghisto(df, snap, "S[NAP]~(nm^{-1})")
 
-p7 <- gghisto(df, fucox, "Fucoxanthin~(mg~m^{-3})")
-p8 <- gghisto(df, fucox_hplcchla_ratio, "Chlorophyll-italic(a)/Fucoxanthin")
+p7 <- gghisto(df, fucox, "'[Fucox]'~(mg~m^{-3})")
+p8 <- gghisto(df, fucox_hplcchla_ratio, "'[Chl-a]'/'[Fucox]'")
 
 p <- p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 +
   plot_layout(byrow = TRUE, ncol = 2) +

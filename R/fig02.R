@@ -121,3 +121,13 @@ my_aov <-
   )
 
 summary(my_aov)
+
+df %>%
+  filter(str_detect(bioregion_name, "Scotian")) %>%
+  group_by(season) %>%
+  summarise(mean_avw = mean(avw_aphy, na.rm = TRUE))
+
+df %>%
+  filter(str_detect(bioregion_name, "Labrador")) %>%
+  pull(avw_aphy) %>%
+  range()

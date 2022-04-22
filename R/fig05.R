@@ -1,21 +1,15 @@
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 # AUTHOR:       Philippe Massicotte
 #
-# DESCRIPTION:  The observed nonlinearity between Chl_a and the ratio of
-# phytoplankton absorption aph (443)/aph (675) indicating the packaging effect
-# and changes in the intracellular composition of pigments.
-#
-# Vishnu et al., Seasonal Variability in Bio-Optical Properties along the
-# Coastal Waters off Cochin.
+# DESCRIPTION:  Show the aphy/anap ratio across the bioregions.
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 rm(list = ls())
 
-source(here("R","zzz.R"))
+source(here("R", "zzz.R"))
 
-df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  filter(wavelength %in% c(443, 675)) %>%
-  select(sample_id, bioregion_name, season, wavelength, aphy, hplcchla, fucox) %>%
+absorption <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
+  filter(wavelength == 443) %>%
   mutate(bioregion_name = factor(
     bioregion_name,
     levels = c(
@@ -26,26 +20,12 @@ df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
   )) %>%
   mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
 
-df %>%
-  count(sample_id) %>%
-  assertr::verify(n == 2)
+# Plot --------------------------------------------------------------------
 
-# aphy443/aphy675 vs chla -------------------------------------------------
-
-df_viz <- df %>%
-  dtplyr::lazy_dt() %>%
-  group_by(sample_id, bioregion_name, bioregion_name_wrap, season) %>%
-  summarise(
-    aphy_443_675 = aphy[wavelength == 443] / aphy[wavelength == 675],
-    hplcchla = unique(hplcchla)
-  ) %>%
-  ungroup() %>%
-  as_tibble()
-
-df_viz
-
-p <- df_viz %>%
-  ggplot(aes(x = hplcchla, y = aphy_443_675)) +
+p1 <- absorption %>%
+  filter(if_all(c(aphy, anap), ~ . > 0)) %>%
+  filter(anap <= 0.05) %>% # 1 obvious outlier
+  ggplot(aes(x = aphy, y = anap)) +
   geom_point(
     aes(color = season, pch = bioregion_name),
     alpha = 0.5,
@@ -53,21 +33,24 @@ p <- df_viz %>%
   ) +
   scale_x_log10() +
   scale_y_log10() +
-  annotation_logticks(sides = "bl", size = 0.1) +
-  geom_smooth(method = "lm", color = "#3c3c3c", size = 0.5) +
+  annotation_logticks(sides = "bl", size = 0.25) +
+  geom_smooth(
+    method = "lm",
+    aes(lty = "This study"),
+    se = FALSE,
+    show.legend = FALSE,
+    color = "black"
+  ) +
   ggpmisc::stat_poly_eq(
     aes(label = ..eq.label..),
-    label.y.npc = 0.95,
-    label.x.npc = 1,
-    size = 3,
-    coef.digits = 3,
+    label.y.npc = 1,
+    size = 2.5,
     family = "Montserrat"
   ) +
   ggpmisc::stat_poly_eq(
-    label.y.npc = 0.88,
-    label.x.npc = 1,
+    label.y.npc = 0.93,
     aes(label = ..rr.label..),
-    size = 3,
+    size = 2.5,
     family = "Montserrat"
   ) +
   scale_color_manual(
@@ -75,7 +58,7 @@ p <- df_viz %>%
     values = season_colors,
     guide = guide_legend(
       override.aes = list(size = 2, alpha = 1),
-      label.theme = element_text(size = 7, family = "Montserrat Light")
+      label.theme = element_text(size = 5, family = "Montserrat Light")
     )
   ) +
   scale_shape_manual(
@@ -83,48 +66,46 @@ p <- df_viz %>%
     values = area_pch
   ) +
   labs(
-    x = quote("Chlorophyll-" * italic(a) ~ (mg~m^{-3})),
-    y = quote(a[phi](443) / a[phi](675)),
+    x = quote(a[phi](443)),
+    y = quote(a[NAP](443)),
     color = NULL
   ) +
+  facet_wrap(~bioregion_name_wrap) +
   guides(shape = "none") +
   theme(
     panel.spacing.y = unit(3, "lines"),
-    strip.text = element_text(size = 10)
+    strip.text = element_text(size = 10),
+    legend.justification = c(1, 0),
+    legend.position = c(0.99, 0.05),
+    legend.key.size = unit(0.5, "lines"),
+    legend.background = element_blank()
   )
-
-ggsave(
-  here("graphs", "fig05b.pdf"),
-  device = cairo_pdf,
-  width = 180,
-  height = 70,
-  units = "mm"
-)
-
-p2 <- p +
-  facet_wrap(~bioregion_name_wrap)
 
 ggsave(
   here("graphs", "fig05.pdf"),
   device = cairo_pdf,
   width = 180,
-  height = 70,
+  height = 80,
   units = "mm"
 )
 
-# Does chla correlates more at 443 or 675 nm? -----------------------------
+# GLM ---------------------------------------------------------------------
 
-# Numbers for the paper
+# Create the models for Emmanuel. He wants the outputs for the paper.
+
+df <- absorption %>%
+  filter(if_all(c(aphy, anap), ~ . > 0)) %>%
+  filter(anap <= 0.05) %>% # 1 obvious outlier
+  group_nest(bioregion_name) %>%
+  mutate(mod_glm = map(data, ~ glm(
+    anap ~ aphy,
+    family = Gamma(link = "log"), data = .
+  )))
+
+df
+
 df %>%
-  pivot_wider(names_from = wavelength, values_from = aphy, names_prefix = "wl") %>%
-  select(hplcchla, fucox, wl443, wl675) %>%
-  mutate(across(everything(), log10)) %>%
-  # replace infinite values with NA
-  mutate(across(everything(), ~ifelse(is.infinite(.), NA, .))) %>%
-  correlate(use = "pairwise.complete.obs") %>%
-  focus(starts_with("wl"))
+  mutate(glm_tidy = map(mod_glm, tidy)) %>%
+  unnest(glm_tidy) %>%
+  select(-where(is.list))
 
-# What is the average R2? -------------------------------------------------
-
-mod <- lm(log10(aphy_443_675) ~ log10(hplcchla), data = df_viz)
-summary(mod)

@@ -1,61 +1,28 @@
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 # AUTHOR:       Philippe Massicotte
 #
-# DESCRIPTION:
-
-# Beaucoup de relation aph(443)-chl ont été etablie avec quelques
-# croisieres seulement, ici avec une serie temporelle de 10-20ans, ca serait
-# bien de voir si ces relations tiennent toujours la route, je vais commencer a
-# remplir le google doc avec ce genre de relations, e.g., Bricaud et al., 1998 &
-# 2004 et on pourra ajouter une figure aph440 vs chl (bricaud utilise 440 et non
-# 443).
+# DESCRIPTION:  Figure asked by Emmanuel.
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 rm(list = ls())
 
-source(here("R","zzz.R"))
+source(here("R", "zzz.R"))
 
 df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  filter(wavelength == 443)
+  filter(wavelength == 443) %>%
+  select(sample_id, season, bioregion_name, fucox, hplcchla)
 
-# Add prediction from other models found in the literature ----------------
+paaw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv"))
 
-df <- df %>%
-  mutate(bricaud_1998 = 0.0378 * hplcchla ^ 0.627) %>%
-  mutate(bricaud_2004 = 0.0654 * hplcchla ^ 0.728) %>%
-  mutate(devred_2006 = ((0.0839 - 0.0176) / 1.613) * (1 - exp(-1.613 * hplcchla)) + 0.0176 * hplcchla)
+df_viz <- inner_join(df, paaw)
 
-# Plot --------------------------------------------------------------------
+df_viz
 
-df_viz <- df %>%
-  filter(hplcchla > 0) %>%
-  mutate(bioregion_name = factor(
-  bioregion_name,
-  levels = c(
-    "Scotian Shelf",
-    "Northwest Atlantic Basin ocean (NAB)",
-    "Labrador"
-  )
-)) %>%
-  mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
-
-p1 <- df_viz %>%
-  ggplot(aes(x = hplcchla, y = aphy)) +
-  geom_point(
-    aes(color = season, shape = bioregion_name),
-    size = 1.5,
-    alpha = 0.3
-  ) +
-  geom_line(aes(y = bricaud_1998, lty = "Bricaud 1998")) +
-  geom_line(aes(y = bricaud_2004, lty = "Bricaud 2004")) +
-  geom_line(aes(y = devred_2006, lty = "Devred 2006")) +
-  geom_smooth(
-    method = "lm",
-    aes(lty = "This study"),
-    se = FALSE,
-    show.legend = FALSE,
-    color = "black"
-  ) +
+p <- df_viz %>%
+  filter(fucox > 0) %>%
+  ggplot(aes(x = hplcchla, y = fucox)) +
+  geom_point(aes(color = season, shape = bioregion_name)) +
+  geom_smooth(method = "lm", color = "black", se = FALSE) +
   scale_x_log10() +
   scale_y_log10() +
   annotation_logticks(sides = "bl", size = 0.25) +
@@ -73,29 +40,17 @@ p1 <- df_viz %>%
   ) +
   scale_color_manual(
     breaks = season_breaks,
-    values = season_colors,
-    guide = guide_legend(
-      override.aes = list(size = 2, alpha = 1),
-      label.theme = element_text(size = 7, family = "Montserrat Light")
-    )
+    values = season_colors
   ) +
   scale_shape_manual(
     breaks = area_breaks,
     values = area_pch
   ) +
-  scale_linetype_manual(
-    breaks = c("This study", "Bricaud 1998", "Bricaud 2004", "Devred 2006"),
-    values = c(1, 2, 3, 4),
-    guide = guide_legend(
-      override.aes = list(size = 0.5, alpha = 1),
-      label.theme = element_text(size = 7, family = "Montserrat Light")
-    )
-  ) +
   labs(
-    x = quote("Chlorophyll-" * italic(a) ~ (mg~m^{-3})),
-    y = quote(a[phi] ~ (443) ~ (m^{-1}))
+    x = quote("[Chl-a]" ~ (mg~m^{-3})),
+    y = quote("[Fucox]" ~ (mg~m^{-3}))
   ) +
-  guides(shape = "none", ncol = 1) +
+  # guides(shape = "none", ncol = 1) +
   theme(
     legend.title = element_blank(),
     legend.background = element_blank(),
@@ -106,26 +61,11 @@ p1 <- df_viz %>%
     legend.box = "vertical"
   )
 
-p2 <- p1 +
-  facet_wrap(~str_wrap(bioregion_name, 20)) +
-  theme(
-    legend.position = "none",
-    strip.text = element_text(
-      size = 8
-    )
-  )
-
-p <- p1 / p2
+p
 
 ggsave(
-  here("graphs","fig03.pdf"),
-  device = cairo_pdf,
-  width = 180,
-  height = 180,
-  units = "mm"
+  here("graphs", "fig03.pdf"),
+  width = 5,
+  height = 5,
+  device = cairo_pdf
 )
-
-# Model stats -------------------------------------------------------------
-
-mod <- lm(log10(aphy) ~ log10(hplcchla), data = df_viz)
-summary(mod)
