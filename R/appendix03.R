@@ -1,6 +1,6 @@
 rm(list = ls())
 
-source(here("R","zzz.R"))
+source(here("R", "zzz.R"))
 
 df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
   filter(wavelength %in% c(443, 675))
@@ -12,13 +12,13 @@ df_viz <- df %>%
 
 df_viz %>%
   mutate(bioregion_name = factor(
-  bioregion_name,
-  levels = c(
-    "Scotian Shelf",
-    "Northwest Atlantic Basin ocean (NAB)",
-    "Labrador"
-  )
-)) %>%
+    bioregion_name,
+    levels = c(
+      "Scotian Shelf",
+      "Northwest Atlantic Basin ocean (NAB)",
+      "Labrador"
+    )
+  )) %>%
   mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
 
 
@@ -67,7 +67,7 @@ p <- df_viz %>%
     values = area_pch
   ) +
   labs(
-    x = quote("[Fucox]" ~ (mg~m^{-3})),
+    x = quote("[Fucox]" ~ (mg ~ m^{-3})),
     y = quote(a[phi] ~ (443) / a[phi] ~ (675))
   ) +
   guides(shape = "none", ncol = 1) +

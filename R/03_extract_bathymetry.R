@@ -10,7 +10,7 @@ rm(list = ls())
 crs_string <-
   "+proj=lcc +lat_1=49 +lat_2=77 +lon_0=-91.52 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"
 
-metadata <- read_csv(here("data","clean","metadata.csv"))
+metadata <- read_csv(here("data", "clean", "metadata.csv"))
 
 metadata
 
@@ -63,5 +63,4 @@ bathymetry
 # Save the data -----------------------------------------------------------
 
 bathymetry %>%
-  write_csv(here("data","clean","bathymetry.csv"))
-
+  write_csv(here("data", "clean", "bathymetry.csv"))

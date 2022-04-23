@@ -6,7 +6,7 @@
 
 rm(list = ls())
 
-absorption <- data.table::fread(here("data","clean","absorption.csv")) %>%
+absorption <- data.table::fread(here("data", "clean", "absorption.csv")) %>%
   as_tibble()
 
 absorption
@@ -27,7 +27,6 @@ df
 # Fit an exponential model ------------------------------------------------
 
 fit_exponential <- function(data) {
-
   reference_wl <- 500
 
   a0 <- data$anap[data$wavelength == reference_wl]
@@ -63,9 +62,9 @@ df <- df %>%
 set.seed(2020)
 
 df_model <- df %>%
-  slice_sample(n= 49) %>%
+  slice_sample(n = 49) %>%
   select(sample_id, data_model = data, model) %>%
-  mutate(pred = map(model, ~predict(., newdata = list(wavelength = 380:730)))) %>%
+  mutate(pred = map(model, ~ predict(., newdata = list(wavelength = 380:730)))) %>%
   mutate(wl = list(380:730))
 
 df_viz <- df_model %>%
@@ -74,7 +73,7 @@ df_viz <- df_model %>%
 df_pred <- df_model %>%
   unnest(c(wl, pred))
 
-p <- df_viz %>%
+df_viz %>%
   ggplot(aes(x = wavelength, y = anap)) +
   geom_point(size = 0.1) +
   geom_line(data = df_pred, aes(x = wl, y = pred), color = "red") +
@@ -83,7 +82,9 @@ p <- df_viz %>%
   labs(
     title = "Examples of fitted non-algal absorption spectra",
     x = "Wavelength (nm)",
-    y = bquote("Non-algal absorption" ~ (m^{-1}))
+    y = bquote("Non-algal absorption" ~ (m^{
+      -1
+    }))
   ) +
   theme(
     legend.title = element_blank(),
@@ -92,13 +93,6 @@ p <- df_viz %>%
     plot.title = element_text(hjust = 0),
     legend.position = "top"
   )
-
-ggsave(
-  here("graphs","02_non_algal_absorption_spectra_vs_fitted.pdf"),
-  device = cairo_pdf,
-  width = 12,
-  height = 7
-)
 
 # Filter out bad models ---------------------------------------------------
 
@@ -127,4 +121,4 @@ df <- df %>%
 
 df %>%
   select(sample_id, snap) %>%
-  write_csv(here("data","clean","non_algal_absorption_slope.csv"))
+  write_csv(here("data", "clean", "non_algal_absorption_slope.csv"))

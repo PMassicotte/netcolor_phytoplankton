@@ -16,16 +16,16 @@ library(broom)
 library(glue)
 library(patchwork)
 library(data.table)
-# library(stars)
+library(stars)
 library(ggtext)
-# library(corrr)
 library(here)
 library(terra)
 library(ggspatial)
 library(ggridges)
+library(MBA)
 
 # library(furrr)
-# plan(multiprocess(workers = availableCores() - 1))
+# plan(multisession(workers = availableCores() - 1))
 
 # Set default ggplot2 font size and font family
 # devtools::install_github("PMassicotte/ggpmthemes")
@@ -45,6 +45,7 @@ source(here("R", "02_calculate_slope_non_algal_absorption.R"))
 source(here("R", "03_extract_bathymetry.R"))
 source(here("R", "04_classify_observations_into_bioregions.R"))
 source(here("R", "05_merge_all_data_into_single_csv.R"))
+source(here("R", "06_calculate_apparent_visible_wavelength.R"))
 
 # Figures for the manuscript ----------------------------------------------
 

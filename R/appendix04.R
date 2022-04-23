@@ -53,7 +53,7 @@ p <- df_viz %>%
   )
 
 ggsave(
-  here("graphs","appendix04.pdf"),
+  here("graphs", "appendix04.pdf"),
   device = cairo_pdf,
   width = 180,
   height = 70,

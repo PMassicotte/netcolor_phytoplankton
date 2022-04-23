@@ -12,7 +12,7 @@ rm(list = ls())
 
 source(here("R", "zzz.R"))
 
-aphy <- read_csv(here("data","clean","merged_dataset.csv")) %>%
+aphy <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
   select(sample_id, bioregion_name, wavelength, aphy, ap) %>%
   filter(between(wavelength, 400, 700))
 
@@ -31,7 +31,7 @@ df %>%
   facet_wrap(~name, scales = "free_y")
 
 df <- df %>%
-  mutate(across(contains("aphy"), .fns = list("avw" = ~sum(.) / sum(. / wavelength))))
+  mutate(across(contains("aphy"), .fns = list("avw" = ~ sum(.) / sum(. / wavelength))))
 
 # No influence of spectra normalization (it was expected!)
 df %>%
@@ -40,7 +40,7 @@ df %>%
 # Lets calculate it for all the absorption spectra
 df <- aphy %>%
   group_by(sample_id, bioregion_name) %>%
-  summarise(across(c(aphy, ap), ~sum(.) / sum(. / wavelength), .names = "avw_{.col}")) %>%
+  summarise(across(c(aphy, ap), ~ sum(.) / sum(. / wavelength), .names = "avw_{.col}")) %>%
   ungroup()
 
 df
