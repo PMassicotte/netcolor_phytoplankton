@@ -40,7 +40,7 @@ metadata <- metadata %>%
   mutate(
     bioregion_name = case_when(
       bioregion_position == "North" ~ "Labrador",
-      bathymetry <= -600 & bioregion_position == "South" ~ "Northwest Atlantic Basin ocean (NAB)",
+      bathymetry <= -600 & bioregion_position == "South" ~ "NAB",
       bathymetry > -600 & bioregion_position == "South" ~ "Scotian Shelf",
       TRUE ~ NA_character_
     )

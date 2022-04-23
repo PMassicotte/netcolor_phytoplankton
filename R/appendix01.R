@@ -15,7 +15,15 @@ station_bathymetry <- read_csv(here("data", "clean", "bathymetry.csv"))
 df <- stations %>%
   select(sample_id, date, season) %>%
   inner_join(bioregions, by = "sample_id") %>%
-  inner_join(station_bathymetry, by = "sample_id")
+  inner_join(station_bathymetry, by = "sample_id") %>%
+  mutate(bioregion_name = factor(
+    bioregion_name,
+    levels = c(
+      "Scotian Shelf",
+      "NAB",
+      "Labrador"
+    )
+  ))
 
 df
 
@@ -127,7 +135,6 @@ p3 <- df %>%
 # Combine plots -----------------------------------------------------------
 
 p <- p1 / p2 / p3 +
-  # plot_layout(widths = c(1, 5, 5)) +
   plot_annotation(tag_levels = "A") &
   theme(
     plot.tag = element_text(face = "bold")

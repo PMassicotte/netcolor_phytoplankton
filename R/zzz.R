@@ -11,7 +11,7 @@ area_breaks <-
   c(
     "Labrador",
     "Scotian Shelf",
-    "Northwest Atlantic Basin ocean (NAB)"
+    "NAB"
   )
 
 area_pch <- c(2, 0, 3)

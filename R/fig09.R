@@ -9,7 +9,8 @@ rm(list = ls())
 
 source(here("R","zzz.R"))
 
-avw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv"))
+avw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv")) %>%
+  filter(avw_aphy < 490)
 
 metadata <- read_csv(here("data", "clean", "metadata.csv")) %>%
   select(sample_id, date, season, longitude, latitude, date) %>%
@@ -24,13 +25,8 @@ df <- df %>%
   mutate(season = factor(season,
     levels = c("Spring", "Summer", "Autumn", "Winter")
   )) %>%
-  mutate(bioregion_name = factor(
-    bioregion_name,
-    levels = c(
-      "Scotian Shelf",
-      "Northwest Atlantic Basin ocean (NAB)",
-      "Labrador"
-    )
+  mutate(bioregion_name = factor(bioregion_name,
+    levels = c("Scotian Shelf", "NAB", "Labrador")
   ))
 
 df
@@ -39,9 +35,9 @@ df
 # calculation.
 
 df_viz <- df %>%
-  mutate(date2 = clock::date_group(date, "year")) %>%
-  group_by(bioregion_name, date2, season) %>%
-  summarise(across(c(contains("avw"), longitude, latitude, yday), mean), n = n()) %>%
+  mutate(year = lubridate::year(date)) %>%
+  group_by(bioregion_name, year, season) %>%
+  summarise(across(c(contains("avw")), mean), n = n()) %>%
   ungroup() %>%
   filter(n >= 10)
 
@@ -54,8 +50,6 @@ df_viz <- df_viz %>%
   filter(n() >= 5) %>%
   ungroup()
 
-df_viz
-
 df_viz <- df_viz %>%
   filter(season %in% c("Autumn", "Spring"))
 
@@ -67,12 +61,13 @@ df_viz <- df_viz %>%
 df %>%
   count(bioregion_name, season)
 
+# How to make a weighted lm directly in ggplot2:
+# https://bitbucket.org/aphalo/ggpmisc/issues/16/ggpmisc-stat_poly_eq-does-not-consider
+
+# Remove aes(weight = n) if we do not want to use a weighted lm
+
 p <- df_viz %>%
-  filter(avw_aphy < 490) %>% # ?
-  group_by(season, bioregion_name) %>%
-  mutate(date_from_zero = lubridate::year(date2 - lubridate::years(2000))) %>%
-  ungroup() %>%
-  ggplot(aes(x = date_from_zero, y = avw_aphy)) +
+  ggplot(aes(x = year, y = avw_aphy)) +
   geom_point(aes(color = season, pch = bioregion_name)) +
   scale_color_manual(
     breaks = season_breaks,
@@ -82,27 +77,40 @@ p <- df_viz %>%
     breaks = area_breaks,
     values = area_pch
   ) +
-  geom_smooth(method = "lm", color = "#3c3c3c", size = 0.5, alpha = 0.2) +
-  ggpmisc::stat_poly_eq(
-    aes(label = ..eq.label..),
-    label.y.npc = 0.12,
-    label.x.npc = 0.2,
-    size = 2.5,
-    coef.digits = 4,
-    family = "Montserrat"
+  # geom_smooth(method = "lm", formula = y ~ x, color = "#3c3c3c", size = 0.5, alpha = 0.2) +
+  geom_smooth(
+    aes(weight = n),
+    method = "lm",
+    formula = y ~ x,
+    color = "#3c3c3c",
+    size = 0.5,
+    alpha = 0.2
   ) +
   ggpmisc::stat_poly_eq(
-    label.y.npc = 0.05,
-    label.x.npc = 0.2,
-    aes(label = ..rr.label..),
+    aes(weight = n, label = ..eq.label..),
+    formula = y ~ x,
+    label.x.npc = 0.1,
+    label.y.npc = 0.12,
+    coef.digits = 4,
+    parse = TRUE,
+    family = "Montserrat",
     size = 2.5,
-    family = "Montserrat"
+  ) +
+  ggpmisc::stat_poly_eq(
+    aes(weight = n, label = ..rr.label..),
+    formula = y ~ x,
+    label.x.npc = 0.1,
+    label.y.npc = 0.05,
+    coef.digits = 4,
+    parse = TRUE,
+    family = "Montserrat",
+    size = 2.5,
   ) +
   labs(
-    x = "Year",
-    y = "Phytoplankton Apparent Absorption Wavelength (PAAW, nm)"
+    x = NULL,
+    y = "PAAW (nm)"
   ) +
-  facet_grid(season ~ str_wrap_factor(bioregion_name, 20), scales = "free_y") +
+  facet_grid(season ~ str_wrap_factor(bioregion_name, 20), scales = "fixed") +
   theme(
     legend.position = "none",
     panel.spacing = unit(1, "lines", data = NULL),
@@ -117,13 +125,12 @@ ggsave(
   units = "mm"
 )
 
-# Calculate the average increase/decrease of PAAW in spring and autumn.
+# Calculate the average increase/decrease of PAAW in spring and au --------
 
 df_viz
 
 # TODO: See if should report these min/max in the manuscript
 df_res <- df_viz %>%
-  mutate(year = lubridate::year(date2)) %>%
   group_nest(bioregion_name, season) %>%
   mutate(model = map(data, ~lm(avw_aphy ~ year, data = .))) %>%
   mutate(augmented = map(model, augment)) %>%
@@ -145,80 +152,29 @@ df_res %>%
 df_viz
 
 mod <- df_viz %>%
-  filter(avw_aphy < 490) %>% # ?
-  mutate(date_from_zero = lubridate::year(date2 - lubridate::years(2000))) %>%
   group_by(bioregion_name, season) %>%
   mutate(prop_n = n / sum(n)) %>%
   nest() %>%
   mutate(mod = map(data, ~ lm(
-    avw_aphy ~ date_from_zero,
-    data = ., weights = prop_n
+    avw_aphy ~ year,
+    data = ., weights = n
   ))) %>%
-  mutate(mod_spatial = map(
-    data,
-    ~ lm(
-      avw_aphy ~ date_from_zero + longitude + latitude + yday,
-      data = .,
-      weights = prop_n
-    )
-  )) %>%
   mutate(tidied = map(mod, tidy)) %>%
   mutate(glanced = map(mod, glance)) %>%
   mutate(augmented = map(mod, augment))
+
+# These coefficients should be the same as those presented on the graph using
+# the ggpmisc package
+
+mod %>%
+  unnest(glanced)
 
 coeffs <- mod %>%
   unnest(tidied)
 
 mod %>%
-  unnest(augmented) %>%
-  ggplot(aes(x = date_from_zero, y = avw_aphy)) +
-  geom_point(aes(color = season, pch = bioregion_name)) +
-  scale_color_manual(
-    breaks = season_breaks,
-    values = season_colors
-  ) +
-  scale_shape_manual(
-    breaks = area_breaks,
-    values = area_pch
-  ) +
-  geom_line(aes(y = .fitted)) +
-  ggpmisc::stat_poly_eq(
-    aes(label = ..eq.label..),
-    label.y.npc = 0.12,
-    label.x.npc = 0.2,
-    size = 2.5,
-    coef.digits = 4,
-    family = "Montserrat"
-  ) +
-  ggpmisc::stat_poly_eq(
-    label.y.npc = 0.05,
-    label.x.npc = 0.2,
-    aes(label = ..rr.label..),
-    size = 2.5,
-    family = "Montserrat"
-  ) +
-  labs(
-    x = "Year",
-    y = "Phytoplankton Apparent Absorption Wavelength (PAAW, nm)",
-    title = "Weighted lm"
-  ) +
-  facet_grid(season ~ str_wrap_factor(bioregion_name, 20), scales = "free_y") +
-  theme(
-    legend.position = "none",
-    panel.spacing = unit(1, "lines", data = NULL),
-    strip.text = element_text(size = 10)
-  )
-
-mod %>%
-  select(bioregion_name, season, mod_spatial) %>%
-  mutate(tidied = map(mod_spatial, tidy)) %>%
+  select(bioregion_name, season, mod) %>%
+  mutate(tidied = map(mod, tidy)) %>%
   unnest(tidied) %>%
-  select(-mod_spatial) %>%
-  gt::gt()
-
-mod %>%
-  select(bioregion_name, season, mod_spatial) %>%
-  mutate(glanced = map(mod_spatial, glance)) %>%
-  unnest(glanced) %>%
-  select(-mod_spatial) %>%
+  select(-mod) %>%
   gt::gt()

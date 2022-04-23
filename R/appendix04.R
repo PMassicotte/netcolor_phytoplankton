@@ -15,11 +15,10 @@ df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
     bioregion_name,
     levels = c(
       "Scotian Shelf",
-      "Northwest Atlantic Basin ocean (NAB)",
+      "NAB",
       "Labrador"
     )
-  )) %>%
-  mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
+  ))
 
 # df <- read_csv(here("data","clean","merged_dataset.csv")) %>%
 #   filter(wavelength %in% c(443, 675)) %>%
@@ -47,7 +46,7 @@ p <- df_viz %>%
     x = NULL,
     y = quote(a[phi](443) / a[phi](675))
   ) +
-  facet_wrap(~bioregion_name_wrap, scales = "free_y") +
+  facet_wrap(~bioregion_name, scales = "free_y") +
   theme(
     legend.position = "none",
     strip.text = element_text(size = 10)
