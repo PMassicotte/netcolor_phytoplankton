@@ -11,7 +11,7 @@ ggboxlpot <- function(df, season, y, strip.text = element_blank(), ylab) {
       x = NULL,
       y = parse(text = ylab)
     ) +
-    facet_wrap(~ bioregion_name_wrap, scales = "free_x", ncol = 3) +
+    facet_wrap(~ bioregion_name, scales = "free_x", ncol = 3) +
     theme(
       legend.position = "none",
       strip.text = strip.text

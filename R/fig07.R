@@ -59,19 +59,17 @@ df_viz <- df_viz %>%
     bioregion_name,
     levels = c(
       "Scotian Shelf",
-      "Northwest Atlantic Basin ocean (NAB)",
+      "NAB",
       "Labrador"
     )
-  )) %>%
-  mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
-
+  ))
 
 # Mean PAAW spectra -------------------------------------------------------
 
 df_viz
 
 mean_paaw <- df_viz %>%
-  group_by(bioregion_name_wrap, wavelength) %>%
+  group_by(bioregion_name, wavelength) %>%
   summarise(mean_normalized_aphy = mean(normalized_aphy)) %>%
   ungroup()
 
@@ -84,7 +82,7 @@ p1 <- df_viz %>%
   geom_line(size = 0.1) +
   geom_line(
     data = mean_paaw,
-    aes(x = wavelength, y = mean_normalized_aphy, group = bioregion_name_wrap),
+    aes(x = wavelength, y = mean_normalized_aphy, group = bioregion_name),
     inherit.aes = FALSE,
     size = 0.5
   ) +
@@ -102,7 +100,7 @@ p1 <- df_viz %>%
       title.theme = element_text(size = 9, family = "Montserrat")
     )
   ) +
-  facet_wrap(~bioregion_name_wrap, ncol = 1) +
+  facet_wrap(~bioregion_name, ncol = 1) +
   labs(
     x = "Wavelength (nm)",
     y = quote(Normalized~a[phi]~(nm^-1)),
@@ -118,7 +116,7 @@ p1 <- df_viz %>%
 # https://wilkelab.org/ggridges/articles/introduction.html
 p2 <- df_viz %>%
   distinct(sample_id, .keep_all = TRUE) %>%
-  ggplot(aes(avw_aphy, bioregion_name_wrap, fill = stat(x))) +
+  ggplot(aes(avw_aphy, bioregion_name, fill = stat(x))) +
   geom_density_ridges_gradient(
     rel_min_height = 0.01,
     size = 0.25,
@@ -127,12 +125,13 @@ p2 <- df_viz %>%
   ) +
   # scale_fill_viridis_c(option = "C", direction = -1) +
   paletteer::scale_fill_paletteer_c("pals::kovesi.rainbow_bgyr_35_85_c72") +
+  scale_x_continuous(limits = c(460, 502)) +
   scale_y_discrete(expand = expansion(mult = c(0, 0.01))) +
   labs(
-    x = str_wrap("Phytoplankton Apparent Absorption Wavelength (PAAW, nm)", 40),
+    x = str_wrap("PAAW (nm)", 40),
     y = NULL
   ) +
-  facet_wrap(~bioregion_name_wrap, ncol = 1, scales = "free_y", strip.position = "right") +
+  facet_wrap(~bioregion_name, ncol = 1, scales = "free", strip.position = "right") +
   coord_cartesian(clip = "off") +
   theme(
     legend.position = "none",
@@ -180,7 +179,7 @@ p3 <- df_viz %>%
     y = NULL
   ) +
   facet_wrap(
-    ~bioregion_name_wrap,
+    ~bioregion_name,
     ncol = 1,
     scales = "free_y",
     strip.position = "right"

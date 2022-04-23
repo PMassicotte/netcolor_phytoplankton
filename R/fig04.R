@@ -33,11 +33,10 @@ df_viz <- df %>%
   bioregion_name,
   levels = c(
     "Scotian Shelf",
-    "Northwest Atlantic Basin ocean (NAB)",
+    "NAB",
     "Labrador"
   )
-)) %>%
-  mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
+))
 
 p1 <- df_viz %>%
   ggplot(aes(x = hplcchla, y = aphy)) +
@@ -107,7 +106,7 @@ p1 <- df_viz %>%
   )
 
 p2 <- p1 +
-  facet_wrap(~bioregion_name_wrap) +
+  facet_wrap(~bioregion_name) +
   theme(
     legend.position = "none",
     strip.text = element_text(

@@ -15,11 +15,10 @@ df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
     bioregion_name,
     levels = c(
       "Scotian Shelf",
-      "Northwest Atlantic Basin ocean (NAB)",
+      "NAB",
       "Labrador"
     )
-  )) %>%
-  mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
+  ))
 
 df %>%
   count(sample_id) %>%
@@ -29,7 +28,7 @@ df %>%
 
 df_viz <- df %>%
   dtplyr::lazy_dt() %>%
-  group_by(sample_id, bioregion_name, bioregion_name_wrap, season) %>%
+  group_by(sample_id, bioregion_name, bioregion_name, season) %>%
   summarise(
     aphy_443_675 = aphy[wavelength == 443] / aphy[wavelength == 675],
     hplcchla = unique(hplcchla)
@@ -39,7 +38,7 @@ df_viz <- df %>%
 
 df_viz
 
-p <- df_viz %>%
+p1 <- df_viz %>%
   ggplot(aes(x = hplcchla, y = aphy_443_675)) +
   geom_point(
     aes(color = season, pch = bioregion_name),
@@ -83,7 +82,6 @@ p <- df_viz %>%
     color = NULL
   ) +
   guides(shape = "none") +
-  facet_wrap(~bioregion_name_wrap) +
   theme(
     panel.spacing.y = unit(3, "lines"),
     strip.text = element_text(size = 10),
@@ -93,10 +91,23 @@ p <- df_viz %>%
     legend.background = element_blank()
   )
 
+p2 <- p1 +
+  facet_wrap(~bioregion_name) +
+  theme(
+    legend.position = "none",
+    strip.text = element_text(
+      size = 8
+    )
+  )
+
+p <- p1 / p2 +
+  plot_annotation(tag_levels = "A") &
+  theme(plot.tag = element_text(size = 16, face = "bold"))
+
 ggsave(
   here("graphs", "fig06.pdf"),
   device = cairo_pdf,
   width = 180,
-  height = 80,
+  height = 180,
   units = "mm"
 )

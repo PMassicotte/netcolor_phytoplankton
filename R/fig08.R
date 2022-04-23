@@ -10,7 +10,7 @@
 
 rm(list = ls())
 
-source(here("R/zzz.R"))
+source(here("R", "zzz.R"))
 
 # Prepare the data --------------------------------------------------------
 
@@ -214,7 +214,7 @@ p3 <- df_viz %>%
     )
   ) +
   labs(
-    x = str_wrap("Phytoplankton Apparent Absorption Wavelength (PAAW, nm)", 40),
+    x = str_wrap("PAAW (nm)", 40),
     y = quote(a[phi] ~ (443) / a[phi] ~ (675))
   ) +
   theme(
@@ -248,124 +248,8 @@ df_viz %>%
 
 range(df_viz$aphy_ratio)
 
-# Bootstraping confidence intervals ---------------------------------------
-
-df_443 <- df %>%
-  filter(wavelength == 443)
-
-# Model 1 for chla --------------------------------------------------------
-
-mod1_bootstrap <- reg_intervals(
-  log10(hplcchla) ~ avw_aphy,
-  data = df_443,
-  type = "percentile",
-  keep_reps = TRUE
-)
-
-mod1_bootstrap
-
-# Model 2 for aphy specific -----------------------------------------------
-
-mod2_bootstrap <- reg_intervals(
-  log10(aphy_specific) ~ avw_aphy,
-  data = df_443,
-  type = "percentile",
-  keep_reps = TRUE
-)
-
-mod2_bootstrap
-
-# Model 3 for aphy ratio --------------------------------------------------
-
-df_443_675 <- df %>%
-  filter(wavelength %in% c(443, 675)) %>%
-  select(-aphy_specific, -hplcchla) %>%
-  pivot_wider(
-    names_from = wavelength,
-    values_from = aphy,
-    names_prefix = "aphy_wl"
-  ) %>%
-  mutate(aphy_ratio = aphy_wl443 / aphy_wl675)
-
-mod3_bootstrap <- reg_intervals(
-  aphy_ratio ~ avw_aphy + I(avw_aphy^2),
-  data = df_443_675,
-  type = "percentile",
-  keep_reps = TRUE
-)
-
-mod3_bootstrap
-
-df_model %>%
-  unnest(tidied)
-
-# Plots of the bootstrap results ------------------------------------------
-
-p4 <- mod1_bootstrap %>%
-  unnest(.replicates) %>%
-  ggplot(aes(x = estimate)) +
-  geom_histogram(fill = "gray65") +
-  geom_vline(aes(xintercept = .estimate), lty = 2) +
-  geom_vline(aes(xintercept = .lower), lty = 2) +
-  geom_vline(aes(xintercept = .upper), lty = 2) +
-  scale_color_discrete(guide = guide_legend(
-    override.aes = list(size = 1.5, alpha = 1))) +
-  labs(
-    x = "Estimate",
-    y = "Count"
-  ) +
-  theme(
-    legend.title = element_blank(),
-    legend.justification = c(0, 0),
-    legend.position = c(0.01, 0.1),
-    legend.text = element_text(size = 7, family = "Montserrat Light")
-  )
-
-p5 <- mod2_bootstrap %>%
-  unnest(.replicates) %>%
-  ggplot(aes(x = estimate)) +
-  geom_histogram(fill = "gray65") +
-  geom_vline(aes(xintercept = .estimate), lty = 2) +
-  geom_vline(aes(xintercept = .lower), lty = 2) +
-  geom_vline(aes(xintercept = .upper), lty = 2) +
-  scale_color_discrete(guide = guide_legend(
-    override.aes = list(size = 1.5, alpha = 1))) +
-  labs(
-    x = "Estimate",
-    y = "Count"
-  ) +
-  theme(
-    legend.title = element_blank(),
-    legend.justification = c(0, 0),
-    legend.position = c(0.01, 0.1),
-    legend.text = element_text(size = 7, family = "Montserrat Light")
-  )
-
-p6 <- mod3_bootstrap %>%
-  unnest(.replicates) %>%
-  ggplot(aes(x = estimate)) +
-  geom_histogram(fill = "gray65") +
-  geom_vline(aes(xintercept = .estimate), lty = 2) +
-  geom_vline(aes(xintercept = .lower), lty = 2) +
-  geom_vline(aes(xintercept = .upper), lty = 2) +
-  scale_color_discrete(guide = guide_legend(
-    override.aes = list(size = 1.5, alpha = 1))) +
-  labs(
-    x = "Estimate",
-    y = "Count"
-  ) +
-  facet_wrap(~term, scales = "free", ncol = 1) +
-  theme(
-    legend.title = element_blank(),
-    legend.justification = c(0, 0),
-    legend.position = c(0.01, 0.1),
-    legend.text = element_text(size = 7, family = "Montserrat Light"),
-    strip.text = element_blank()
-  )
-
 ## Save plots --------------------------------------------------------------
 
-# p <- p1 + p2 + p3 + p4 + p5 + p6 +
 p <- p1 + p2 + p3 +
   plot_layout(ncol = 1, byrow = FALSE) +
   plot_annotation(tag_levels = "A") &

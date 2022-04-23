@@ -14,7 +14,7 @@ absorption <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
     bioregion_name,
     levels = c(
       "Scotian Shelf",
-      "Northwest Atlantic Basin ocean (NAB)",
+      "NAB",
       "Labrador"
     )
   )) %>%
@@ -31,8 +31,8 @@ p1 <- absorption %>%
     alpha = 0.5,
     stroke = 0.25
   ) +
-  scale_x_log10() +
-  scale_y_log10() +
+  scale_x_log10(labels = scales::label_number()) +
+  scale_y_log10(labels = scales::label_number()) +
   annotation_logticks(sides = "bl", size = 0.25) +
   geom_smooth(
     method = "lm",

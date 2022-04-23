@@ -16,15 +16,13 @@ df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
   mutate(season = factor(season,
     levels = c("Spring", "Summer", "Autumn", "Winter")
   )) %>%
-  mutate(bioregion_name = factor(
-    bioregion_name,
+  mutate(bioregion_name = factor(bioregion_name,
     levels = c(
       "Scotian Shelf",
-      "Northwest Atlantic Basin ocean (NAB)",
+      "NAB",
       "Labrador"
     )
-  )) %>%
-  mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
+  ))
 
 # PAAW
 
@@ -58,7 +56,7 @@ p2 <- ggboxlpot(
   filter(df, wavelength == 675),
   season,
   aphy,
-  strip.text = element_text(size = 10),
+  strip.text = element_blank(),
   ylab = "a[phi]~(675)~(m^{-1})"
 )
 
@@ -74,7 +72,7 @@ p4 <- ggboxlpot(
   filter(df, wavelength == 443),
   season,
   anap,
-  strip.text = element_text(size = 10),
+  strip.text = element_blank(),
   ylab = "a[NAP]~(443)~(m^{-1})"
 )
 
@@ -82,7 +80,7 @@ p4 <- ggboxlpot(
 p5 <- ggboxlpot(df %>% filter(snap > 0.00100),
   season,
   snap,
-  strip.text = element_text(size = 10),
+  strip.text = element_blank(),
   ylab = "s[NAP]~(nm^{-1})"
 )
 
@@ -90,7 +88,7 @@ p6 <- ggboxlpot(
   df,
   season,
   avw_aphy,
-  strip.text = element_text(size = 10),
+  strip.text = element_blank(),
   ylab = "PAAW~(nm)"
 )
 
@@ -117,7 +115,7 @@ my_aov <-
   aov(
     log10(anap) ~ season,
     data = filter(df, wavelength == 443),
-    subset = bioregion_name == "Northwest Atlantic Basin ocean (NAB)"
+    subset = bioregion_name == "NAB"
   )
 
 summary(my_aov)
