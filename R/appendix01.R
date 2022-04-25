@@ -45,11 +45,10 @@ df_viz <- df %>%
 df_viz
 
 p1 <- df_viz %>%
-  ggplot(aes(x = date_month, y = bioregion_name)) +
-  geom_point(aes(size = n)) +
+  ggplot(aes(x = date_month, y = fct_rev(bioregion_name))) +
+  geom_point(aes(size = n), color = "#4c4c4c") +
   geom_text(aes(label = n), color = "white", size = 3) +
   scale_x_date(breaks = scales::breaks_pretty(n = 10)) +
-  scale_y_discrete(labels = ~ str_wrap(., width = 15)) +
   scale_size(range = c(4, 10)) +
   labs(
     x = "Sampling year",
@@ -88,9 +87,17 @@ p2 <- df %>%
         "Autumn"
       )
   )) %>%
+  mutate(bioregion_name = factor(
+    bioregion_name,
+    levels = c(
+      "Scotian Shelf",
+      "NAB",
+      "Labrador"
+    )
+  )) %>%
   mutate(label = fct_reorder(label, as.numeric(season))) %>%
   ggplot(aes(x = n, y = label)) +
-  geom_col(position = "dodge", fill = "gray75") +
+  geom_col(position = "dodge", fill = "#4c4c4c") +
   geom_text(
     aes(label = n),
     size = 2.5,
@@ -105,7 +112,7 @@ p2 <- df %>%
     x = "Number of observations",
     y = NULL
   ) +
-  facet_wrap(~str_wrap(bioregion_name, 20)) +
+  facet_wrap(~ bioregion_name) +
   theme(
     legend.position = "none",
     axis.text.y = element_markdown(),
@@ -120,7 +127,7 @@ df
 
 p3 <- df %>%
   ggplot(aes(x = -bathymetry, y = bioregion_name)) +
-  ggbeeswarm::geom_quasirandom(size = 0.25, groupOnX = FALSE) +
+  ggbeeswarm::geom_quasirandom(size = 0.25, groupOnX = FALSE, color = "#4c4c4c") +
   scale_x_log10() +
   scale_y_discrete(labels = ~ str_wrap(., width = 15)) +
   annotation_logticks(sides = "b", size = 0.1) +

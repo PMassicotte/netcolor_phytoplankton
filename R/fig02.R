@@ -12,7 +12,14 @@ source(here("R", "zzz_ggboxplot.R"))
 # Load data ---------------------------------------------------------------
 
 df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  filter(wavelength %in% c(443, 675)) %>%
+  filter(wavelength %in% c(443, 675))
+
+# PAAW
+
+paaw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv"))
+
+df <- df %>%
+  left_join(paaw, by = c("sample_id", "bioregion_name")) %>%
   mutate(season = factor(season,
     levels = c("Spring", "Summer", "Autumn", "Winter")
   )) %>%
@@ -23,13 +30,6 @@ df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
       "Labrador"
     )
   ))
-
-# PAAW
-
-paaw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv"))
-
-df <- df %>%
-  left_join(paaw, by = c("sample_id", "bioregion_name"))
 
 df %>%
   count(sample_id, wavelength) %>%

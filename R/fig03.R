@@ -14,7 +14,17 @@ df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
 
 paaw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv"))
 
-df_viz <- inner_join(df, paaw)
+df_viz <- inner_join(df, paaw) %>%
+  mutate(season = factor(season,
+    levels = c("Spring", "Summer", "Autumn", "Winter")
+  )) %>%
+  mutate(bioregion_name = factor(bioregion_name,
+    levels = c(
+      "Scotian Shelf",
+      "NAB",
+      "Labrador"
+    )
+  ))
 
 df_viz
 

@@ -83,12 +83,13 @@ p1 <- df_viz %>%
   ) +
   guides(shape = "none") +
   theme(
-    panel.spacing.y = unit(3, "lines"),
-    strip.text = element_text(size = 10),
-    legend.justification = c(1, 1),
-    legend.position = c(0.99, 0.8),
-    legend.key.size = unit(0.5, "lines"),
-    legend.background = element_blank()
+    legend.title = element_blank(),
+    legend.background = element_blank(),
+    legend.key = element_blank(),
+    legend.spacing.x = unit(0.1, "cm"),
+    legend.spacing.y = unit(0, "cm"),
+    legend.position = "top",
+    legend.box = "vertical"
   )
 
 p2 <- p1 +
@@ -108,6 +109,6 @@ ggsave(
   here("graphs", "fig06.pdf"),
   device = cairo_pdf,
   width = 180,
-  height = 180,
+  height = 160,
   units = "mm"
 )
