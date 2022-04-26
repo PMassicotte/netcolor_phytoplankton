@@ -6,9 +6,7 @@
 
 rm(list = ls())
 
-source(here("R", "read_hplc.R"))
-source(here("R", "read_metadata.R"))
-source(here("R", "read_absorption.R"))
+source(here("R", "zzz_read_functions.R"))
 
 # List the folder in which all the data is --------------------------------
 
