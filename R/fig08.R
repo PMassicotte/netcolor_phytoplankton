@@ -40,11 +40,11 @@ p1 <- df %>%
   ggplot(aes(x = avw_aphy, y = hplcchla)) +
   geom_point(
     aes(fill = season),
-    color = "transparent",
     size = 1.5,
-    stroke = 0,
+    stroke = 0.1,
     pch = 21,
-    alpha = 0.3
+    alpha = 0.3,
+    cex = 2.3
   ) +
   scale_fill_manual(
     breaks = season_breaks,
@@ -99,11 +99,11 @@ p2 <- df %>%
   ggplot(aes(x = avw_aphy, y = aphy_specific)) +
   geom_point(
     aes(fill = season),
-    color = "transparent",
     size = 1.5,
-    stroke = 0,
+    stroke = 0.1,
     pch = 21,
-    alpha = 0.3
+    alpha = 0.3,
+    cex = 2.3
   ) +
   scale_fill_manual(
     breaks = season_breaks,
@@ -172,11 +172,11 @@ p3 <- df_viz %>%
   ggplot(aes(x = avw_aphy, y = aphy_ratio)) +
   geom_point(
     aes(fill = season),
-    color = "transparent",
     size = 1.5,
-    stroke = 0,
+    stroke = 0.1,
     pch = 21,
-    alpha = 0.3
+    alpha = 0.3,
+    cex = 2.3
   ) +
   geom_smooth(
     formula = formula,
