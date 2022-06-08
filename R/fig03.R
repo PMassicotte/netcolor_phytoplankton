@@ -8,16 +8,17 @@ rm(list = ls())
 
 source(here("R", "zzz.R"))
 
-df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  filter(wavelength == 443) %>%
-  select(sample_id, season, bioregion_name, fucox, hplcchla)
+df <- open_dataset(here("data", "clean", "merged_dataset")) |>
+  filter(wavelength == 443) |>
+  select(sample_id, season, bioregion_name, fucox, hplcchla) |>
+  collect()
 
 paaw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv"))
 
-df_viz <- inner_join(df, paaw) %>%
+df_viz <- inner_join(df, paaw) |>
   mutate(season = factor(season,
     levels = c("Spring", "Summer", "Autumn", "Winter")
-  )) %>%
+  )) |>
   mutate(bioregion_name = factor(bioregion_name,
     levels = c(
       "Scotian Shelf",
@@ -28,8 +29,8 @@ df_viz <- inner_join(df, paaw) %>%
 
 df_viz
 
-p <- df_viz %>%
-  filter(fucox > 0) %>%
+p <- df_viz |>
+  filter(fucox > 0) |>
   ggplot(aes(x = hplcchla, y = fucox)) +
   geom_point(aes(color = season, shape = bioregion_name)) +
   geom_smooth(method = "lm", color = "black", se = FALSE) +
@@ -57,8 +58,8 @@ p <- df_viz %>%
     values = area_pch
   ) +
   labs(
-    x = quote("[Chl-a]" ~ (mg~m^{-3})),
-    y = quote("[Fucox]" ~ (mg~m^{-3}))
+    x = quote("[Chl-a]" ~ (mg ~ m^{-3})),
+    y = quote("[Fucox]" ~ (mg ~ m^{-3}))
   ) +
   # guides(shape = "none", ncol = 1) +
   theme(

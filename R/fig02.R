@@ -11,18 +11,19 @@ source(here("R", "zzz_ggboxplot.R"))
 
 # Load data ---------------------------------------------------------------
 
-df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  filter(wavelength %in% c(443, 675))
+df <- open_dataset(here("data", "clean", "merged_dataset")) |>
+  filter(wavelength %in% c(443, 675)) |>
+  collect()
 
 # PAAW
 
 paaw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv"))
 
-df <- df %>%
-  left_join(paaw, by = c("sample_id", "bioregion_name")) %>%
+df <- df |>
+  left_join(paaw, by = c("sample_id", "bioregion_name")) |>
   mutate(season = factor(season,
     levels = c("Spring", "Summer", "Autumn", "Winter")
-  )) %>%
+  )) |>
   mutate(bioregion_name = factor(bioregion_name,
     levels = c(
       "Scotian Shelf",
@@ -31,15 +32,15 @@ df <- df %>%
     )
   ))
 
-df %>%
-  count(sample_id, wavelength) %>%
+df |>
+  count(sample_id, wavelength) |>
   assertr::verify(n == 1)
 
 # Range
-df %>%
-  filter(snap > 0.001) %>%
-  pull(snap) %>%
-  range() %>%
+df |>
+  filter(snap > 0.001) |>
+  pull(snap) |>
+  range() |>
   round(digits = 3)
 
 # Fig 7 Boxplots on absorption --------------------------------------------
@@ -77,7 +78,7 @@ p4 <- ggboxlpot(
 )
 
 # There is 1 obvious outlier
-p5 <- ggboxlpot(df %>% filter(snap > 0.00100),
+p5 <- ggboxlpot(df |> filter(snap > 0.00100),
   season,
   snap,
   strip.text = element_blank(),
@@ -98,7 +99,7 @@ p <- p1 + p2 + p3 + p4 + p5 + p6 +
   theme(plot.tag = element_text(size = 16, face = "bold"))
 
 ggsave(
-  here("graphs","fig02.pdf"),
+  here("graphs", "fig02.pdf"),
   device = cairo_pdf,
   width = 190,
   height = 330,
@@ -120,12 +121,12 @@ my_aov <-
 
 summary(my_aov)
 
-df %>%
-  filter(str_detect(bioregion_name, "Scotian")) %>%
-  group_by(season) %>%
+df |>
+  filter(str_detect(bioregion_name, "Scotian")) |>
+  group_by(season) |>
   summarise(mean_avw = mean(avw_aphy, na.rm = TRUE))
 
-df %>%
-  filter(str_detect(bioregion_name, "Labrador")) %>%
-  pull(avw_aphy) %>%
+df |>
+  filter(str_detect(bioregion_name, "Labrador")) |>
+  pull(avw_aphy) |>
   range()

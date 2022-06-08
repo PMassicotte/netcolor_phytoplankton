@@ -9,11 +9,11 @@ rm(list = ls())
 
 source(here("R", "zzz.R"))
 
-avw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv")) %>%
+avw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv")) |>
   filter(avw_aphy < 490)
 
-metadata <- read_csv(here("data", "clean", "metadata.csv")) %>%
-  select(sample_id, date, season, longitude, latitude, date) %>%
+metadata <- read_csv(here("data", "clean", "metadata.csv")) |>
+  select(sample_id, date, season, longitude, latitude, date) |>
   mutate(yday = lubridate::yday(date))
 
 df <- inner_join(avw, metadata, by = "sample_id")
@@ -21,10 +21,10 @@ df <- inner_join(avw, metadata, by = "sample_id")
 df
 
 # Order by season and bioregion
-df <- df %>%
+df <- df |>
   mutate(season = factor(season,
     levels = c("Spring", "Summer", "Autumn", "Winter")
-  )) %>%
+  )) |>
   mutate(bioregion_name = factor(bioregion_name,
     levels = c("Scotian Shelf", "NAB", "Labrador")
   ))
@@ -34,23 +34,23 @@ df
 # Average by year and make sure that at least 10 observations were used for the
 # calculation.
 
-df_viz <- df %>%
-  mutate(year = lubridate::year(date)) %>%
-  group_by(bioregion_name, year, season) %>%
-  summarise(across(c(contains("avw")), mean), n = n()) %>%
-  ungroup() %>%
+df_viz <- df |>
+  mutate(year = lubridate::year(date)) |>
+  group_by(bioregion_name, year, season) |>
+  summarise(across(c(contains("avw")), mean), n = n()) |>
+  ungroup() |>
   filter(n >= 10)
 
 df_viz
 
 # Need at least 5 points to see a temporal trend?
 
-df_viz <- df_viz %>%
-  group_by(bioregion_name, season) %>%
-  filter(n() >= 5) %>%
+df_viz <- df_viz |>
+  group_by(bioregion_name, season) |>
+  filter(n() >= 5) |>
   ungroup()
 
-df_viz <- df_viz %>%
+df_viz <- df_viz |>
   filter(season %in% c("Autumn", "Spring"))
 
 # Plot --------------------------------------------------------------------
@@ -58,7 +58,7 @@ df_viz <- df_viz %>%
 # There are very few measurements in autumn in the Labrador sea (n = 21). That
 # is why these are no plot in the Labrador/Autumn facet.
 
-df %>%
+df |>
   count(bioregion_name, season)
 
 # How to make a weighted lm directly in ggplot2:
@@ -66,7 +66,7 @@ df %>%
 
 # Remove aes(weight = n) if we do not want to use a weighted lm
 
-p <- df_viz %>%
+p <- df_viz |>
   ggplot(aes(x = year, y = avw_aphy)) +
   geom_point(aes(color = season, pch = bioregion_name)) +
   scale_color_manual(
@@ -117,7 +117,7 @@ p <- df_viz %>%
   )
 
 ggsave(
-  here("graphs","fig09.pdf"),
+  here("graphs", "fig09.pdf"),
   device = cairo_pdf,
   width = 180,
   height = 120,
@@ -129,15 +129,15 @@ ggsave(
 df_viz
 
 # TODO: See if should report these min/max in the manuscript
-df_res <- df_viz %>%
-  group_nest(bioregion_name, season) %>%
-  mutate(model = map(data, ~lm(avw_aphy ~ year, data = .))) %>%
-  mutate(augmented = map(model, augment)) %>%
+df_res <- df_viz |>
+  group_nest(bioregion_name, season) |>
+  mutate(model = map(data, ~ lm(avw_aphy ~ year, data = .))) |>
+  mutate(augmented = map(model, augment)) |>
   mutate(tidied = map(model, tidy))
 
 df_res
 
-df_res %>%
+df_res |>
   unnest(tidied)
 
 # Weighted lm ------------------------------------------------------------- I
@@ -150,30 +150,30 @@ df_res %>%
 
 df_viz
 
-mod <- df_viz %>%
-  group_by(bioregion_name, season) %>%
-  mutate(prop_n = n / sum(n)) %>%
-  nest() %>%
+mod <- df_viz |>
+  group_by(bioregion_name, season) |>
+  mutate(prop_n = n / sum(n)) |>
+  nest() |>
   mutate(mod = map(data, ~ lm(
     avw_aphy ~ year,
     data = ., weights = n
-  ))) %>%
-  mutate(tidied = map(mod, tidy)) %>%
-  mutate(glanced = map(mod, glance)) %>%
+  ))) |>
+  mutate(tidied = map(mod, tidy)) |>
+  mutate(glanced = map(mod, glance)) |>
   mutate(augmented = map(mod, augment))
 
 # These coefficients should be the same as those presented on the graph using
 # the ggpmisc package
 
-mod %>%
+mod |>
   unnest(glanced)
 
-coeffs <- mod %>%
+coeffs <- mod |>
   unnest(tidied)
 
-mod %>%
-  select(bioregion_name, season, mod) %>%
-  mutate(tidied = map(mod, tidy)) %>%
-  unnest(tidied) %>%
-  select(-mod) %>%
+mod |>
+  select(bioregion_name, season, mod) |>
+  mutate(tidied = map(mod, tidy)) |>
+  unnest(tidied) |>
+  select(-mod) |>
   gt::gt()

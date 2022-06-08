@@ -10,30 +10,32 @@ source(here("R", "zzz.R"))
 
 df <- read_csv(here("data","clean","apparent_visible_wavelength.csv"))
 
-aphy <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  select(sample_id, bioregion_name, season, wavelength, aphy, anap) %>%
-  filter(between(wavelength, 400, 700))
+aphy <- read_csv(here("data", "clean", "merged_dataset.csv")) |>
+  select(sample_id, bioregion_name, season, wavelength, aphy, anap)  |>
+  filter(between(wavelength, 400, 700)) |>
+  collect()
 
-df_viz <- df %>%
-  dtplyr::lazy_dt() %>%
-  inner_join(aphy, by = c("sample_id", "bioregion_name")) %>%
-  group_by(sample_id) %>%
+df_viz <- df  |>
+  dtplyr::lazy_dt()  |>
+  inner_join(aphy, by = c("sample_id", "bioregion_name"))  |>
+  group_by(sample_id)  |>
   mutate(across(c(aphy, anap),
     ~ . / pracma::trapz(wavelength, .),
     .names = "normalized_{.col}"
-  )) %>%
-  ungroup() %>%
-  as_tibble()
+  ))  |>
+  ungroup()  |>
+  as_tibble() |>
+  filter(normalized_aphy <= 0.03)
 
-df_viz <- df_viz %>%
-  group_by(sample_id) %>%
-  filter(all(normalized_aphy[between(wavelength, 400, 600)] > 0)) %>%
+df_viz <- df_viz  |>
+  group_by(sample_id)  |>
+  filter(all(normalized_aphy[between(wavelength, 400, 600)] > 0))  |>
   ungroup()
 
 df_viz
 
 # Export the data for later use
-df_viz %>%
+df_viz  |>
   write_csv(here(
     "data",
     "clean",
@@ -42,8 +44,8 @@ df_viz %>%
 
 # What is the range of PAAW?
 
-paaw <- df_viz %>%
-  distinct(sample_id, .keep_all = TRUE) %>%
+paaw <- df_viz  |>
+  distinct(sample_id, .keep_all = TRUE)  |>
   pull(avw_aphy)
 
 range(paaw)
@@ -51,10 +53,10 @@ quantile(paaw)
 
 # Reorder by season and bioregion -----------------------------------------
 
-df_viz <- df_viz %>%
+df_viz <- df_viz  |>
   mutate(season = factor(season,
     levels = c("Spring", "Summer", "Autumn", "Winter")
-  )) %>%
+  ))  |>
   mutate(bioregion_name = factor(
     bioregion_name,
     levels = c(
@@ -68,16 +70,16 @@ df_viz <- df_viz %>%
 
 df_viz
 
-mean_paaw <- df_viz %>%
-  group_by(bioregion_name, wavelength) %>%
-  summarise(mean_normalized_aphy = mean(normalized_aphy)) %>%
+mean_paaw <- df_viz  |>
+  group_by(bioregion_name, wavelength)  |>
+  summarise(mean_normalized_aphy = mean(normalized_aphy))  |>
   ungroup()
 
 mean_paaw
 
 # Plot --------------------------------------------------------------------
 
-p1 <- df_viz %>%
+p1 <- df_viz  |>
   ggplot(aes(x = wavelength, y = normalized_aphy, color = avw_aphy, group = sample_id)) +
   geom_line(size = 0.1) +
   geom_line(
@@ -114,8 +116,8 @@ p1 <- df_viz %>%
   )
 
 # https://wilkelab.org/ggridges/articles/introduction.html
-p2 <- df_viz %>%
-  distinct(sample_id, .keep_all = TRUE) %>%
+p2 <- df_viz  |>
+  distinct(sample_id, .keep_all = TRUE)  |>
   ggplot(aes(avw_aphy, bioregion_name, fill = stat(x))) +
   geom_density_ridges_gradient(
     rel_min_height = 0.01,
@@ -154,15 +156,15 @@ ggsave(
   units = "mm"
 )
 
-df_viz %>%
-  group_by(bioregion_name) %>%
+df_viz  |>
+  group_by(bioregion_name)  |>
   summarise(mean_avw_aphy = mean(avw_aphy, na.rm = TRUE))
 
 
 # Test --------------------------------------------------------------------
 
-p3 <- df_viz %>%
-  distinct(sample_id, .keep_all = TRUE) %>%
+p3 <- df_viz  |>
+  distinct(sample_id, .keep_all = TRUE)  |>
   ggplot(aes(avw_aphy, fct_rev(season), fill = stat(x))) +
   geom_density_ridges_gradient(
     rel_min_height = 0.005,

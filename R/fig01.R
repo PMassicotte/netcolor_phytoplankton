@@ -14,16 +14,16 @@ bioregions <- read_csv(here("data", "clean", "bioregions.csv"))
 
 # crs_string <- "+proj=lcc +lat_1=49 +lat_2=77 +lon_0=-91.52 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"
 
-bbox <- st_read(here("data", "clean", "bbox_sampling_area.json")) %>%
+bbox <- st_read(here("data", "clean", "bbox_sampling_area.json")) |>
   st_transform(crs = 4326)
 
 # crs_string <- 4326
 
-stations_sf <- stations %>%
-  inner_join(bioregions, by = "sample_id") %>%
+stations_sf <- stations |>
+  inner_join(bioregions, by = "sample_id") |>
   st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
 
-wm <- rnaturalearth::ne_countries(returnclass = "sf", scale = "large") %>%
+wm <- rnaturalearth::ne_countries(returnclass = "sf", scale = "large") |>
   st_crop(c(xmin = -100, xmax = 0, ymin = 20, ymax = 90))
 
 canada <- rnaturalearth::ne_states("canada", returnclass = "sf")
@@ -42,16 +42,16 @@ bathy <- rast(
     "GEBCO_2020_13_May_2021_578bee3937bb",
     "gebco_2020_n75.0_s30.0_w-100.0_e-20.0.tif"
   )
-) %>%
-  spatSample(size = 1e5, as.raster = TRUE, method = "regular") %>%
-  as.data.frame(xy = TRUE) %>%
-  as_tibble() %>%
+) |>
+  spatSample(size = 1e5, as.raster = TRUE, method = "regular") |>
+  as.data.frame(xy = TRUE) |>
+  as_tibble() |>
   rename(z = 3)
 
-bathy_interpolated <- bathy %>%
-  mba.surf(no.X = 600, no.Y = 600, sp = TRUE) %>%
-  as.data.frame() %>%
-  as_tibble() %>%
+bathy_interpolated <- bathy |>
+  mba.surf(no.X = 600, no.Y = 600, sp = TRUE) |>
+  as.data.frame() |>
+  as_tibble() |>
   mutate(xyz.est.z = ifelse(xyz.est.z >= 0, 0, xyz.est.z))
 
 range(bathy_interpolated$xyz.est.z, na.rm = TRUE)

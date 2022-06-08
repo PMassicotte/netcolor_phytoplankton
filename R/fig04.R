@@ -13,32 +13,33 @@
 
 rm(list = ls())
 
-source(here("R","zzz.R"))
+source(here("R", "zzz.R"))
 
-df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  filter(wavelength == 443)
+df <- open_dataset(here("data", "clean", "merged_dataset")) |>
+  filter(wavelength == 443) |>
+  collect()
 
 # Add prediction from other models found in the literature ----------------
 
-df <- df %>%
-  mutate(bricaud_1998 = 0.0378 * hplcchla ^ 0.627) %>%
-  mutate(bricaud_2004 = 0.0654 * hplcchla ^ 0.728) %>%
+df <- df |>
+  mutate(bricaud_1998 = 0.0378 * hplcchla^0.627) |>
+  mutate(bricaud_2004 = 0.0654 * hplcchla^0.728) |>
   mutate(devred_2006 = ((0.0839 - 0.0176) / 1.613) * (1 - exp(-1.613 * hplcchla)) + 0.0176 * hplcchla)
 
 # Plot --------------------------------------------------------------------
 
-df_viz <- df %>%
-  filter(hplcchla > 0) %>%
+df_viz <- df |>
+  filter(hplcchla > 0) |>
   mutate(bioregion_name = factor(
-  bioregion_name,
-  levels = c(
-    "Scotian Shelf",
-    "NAB",
-    "Labrador"
-  )
-))
+    bioregion_name,
+    levels = c(
+      "Scotian Shelf",
+      "NAB",
+      "Labrador"
+    )
+  ))
 
-p1 <- df_viz %>%
+p1 <- df_viz |>
   ggplot(aes(x = hplcchla, y = aphy)) +
   geom_point(
     aes(color = season, shape = bioregion_name),
@@ -91,7 +92,7 @@ p1 <- df_viz %>%
     )
   ) +
   labs(
-    x = quote("[Chl-a]" ~ (mg~m^{-3})),
+    x = quote("[Chl-a]" ~ (mg ~ m^{-3})),
     y = quote(a[phi] ~ (443) ~ (m^{-1}))
   ) +
   guides(shape = "none", ncol = 1) +
@@ -119,7 +120,7 @@ p <- p1 / p2 +
   theme(plot.tag = element_text(size = 16, face = "bold"))
 
 ggsave(
-  here("graphs","fig04.pdf"),
+  here("graphs", "fig04.pdf"),
   device = cairo_pdf,
   width = 180,
   height = 180,

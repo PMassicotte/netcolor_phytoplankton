@@ -8,9 +8,10 @@ rm(list = ls())
 
 source(here("R", "zzz.R"))
 
-df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  filter(wavelength %in% c(443, 675)) %>%
-  select(sample_id, bioregion_name, season, wavelength, aphy, hplcchla, fucox) %>%
+df <- open_dataset(here("data", "clean", "merged_dataset")) |>
+  filter(wavelength %in% c(443, 675)) |>
+  select(sample_id, bioregion_name, season, wavelength, aphy, hplcchla, fucox) |>
+  collect() |>
   mutate(bioregion_name = factor(
     bioregion_name,
     levels = c(
@@ -20,25 +21,25 @@ df <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
     )
   ))
 
-df %>%
-  count(sample_id) %>%
+df |>
+  count(sample_id) |>
   assertr::verify(n == 2)
 
 # aphy443/aphy675 vs chla -------------------------------------------------
 
-df_viz <- df %>%
-  dtplyr::lazy_dt() %>%
-  group_by(sample_id, bioregion_name, bioregion_name, season) %>%
+df_viz <- df |>
+  dtplyr::lazy_dt() |>
+  group_by(sample_id, bioregion_name, bioregion_name, season) |>
   summarise(
     aphy_443_675 = aphy[wavelength == 443] / aphy[wavelength == 675],
     hplcchla = unique(hplcchla)
-  ) %>%
-  ungroup() %>%
+  ) |>
+  ungroup() |>
   as_tibble()
 
 df_viz
 
-p1 <- df_viz %>%
+p1 <- df_viz |>
   ggplot(aes(x = hplcchla, y = aphy_443_675)) +
   geom_point(
     aes(color = season, pch = bioregion_name),
@@ -77,7 +78,7 @@ p1 <- df_viz %>%
     values = area_pch
   ) +
   labs(
-    x = quote("[Chl-a]" ~ (mg~m^{-3})),
+    x = quote("[Chl-a]" ~ (mg ~ m^{-3})),
     y = quote(a[phi](443) / a[phi](675)),
     color = NULL
   ) +

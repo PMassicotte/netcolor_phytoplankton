@@ -14,8 +14,8 @@ source(here("R", "zzz.R"))
 
 # Prepare the data --------------------------------------------------------
 
-aphy <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  filter(wavelength %in% c(443, 675)) %>%
+aphy <- open_dataset("data/clean/merged_dataset/") |>
+  filter(wavelength %in% c(443, 675)) |>
   select(
     sample_id,
     bioregion_name,
@@ -24,9 +24,10 @@ aphy <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
     aphy,
     aphy_specific,
     hplcchla
-  )
+  ) |>
+  collect()
 
-paaw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv")) %>%
+paaw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv")) |>
   select(sample_id, bioregion_name, avw_aphy)
 
 df <- inner_join(aphy, paaw, by = c("sample_id", "bioregion_name"))
@@ -35,8 +36,8 @@ df
 
 # chla vs paaw ------------------------------------------------------------
 
-p1 <- df %>%
-  filter(wavelength == 443) %>%
+p1 <- df |>
+  filter(wavelength == 443) |>
   ggplot(aes(x = avw_aphy, y = hplcchla)) +
   geom_point(
     aes(fill = season),
@@ -65,7 +66,9 @@ p1 <- df %>%
   ) +
   labs(
     x = NULL,
-    y = quote("[Chl-a]" ~ (mg~m^{-3}))
+    y = quote("[Chl-a]" ~ (mg ~ m^{
+      -3
+    }))
   ) +
   ggpmisc::stat_poly_eq(
     aes(label = ..eq.label..),
@@ -94,8 +97,8 @@ p1 <- df %>%
 
 # aphy* vs paaw -----------------------------------------------------------
 
-p2 <- df %>%
-  filter(wavelength == 443) %>%
+p2 <- df |>
+  filter(wavelength == 443) |>
   ggplot(aes(x = avw_aphy, y = aphy_specific)) +
   geom_point(
     aes(fill = season),
@@ -155,20 +158,20 @@ p2 <- df %>%
 # It was shown that the aphy* 443/675 could be related to both as a function of
 # cell size and irradiance (Fujiki2002).
 
-df_viz <- df %>%
-  select(-aphy_specific, -hplcchla) %>%
+df_viz <- df |>
+  select(-aphy_specific, -hplcchla) |>
   pivot_wider(
     names_from = wavelength,
     values_from = aphy,
     names_prefix = "aphy_wl"
-  ) %>%
+  ) |>
   mutate(aphy_ratio = aphy_wl443 / aphy_wl675)
 
 df_viz
 
 formula <- y ~ x + I(x^2)
 
-p3 <- df_viz %>%
+p3 <- df_viz |>
   ggplot(aes(x = avw_aphy, y = aphy_ratio)) +
   geom_point(
     aes(fill = season),
@@ -223,13 +226,13 @@ p3 <- df_viz %>%
 
 ## Model to predict aphy* ratio from PAAW ----
 
-df_model <- df_viz %>%
-  group_nest() %>%
+df_model <- df_viz |>
+  group_nest() |>
   mutate(model = map(data, ~ lm(
     aphy_ratio ~ avw_aphy + I(avw_aphy^2),
     data = .
-  ))) %>%
-  mutate(tidied = map(model, tidy)) %>%
+  ))) |>
+  mutate(tidied = map(model, tidy)) |>
   mutate(augmented = map(model, augment))
 
 df_model
@@ -241,9 +244,9 @@ summary(df_model$model[[1]])
 
 df_viz
 
-df_viz %>%
-  group_by(season) %>%
-  summarise(mean_aphy_ratio = mean(aphy_ratio)) %>%
+df_viz |>
+  group_by(season) |>
+  summarise(mean_aphy_ratio = mean(aphy_ratio)) |>
   arrange(mean_aphy_ratio)
 
 range(df_viz$aphy_ratio)

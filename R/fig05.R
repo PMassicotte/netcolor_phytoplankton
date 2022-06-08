@@ -8,8 +8,9 @@ rm(list = ls())
 
 source(here("R", "zzz.R"))
 
-absorption <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
-  filter(wavelength == 443) %>%
+absorption <- open_dataset(here("data", "clean", "merged_dataset")) |>
+  filter(wavelength == 443) |>
+  collect() |>
   mutate(bioregion_name = factor(
     bioregion_name,
     levels = c(
@@ -17,14 +18,14 @@ absorption <- read_csv(here("data", "clean", "merged_dataset.csv")) %>%
       "NAB",
       "Labrador"
     )
-  )) %>%
+  )) |>
   mutate(bioregion_name_wrap = str_wrap_factor(bioregion_name, 20))
 
 # Plot --------------------------------------------------------------------
 
-p1 <- absorption %>%
-  filter(if_all(c(aphy, anap), ~ . > 0)) %>%
-  filter(anap <= 0.05) %>% # 1 obvious outlier
+p1 <- absorption |>
+  filter(if_all(c(aphy, anap), ~ . > 0)) |>
+  filter(anap <= 0.05) |> # 1 obvious outlier
   ggplot(aes(x = aphy, y = anap)) +
   geom_point(
     aes(color = season, pch = bioregion_name),
@@ -93,10 +94,10 @@ ggsave(
 
 # Create the models for Emmanuel. He wants the outputs for the paper.
 
-df <- absorption %>%
-  filter(if_all(c(aphy, anap), ~ . > 0)) %>%
-  filter(anap <= 0.05) %>% # 1 obvious outlier
-  group_nest(bioregion_name) %>%
+df <- absorption |>
+  filter(if_all(c(aphy, anap), ~ . > 0)) |>
+  filter(anap <= 0.05) |> # 1 obvious outlier
+  group_nest(bioregion_name) |>
   mutate(mod_glm = map(data, ~ glm(
     anap ~ aphy,
     family = Gamma(link = "log"), data = .
@@ -104,8 +105,7 @@ df <- absorption %>%
 
 df
 
-df %>%
-  mutate(glm_tidy = map(mod_glm, tidy)) %>%
-  unnest(glm_tidy) %>%
+df |>
+  mutate(glm_tidy = map(mod_glm, tidy)) |>
+  unnest(glm_tidy) |>
   select(-where(is.list))
-
