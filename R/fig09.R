@@ -7,7 +7,7 @@
 
 rm(list = ls())
 
-source(here("R","zzz.R"))
+source(here("R", "zzz.R"))
 
 avw <- read_csv(here("data", "clean", "apparent_visible_wavelength.csv")) %>%
   filter(avw_aphy < 490)
@@ -77,7 +77,6 @@ p <- df_viz %>%
     breaks = area_breaks,
     values = area_pch
   ) +
-  # geom_smooth(method = "lm", formula = y ~ x, color = "#3c3c3c", size = 0.5, alpha = 0.2) +
   geom_smooth(
     aes(weight = n),
     method = "lm",
