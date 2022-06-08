@@ -46,3 +46,14 @@ df %>%
   distinct(sample_id)
 
 fwrite(df, here("data", "clean", "merged_dataset.csv"))
+
+# Write arrow parquet files -----------------------------------------------
+
+df
+
+df |>
+  write_dataset(here("data", "clean", "merged_dataset"),
+    partitioning = c("season", "bioregion_name")
+  )
+
+

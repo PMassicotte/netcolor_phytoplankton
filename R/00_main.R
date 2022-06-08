@@ -23,17 +23,16 @@ library(terra)
 library(ggspatial)
 library(ggridges)
 library(MBA)
+library(arrow)
 
 # renv::install("clauswilke/ggisoband")
-
 # renv::install("MilesMcBain/breakerofchains")
 # renv::install("mcguinlu/pathformatr")
-
 # renv::install("ropensci/rnaturalearthdata")
 # renv::install("ropensci/rnaturalearthhires")
+# renv::install("PMassicotte/ggpmthemes")
 
 # Set default ggplot2 font size and font family
-# renv::install("PMassicotte/ggpmthemes")
 theme_set(theme_light_modified(base_family = "Montserrat", base_size = 10))
 
 theme_update(
