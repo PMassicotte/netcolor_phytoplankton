@@ -54,16 +54,21 @@ p1 <- df_viz |>
     aes(label = ..eq.label..),
     label.y.npc = 0.95,
     label.x.npc = 1,
-    size = 3,
+    size = 2.5,
     coef.digits = 3,
     family = "Montserrat"
   ) +
   ggpmisc::stat_poly_eq(
-    label.y.npc = 0.88,
+    aes(
+      label = paste(..rr.label.., after_stat(p.value.label), sep = "*\", \"*")
+    ),
     label.x.npc = 1,
-    aes(label = ..rr.label..),
-    size = 3,
-    family = "Montserrat"
+    label.y.npc = 0.88,
+    coef.digits = 4,
+    parse = TRUE,
+    family = "Montserrat",
+    size = 2.5,
+    small.p = TRUE
   ) +
   scale_color_manual(
     breaks = season_breaks,

@@ -96,7 +96,10 @@ p <- df_viz |>
     size = 2.5,
   ) +
   ggpmisc::stat_poly_eq(
-    aes(weight = n, label = ..rr.label..),
+    aes(
+      weight = n,
+      label = paste(..rr.label.., after_stat(p.value.label), sep = "*\", \"*")
+    ),
     formula = y ~ x,
     label.x.npc = 0.1,
     label.y.npc = 0.05,
@@ -104,6 +107,7 @@ p <- df_viz |>
     parse = TRUE,
     family = "Montserrat",
     size = 2.5,
+    small.p = TRUE
   ) +
   labs(
     x = NULL,

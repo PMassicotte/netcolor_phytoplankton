@@ -81,11 +81,16 @@ p1 <- df |>
     size = 2.5
   ) +
   ggpmisc::stat_poly_eq(
+    aes(
+      label = paste(..rr.label.., after_stat(p.value.label), sep = "*\", \"*")
+    ),
     label.x.npc = 0.05,
     label.y.npc = 0.88,
-    aes(label = ..rr.label..),
+    coef.digits = 4,
+    parse = TRUE,
+    family = "Montserrat",
     size = 2.5,
-    family = "Montserrat"
+    small.p = TRUE
   ) +
   theme(
     legend.title = element_blank(),
@@ -143,11 +148,16 @@ p2 <- df |>
     size = 2.5
   ) +
   ggpmisc::stat_poly_eq(
+    aes(
+      label = paste(..rr.label.., after_stat(p.value.label), sep = "*\", \"*")
+    ),
     label.x.npc = 1,
     label.y.npc = 0.8,
-    aes(label = ..rr.label..),
+    coef.digits = 4,
+    parse = TRUE,
+    family = "Montserrat",
     size = 2.5,
-    family = "Montserrat"
+    small.p = TRUE
   ) +
   theme(
     legend.position = "none"
@@ -201,12 +211,17 @@ p3 <- df_viz |>
     size = 2.5
   ) +
   ggpmisc::stat_poly_eq(
+    aes(
+      label = paste(..rr.label.., after_stat(p.value.label), sep = "*\", \"*")
+    ),
     formula = formula,
-    label.y.npc = 0.8,
     label.x.npc = 1,
-    aes(label = ..rr.label..),
+    label.y.npc = 0.8,
+    coef.digits = 4,
+    parse = TRUE,
+    family = "Montserrat",
     size = 2.5,
-    family = "Montserrat"
+    small.p = TRUE
   ) +
   scale_fill_manual(
     breaks = season_breaks,
