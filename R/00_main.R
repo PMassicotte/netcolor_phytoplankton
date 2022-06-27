@@ -51,6 +51,8 @@ source(here("R", "03_extract_bathymetry.R"))
 source(here("R", "04_classify_observations_into_bioregions.R"))
 source(here("R", "05_merge_all_data_into_single_csv.R"))
 source(here("R", "06_calculate_apparent_visible_wavelength.R"))
+source(here("R", "07_decadal_trends_anap_aphy_snap.R"))
+source(here("R", "08_decadal_trends_chla.R"))
 
 # Figures for the manuscript ----------------------------------------------
 
@@ -63,6 +65,7 @@ source(here("R", "fig06.R"))
 source(here("R", "fig07.R"))
 source(here("R", "fig08.R"))
 source(here("R", "fig09.R"))
+source(here("R", "fig10.R"))
 
 source(here("R", "appendix01.R"))
 source(here("R", "appendix02.R"))
