@@ -24,6 +24,7 @@ library(ggspatial)
 library(ggridges)
 library(MBA)
 library(arrow)
+library(vapour)
 
 # renv::install("clauswilke/ggisoband")
 # renv::install("MilesMcBain/breakerofchains")

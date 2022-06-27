@@ -32,23 +32,31 @@ greenland <- rnaturalearth::ne_states("greenland", returnclass = "sf")
 
 # Bathymetry --------------------------------------------------------------
 
-set.seed(2021)
+f <- "/vsicurl/https://public.services.aad.gov.au/datasets/science/GEBCO_2019_GEOTIFF/GEBCO_2019.tif"
 
-bathy <- rast(
-  here(
-    "data",
-    "raw",
-    "bathymetry",
-    "GEBCO_2020_13_May_2021_578bee3937bb",
-    "gebco_2020_n75.0_s30.0_w-100.0_e-20.0.tif"
-  )
-) |>
-  spatSample(size = 1e5, as.raster = TRUE, method = "regular") |>
+extent <- c(-100, -20, 30, 75)
+
+vals <- vapour_warp_raster(
+  f,
+  extent = extent,
+  dimension = c(238, 422),
+  bands = 1,
+  warp_options = c("SAMPLE_GRID=YES"),
+  resample = "bilinear"
+)
+
+r <- rast(
+  ext(extent),
+  nrows = 422,
+  ncols = 238,
+  vals = vals[[1]],
+  crs = "EPSG:4326"
+)
+
+bathy_interpolated <- r |>
   as.data.frame(xy = TRUE) |>
   as_tibble() |>
-  rename(z = 3)
-
-bathy_interpolated <- bathy |>
+  rename(z = 3) |>
   mba.surf(no.X = 600, no.Y = 600, sp = TRUE) |>
   as.data.frame() |>
   as_tibble() |>
